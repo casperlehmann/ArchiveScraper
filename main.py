@@ -32,9 +32,9 @@ def get_archive_urls():
 
 class Dearchiver(object):
     """Starts from a list of archieve urls and crawls links.
-    
+
     """
-    
+
     archive_json_file = 'data_dearchiver/archive.json'
     scanned_json_file = 'data_dearchiver/scanned.json'
     article_json_file = 'data_dearchiver/article.json'
@@ -44,7 +44,7 @@ class Dearchiver(object):
     pages = []
     scanned = []
     links = {}
-    
+
     def __init__(self, archive):
         self._load_archive_json()
         self._load_scanned_json()
@@ -60,11 +60,11 @@ class Dearchiver(object):
             print ('Creating new file: ' + self.archive_json_file)
             self.archive_meta = dd(lambda: dict())
             json.dump(self.archive_meta, open(self.archive_json_file, 'w'))
-            
+
     def _save_archive_url(self, url, fname):
         self.archive_meta[url]['f'] = fname
         json.dump(self.archive_meta, open(self.archive_json_file, 'w'))
-    
+
     def _save_archive_links(self, url, links):
         self.archive_meta[url]['l'] = links
         json.dump(self.archive_meta, open(self.archive_json_file, 'w'))
@@ -77,15 +77,15 @@ class Dearchiver(object):
             print ('Creating new file: ' + self.article_json_file)
             self.article_data = dd(lambda: dict())
             json.dump(self.article_data, open(self.article_json_file, 'w'))
-            
+
     def _save_article_url(self, url, fname):
         self.article_data[url]['f'] = fname
         json.dump(self.article_mdata, open(self.article_json_file, 'w'))
-    
+
     def _save_article_links(self, url, links):
         self.article_data[url]['l'] = links
         json.dump(self.article_data, open(self.article_json_file, 'w'))
-    
+
     # Scanned
     def _load_scanned_json(self):
         try:
@@ -94,11 +94,11 @@ class Dearchiver(object):
             print ('Creating new file: ' + self.scanned_json_file)
             self.scanned = []
             json.dump(self.scanned, open(self.scanned_json_file, 'w'))
-    
+
     def _save_scanned(self, url):
         self.scanned.append(url)
         json.dump(self.scanned, open(self.scanned_json_file, 'w'))
-    
+
     # Data
     @classmethod
     def clean(self):
@@ -113,7 +113,7 @@ class Dearchiver(object):
             print ('Deleting: ' + file)
             os.remove(file)
         print()
-    
+
     def load_archive_pages(self, *urls):
         for url in urls:
             if url in self.archive_meta:
@@ -141,7 +141,7 @@ class Dearchiver(object):
             else:
                 self._fetch_article_page(url)
                 self._get_filename(url)
-                
+
     def _fetch_article_page(self, url):
         with urllib.request.urlopen(url) as url_obj:
             if not os.path.exists('data_dearchiver/articles'):
@@ -158,7 +158,7 @@ class Dearchiver(object):
             print ('Loading & Souping file: {} for url {}'.format(fname, url))
             with open(fname, 'rb') as fobj:
                 return bs(fobj.read(), 'html.parser')
-    
+
     # 
     def _get_filename(self, url):
         fname = self.archive_meta[url]['f']
@@ -166,7 +166,7 @@ class Dearchiver(object):
             return fname
         else:
             print ('File {} does not exist.'.format(fname))
-        
+
     # Analysis
     def count_links(self, counter = None, links = None, domain = None):
         if counter is None:
