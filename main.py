@@ -1,4 +1,4 @@
-import urllib, requests, re, json
+import urllib, re, json
 from collections import defaultdict as dd
 import numpy as np
 import os
@@ -13,7 +13,7 @@ fp = FontProperties('Simsun', 'normal', weight=14)
 # http://matplotlib.org/examples/pylab_examples/tex_unicode_demo.html
 #matplotlib.rcParams['text.usetex'] = True
 #matplotlib.rcParams['text.latex.unicode'] = True
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 from bs4 import BeautifulSoup as bs
 #%matplotlib inline
