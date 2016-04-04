@@ -20,11 +20,14 @@ from bs4 import BeautifulSoup as bs
 
 import datetime
 
-def get_archive_urls():
+def get_archive_urls(from_date='today'):
     numdays = 5000
-    base = datetime.datetime.today()
+    if from_date == datetime.datetime.today():
+        from_date = datetime.datetime.today()
+    else:
+        from_date = datetime.datetime.strptime('2016-04-01', '%Y-%m-%d')
     out = []
-    for date in [base - datetime.timedelta(days=x) for x in range(0, numdays)]:
+    for date in [from_date - datetime.timedelta(days=x) for x in range(0, numdays)]:
         date_string = '{}{}{}'.format(date.year, str(date.month).zfill(2), str(date.day).zfill(2))
         out.append('http://politics.people.com.cn/GB/70731/review/{}.html'.format(date_string))
         if '20120206' == date_string:
@@ -212,10 +215,12 @@ class Dearchiver(object):
             print (href)
 
 
-archive = get_archive_urls()
+if __name__ == '__main__':
+    archive = get_archive_urls()
 
-dearch = Dearchiver(archive)
+    dearch = Dearchiver(archive)
 
-dearch.clean()
-dearch.find_links()
-print( len(dearch.archive_meta))
+    #dearch.clean()
+    dearch.find_links()
+    print( len(dearch.archive_meta))
+
