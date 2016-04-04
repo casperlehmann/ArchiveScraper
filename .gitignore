@@ -4,4 +4,5 @@
 
 .ipynb_checkpoints/
 data/
+data_dearchiver/
 __pycache__/
