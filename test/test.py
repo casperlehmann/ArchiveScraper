@@ -3,6 +3,8 @@ from nose.tools import assert_is_instance
 from nose.tools import assert_raises, raises
 
 import datetime
+import tempfile
+import os
 
 from archiver import archiver
 
@@ -101,4 +103,34 @@ class TestGetDate(object):
 
     def test_wrong_format(self):
         assert_raises(ValueError, archiver.get_date, '06=06-2016')
+
+class TestDearchiver(object):
+
+    @classmethod
+    def setup_class(cls):
+        _, cls.temp_dir = tempfile.mkstemp()
+        cls.archive = archiver.get_archive_urls(
+            from_date = '2016-04-01',
+            earliest_date='2012-02-06',
+            url = 'http://politics.people.com.cn/GB/70731/review/{}.html'
+        )
+
+        cls.dearch = archiver.Dearchiver(cls.archive)
+
+    @classmethod
+    def teardown_class(cls):
+        #cls.dearch._.close()
+        os.remove(cls.temp_dir)
+
+    def setup(self):
+        pass
+
+    def teardown(self):
+        pass
+
+    def test_len_of_archive(self):
+        assert_equals(len(self.archive), 1517)
+
+    #def test_lol(self):
+    #    assert_equals(self.dearch, 1)
 
