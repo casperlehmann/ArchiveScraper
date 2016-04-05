@@ -121,3 +121,16 @@ class TestGetDateAsString(object):
             archiver.get_date_as_string_YYYYmmdd(
                 datetime.datetime.strptime(date_string, '%Y%m%d')),
             date_string)
+
+class TestGetDate(object):
+    def test_date(self):
+        assert_equals(
+            archiver.get_date('2016-06-06'),
+            datetime.datetime.strptime('20160606', '%Y%m%d'))
+
+    def test_not_string(self):
+        assert_raises(TypeError, archiver.get_date, 20160606)
+
+    def test_wrong_format(self):
+        assert_raises(ValueError, archiver.get_date, '06=06-2016')
+

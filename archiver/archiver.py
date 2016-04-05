@@ -53,7 +53,12 @@ def get_date_string_generator(
             break
 
 def get_date(date_string):
-    if date_string == 'today': from_date = datetime.datetime.today()
+    if not isinstance (date_string, str):
+        raise TypeError
+    if not (date_string == 'today' or
+            re.match(r'\d\d\d\d-\d\d-\d\d', date_string)):
+        raise ValueError
+    if date_string == 'today': date_string = datetime.datetime.today()
     else: date_string = datetime.datetime.strptime(date_string, '%Y-%m-%d')
     return date_string
 
