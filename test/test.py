@@ -10,7 +10,9 @@ class TestGetArchiveUrls(object):
 
     @classmethod
     def setup_class(cls):
-        cls.data = archiver.get_archive_urls(from_date = '2016-04-01')
+        cls.data = archiver.get_archive_urls(
+            from_date = '2016-04-01',
+            url = 'http://politics.people.com.cn/GB/70731/review/{}.html')
 
     @classmethod
     def teardown_class(cls):

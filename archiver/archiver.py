@@ -57,7 +57,7 @@ def get_date(date_string):
     else: date_string = datetime.datetime.strptime(date_string, '%Y-%m-%d')
     return date_string
 
-def get_archive_urls(from_date='today', earliest_date='2012-02-06'):
+def get_archive_urls(from_date='today', earliest_date='2012-02-06', url='{}'):
     if not isinstance (from_date, str):
         raise TypeError
     if not (from_date == 'today' or
@@ -73,9 +73,7 @@ def get_archive_urls(from_date='today', earliest_date='2012-02-06'):
     for date in get_date_string_generator(
             from_date=from_date,
             earliest_date=earliest_date):
-        out.append(
-            'http://politics.people.com.cn/GB/70731/review/{}.html'.format(
-                date))
+        out.append(url.format(date))
     return out
 
 class Dearchiver(object):
