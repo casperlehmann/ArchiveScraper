@@ -14,30 +14,14 @@ class TestGetArchiveUrls(object):
             from_date = '2016-04-01',
             url = 'http://politics.people.com.cn/GB/70731/review/{}.html')
 
-    @classmethod
-    def teardown_class(cls):
-        pass
-
-    def setup(self):
-        pass
-
-    def teardown(self):
-        pass
-
     def test_type_urls(self):
-        assert_is_instance(
-            self.data,
-            (list,))
+        assert_is_instance(self.data, (list,))
 
     def test_len_urls(self):
-        assert_equals(
-            len(self.data),
-            1517)
+        assert_equals(len(self.data), 1517)
 
     def test_type_url(self):
-        assert_is_instance(
-            self.data[0],
-            (str,))
+        assert_is_instance(self.data[0], (str,))
 
     def test_first_url(self):
         assert_equals(
@@ -50,34 +34,18 @@ class TestGetArchiveUrls(object):
             'http://politics.people.com.cn/GB/70731/review/20120206.html')
 
     def test_from_date_not_string(self):
-        assert_raises(
-            TypeError,
-            archiver.get_archive_urls,
-            20160401)
+        assert_raises(TypeError, archiver.get_archive_urls, 20160401)
 
     def test_from_date_string_wrong_format(self):
-        assert_raises(
-            ValueError,
-            archiver.get_archive_urls,
-            '2016-4-1')
+        assert_raises(ValueError, archiver.get_archive_urls, '2016-4-1')
 
 class TestGetDateStringeGenerator(object):
-    @classmethod
-    def setup_class(cls):
-        pass
-
-    @classmethod
-    def teardown_class(cls):
-        pass
 
     def setup(self):
         self.dates = archiver.get_date_string_generator(
             from_date = '2015-04-01',
             earliest_date='2015-01-01',
             date_formatter=archiver.get_date_as_string_YYYYmmdd)
-
-    def teardown(self):
-        pass
 
     def test_first_date(self):
         for generator_item, number in zip(self.dates, ['20150401']):
