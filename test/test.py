@@ -1,23 +1,43 @@
-import nose
 from nose.tools import assert_equals, assert_not_equals
+from nose.tools import assert_is_instance
 from nose.tools import assert_raises, raises
-#print (dir (nose.tools))
 
-class TestCase(object):
+from archiver import archiver
+
+class TestGetArchiveUrls(object):
 
     @classmethod
     def setup_class(cls):
-        print ('##')
+        cls.data = archiver.get_archive_urls(
+            from_date = '2016-04-01')
 
     @classmethod
     def teardown_class(cls):
-        print ('##')
+        pass
 
     def setup(self):
-        print ('#')
+        pass
 
     def teardown(self):
-        print ('#')
+        pass
 
-    def test_this(self):
-        print ('Test')
+    def test_type_urls(self):
+        assert_is_instance(
+            self.data,
+            (list,))
+
+    def test_type_url(self):
+        assert_is_instance(
+            self.data[0],
+            (str,))
+
+    def test_first_url(self):
+        assert_equals(
+            self.data[0],
+            'http://politics.people.com.cn/GB/70731/review/20160401.html')
+
+    def test_final_url(self):
+        assert_equals(
+            self.data[-1],
+            'http://politics.people.com.cn/GB/70731/review/20120206.html')
+
