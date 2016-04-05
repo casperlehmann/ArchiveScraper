@@ -20,27 +20,38 @@ from bs4 import BeautifulSoup as bs
 
 import datetime
 
-def get_archive_urls(from_date='today'):
+def get_archive_urls(
+        from_date='today',
+        earliest_date='2012-02-06'):
     if not isinstance (from_date, str):
         raise TypeError
     if not (from_date == 'today' or
             re.match(r'\d\d\d\d-\d\d-\d\d', from_date)):
         raise ValueError
+    if not re.match(r'\d\d\d\d-\d\d-\d\d', earliest_date):
+        raise ValueError
 
-    numdays = 5000
+    earliest_date = datetime.datetime.strptime(earliest_date, '%Y-%m-%d')
+    earliest_date = '{}{}{}'.format(
+        earliest_date.year,
+        str(earliest_date.month).zfill(2),
+        str(earliest_date.day).zfill(2))
+
     if from_date == 'today':
         from_date = datetime.datetime.today()
     else:
         from_date = datetime.datetime.strptime('2016-04-01', '%Y-%m-%d')
     out = []
-    for date in [from_date - datetime.timedelta(days=x)
-                 for x in range(0, numdays)]:
+    i = 0
+    while True:
+        date = from_date - datetime.timedelta(days=i)
         date_string = '{}{}{}'.format(
             date.year, str(date.month).zfill(2), str(date.day).zfill(2))
         out.append(
             'http://politics.people.com.cn/GB/70731/review/{}.html'.format(
                 date_string))
-        if '20120206' == date_string:
+        i += 1
+        if earliest_date == date_string:
             return out
 
 class Dearchiver(object):
