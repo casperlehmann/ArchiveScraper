@@ -21,8 +21,15 @@ from bs4 import BeautifulSoup as bs
 import datetime
 
 def get_archive_urls(from_date='today'):
+    if not isinstance (from_date, str):
+        raise TypeError
+    if not (from_date == 'today' or len(from_date) == 10):
+        raise ValueError
+    if False in [(_ in '0123456789') for _ in ''.join(from_date.split('-'))]:
+        raise ValueError
+
     numdays = 5000
-    if from_date == datetime.datetime.today():
+    if from_date == 'today':
         from_date = datetime.datetime.today()
     else:
         from_date = datetime.datetime.strptime('2016-04-01', '%Y-%m-%d')
