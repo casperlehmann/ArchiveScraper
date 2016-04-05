@@ -27,9 +27,13 @@ def get_archive_urls(from_date='today'):
     else:
         from_date = datetime.datetime.strptime('2016-04-01', '%Y-%m-%d')
     out = []
-    for date in [from_date - datetime.timedelta(days=x) for x in range(0, numdays)]:
-        date_string = '{}{}{}'.format(date.year, str(date.month).zfill(2), str(date.day).zfill(2))
-        out.append('http://politics.people.com.cn/GB/70731/review/{}.html'.format(date_string))
+    for date in [from_date - datetime.timedelta(days=x)
+                 for x in range(0, numdays)]:
+        date_string = '{}{}{}'.format(
+            date.year, str(date.month).zfill(2), str(date.day).zfill(2))
+        out.append(
+            'http://politics.people.com.cn/GB/70731/review/{}.html'.format(
+                date_string))
         if '20120206' == date_string:
             return out
 
@@ -58,7 +62,9 @@ class Dearchiver(object):
     # JSON
     def _load_archive_json(self):
         try:
-            self.archive_meta = dd(lambda: dict(), json.load(open(self.archive_json_file)))
+            self.archive_meta = dd(
+                lambda: dict(),
+                json.load(open(self.archive_json_file)))
         except FileNotFoundError as e:
             print ('Creating new file: ' + self.archive_json_file)
             self.archive_meta = dd(lambda: dict())
@@ -75,7 +81,9 @@ class Dearchiver(object):
     # Articles
     def _load_article_json(self):
         try:
-            self.article_data = dd(lambda: dict(), json.load(open(self.article_json_file)))
+            self.article_data = dd(
+                lambda: dict(),
+                json.load(open(self.article_json_file)))
         except FileNotFoundError as e:
             print ('Creating new file: ' + self.article_json_file)
             self.article_data = dd(lambda: dict())
@@ -130,7 +138,8 @@ class Dearchiver(object):
         with urllib.request.urlopen(url) as url_obj:
             if not os.path.exists('data_dearchiver/archive'):
                 os.mkdir('data_dearchiver/archive')
-            fname = 'data_dearchiver/archive/'+str(len(self.archive_meta)).zfill(6)+'.html'
+            fname = 'data_dearchiver/archive/'+str(
+                len(self.archive_meta)).zfill(6)+'.html'
             with open(fname, 'wb') as f:
                 print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
@@ -149,7 +158,8 @@ class Dearchiver(object):
         with urllib.request.urlopen(url) as url_obj:
             if not os.path.exists('data_dearchiver/articles'):
                 os.mkdir('data_dearchiver/articles')
-            fname = 'data_dearchiver/articles/'+str(len(self.article_data)).zfill(6)+'.html'
+            fname = 'data_dearchiver/articles/'+str(
+                len(self.article_data)).zfill(6)+'.html'
             with open(fname, 'wb') as f:
                 print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
@@ -175,8 +185,10 @@ class Dearchiver(object):
         if counter is None:
             counter = dd(int)
         if links is None:
-            #links = {_ for key, item in self.archive_meta.items() for _ in item['l']}
-            links = [_ for key, item in self.archive_meta.items() for _ in item['l']]
+            #links = {_ for key, item in self.archive_meta.items()
+            #        for _ in item['l']}
+            links = [_ for key, item in self.archive_meta.items()
+                     for _ in item['l']]
         if domain is None: domain = ''
         if domain == '': domain = 'politics.people.com.cn'
         for link in links:
@@ -211,9 +223,10 @@ class Dearchiver(object):
         for item in counter:
             if re.search(filtr, item) is not None:
                 refiltered_count[item] = counter[item]
-        for href, count in sorted(refiltered_count.items(), key=lambda x: x[0]):
+        for href, count in sorted(
+                refiltered_count.items(),
+                key=lambda x: x[0]):
             print (href)
-
 
 if __name__ == '__main__':
     archive = get_archive_urls()
