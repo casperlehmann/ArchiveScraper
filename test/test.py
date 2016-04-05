@@ -25,6 +25,11 @@ class TestGetArchiveUrls(object):
             self.data,
             (list,))
 
+    def test_len_urls(self):
+        assert_equals(
+            len(self.data),
+            1517)
+
     def test_type_url(self):
         assert_is_instance(
             self.data[0],
