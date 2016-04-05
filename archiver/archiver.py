@@ -86,9 +86,10 @@ class Dearchiver(object):
 
     """
 
-    archive_json_file = 'data_dearchiver/archive.json'
-    scanned_json_file = 'data_dearchiver/scanned.json'
-    article_json_file = 'data_dearchiver/article.json'
+    directory = 'data_dearchiver/'
+    archive_json_file = directory + 'archive.json'
+    scanned_json_file = directory + 'scanned.json'
+    article_json_file = directory + 'article.json'
     archive_meta = None
     article_data = None
     url_queue = []
@@ -96,10 +97,16 @@ class Dearchiver(object):
     scanned = []
     links = {}
 
-    def __init__(self, archive):
+    def __init__(self, archive, directory = None):
+        if directory is not None:
+            self.archive_json_file = directory + 'archive.json'
+            self.scanned_json_file = directory + 'scanned.json'
+            self.article_json_file = directory + 'article.json'
         self._load_archive_json()
         self._load_scanned_json()
         self._load_article_json()
+
+    def load_archive(self):
         for url in archive[:10]:
             self.load_archive_pages(url)
 
@@ -169,14 +176,13 @@ class Dearchiver(object):
             os.remove(file)
         print()
 
-    def load_archive_pages(self, *urls):
-        for url in urls:
-            if url in self.archive_meta:
-                print ('Alredy here')
-                self._get_filename(url)
-            else:
-                self._fetch_archive_page(url)
-                self._get_filename(url)
+    def load_archive_pages(self, url):
+        if url in self.archive_meta:
+            print ('Alredy here')
+            self._get_filename(url)
+        else:
+            self._fetch_archive_page(url)
+            self._get_filename(url)
 
     def _fetch_archive_page(self, url):
         with urllib.request.urlopen(url) as url_obj:
