@@ -20,49 +20,57 @@ from bs4 import BeautifulSoup as bs
 
 import datetime
 
-def det_date_format_YYYYmmdd(date):
+def get_date_as_string_YYYY_mm_dd(date):
+    if not isinstance (date, datetime.datetime):
+        raise TypeError
+    return '{}-{}-{}'.format(
+        date.year,
+        str(date.month).zfill(2),
+        str(date.day).zfill(2))
+
+def get_date_as_string_YYYYmmdd(date):
+    if not isinstance (date, datetime.datetime):
+        raise TypeError
     return '{}{}{}'.format(
         date.year,
         str(date.month).zfill(2),
         str(date.day).zfill(2))
 
-def get_date_generator(
-        from_date='today',
-        earliest_date='2010-01-01'):
-    earliest_date = datetime.datetime.strptime(earliest_date, '%Y-%m-%d')
-    earliest_date = '{}{}{}'.format(
-        earliest_date.year,
-        str(earliest_date.month).zfill(2),
-        str(earliest_date.day).zfill(2))
+def get_date_string_generator(
+        from_date = 'today',
+        earliest_date = '2010-01-01',
+        date_formatter = get_date_as_string_YYYYmmdd):
+    earliest_date = get_date(earliest_date)
+    earliest_date = date_formatter(earliest_date)
+    from_date = get_date(from_date)
     i = 0
     while True:
         date = from_date - datetime.timedelta(days=i)
-        date_string = det_date_format_YYYYmmdd(date)
+        date_string = date_formatter(date)
         yield date_string
         i += 1
         if earliest_date == date_string:
             break
-            #return out
 
+def get_date(date_string):
+    if date_string == 'today': from_date = datetime.datetime.today()
+    else: date_string = datetime.datetime.strptime(date_string, '%Y-%m-%d')
+    return date_string
 
-def get_archive_urls(
-        from_date='today',
-        earliest_date='2012-02-06'):
+def get_archive_urls(from_date='today', earliest_date='2012-02-06'):
     if not isinstance (from_date, str):
         raise TypeError
     if not (from_date == 'today' or
             re.match(r'\d\d\d\d-\d\d-\d\d', from_date)):
         raise ValueError
+    if not isinstance (earliest_date, str):
+        raise TypeError
     if not re.match(r'\d\d\d\d-\d\d-\d\d', earliest_date):
         raise ValueError
 
-
-    if from_date == 'today':
-        from_date = datetime.datetime.today()
-    else:
-        from_date = datetime.datetime.strptime('2016-04-01', '%Y-%m-%d')
+    get_date(from_date)
     out = []
-    for date in get_date_generator(
+    for date in get_date_string_generator(
             from_date=from_date,
             earliest_date=earliest_date):
         out.append(
