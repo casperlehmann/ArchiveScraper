@@ -25,7 +25,13 @@ def get_archive_urls(from_date='today'):
         raise TypeError
     if not (from_date == 'today' or len(from_date) == 10):
         raise ValueError
+    if len([_ for _ in ''.join(from_date.split('-')) if _ in '0123456789']) != 8:
+        raise ValueError
+    if from_date.count('-') != 2:
+        raise ValueError
     if False in [(_ in '0123456789') for _ in ''.join(from_date.split('-'))]:
+        raise ValueError
+    if not [4, 2, 2] == [len(_) for _ in from_date.split('-')]:
         raise ValueError
 
     numdays = 5000

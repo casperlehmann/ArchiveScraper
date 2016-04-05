@@ -51,3 +51,21 @@ class TestGetArchiveUrls(object):
             ValueError,
             archiver.get_archive_urls,
             '2016-4-1')
+
+    def test_from_date_string_wrong_number_count(self):
+        assert_raises(
+            ValueError,
+            archiver.get_archive_urls,
+            '2016-04- 1')
+
+    def test_from_date_string_wrong_hyphen_count(self):
+        assert_raises(
+            ValueError,
+            archiver.get_archive_urls,
+            '2016-04 01')
+
+    def test_from_date_string_wrong_format(self):
+        assert_raises(
+            ValueError,
+            archiver.get_archive_urls,
+            '01-04-2016')
