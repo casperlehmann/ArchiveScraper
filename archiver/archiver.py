@@ -20,6 +20,31 @@ from bs4 import BeautifulSoup as bs
 
 import datetime
 
+def det_date_format_YYYYmmdd(date):
+    return '{}{}{}'.format(
+        date.year,
+        str(date.month).zfill(2),
+        str(date.day).zfill(2))
+
+def get_date_generator(
+        from_date='today',
+        earliest_date='2010-01-01'):
+    earliest_date = datetime.datetime.strptime(earliest_date, '%Y-%m-%d')
+    earliest_date = '{}{}{}'.format(
+        earliest_date.year,
+        str(earliest_date.month).zfill(2),
+        str(earliest_date.day).zfill(2))
+    i = 0
+    while True:
+        date = from_date - datetime.timedelta(days=i)
+        date_string = det_date_format_YYYYmmdd(date)
+        yield date_string
+        i += 1
+        if earliest_date == date_string:
+            break
+            #return out
+
+
 def get_archive_urls(
         from_date='today',
         earliest_date='2012-02-06'):
@@ -31,28 +56,19 @@ def get_archive_urls(
     if not re.match(r'\d\d\d\d-\d\d-\d\d', earliest_date):
         raise ValueError
 
-    earliest_date = datetime.datetime.strptime(earliest_date, '%Y-%m-%d')
-    earliest_date = '{}{}{}'.format(
-        earliest_date.year,
-        str(earliest_date.month).zfill(2),
-        str(earliest_date.day).zfill(2))
 
     if from_date == 'today':
         from_date = datetime.datetime.today()
     else:
         from_date = datetime.datetime.strptime('2016-04-01', '%Y-%m-%d')
     out = []
-    i = 0
-    while True:
-        date = from_date - datetime.timedelta(days=i)
-        date_string = '{}{}{}'.format(
-            date.year, str(date.month).zfill(2), str(date.day).zfill(2))
+    for date in get_date_generator(
+            from_date=from_date,
+            earliest_date=earliest_date):
         out.append(
             'http://politics.people.com.cn/GB/70731/review/{}.html'.format(
-                date_string))
-        i += 1
-        if earliest_date == date_string:
-            return out
+                date))
+    return out
 
 class Dearchiver(object):
     """Starts from a list of archieve urls and crawls links.
