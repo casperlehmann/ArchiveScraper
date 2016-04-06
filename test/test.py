@@ -8,6 +8,7 @@ import datetime
 import tempfile
 import os
 import json
+import shutil
 
 import archiver
 
@@ -108,6 +109,7 @@ class TestDearchiver(object):
     @classmethod
     def setup_class(cls):
         cls.temp_dir = tempfile.mkdtemp()
+        os.mkdir(cls.temp_dir + '/archive')
         cls.archive = archiver.get_archive_urls(
             from_date = '2016-04-01',
             earliest_date='2012-02-06',
@@ -117,7 +119,7 @@ class TestDearchiver(object):
     @classmethod
     def teardown_class(cls):
         #cls.dearch._.close()
-        os.rmdir(cls.temp_dir)
+        shutil.rmtree(cls.temp_dir)
 
     def setup(self):
         self.dearch = archiver.Dearchiver(
@@ -201,3 +203,34 @@ class TestDearchiver(object):
         assert_equals(
             json.load(open(self.dearch.archive_json_file)),
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
+
+    def test__get_filename_wrong_type(self):
+        assert_raises(TypeError, self.dearch._get_filename, ['list of strings'])
+
+    def test__get_filename_key_not_registered(self):
+        self.dearch._load_archive_json()
+        assert_raises(KeyError, self.dearch._get_filename, 'www.example.com')
+
+    def test__get_filename_file_does_not_exist(self):
+        self.dearch._load_archive_json()
+        self.dearch._save_archive_url('www.example.com', '000001')
+        assert_raises(IOError, self.dearch._get_filename, 'www.example.com')
+
+    def test__load_archive_pages(self):
+        self.dearch._load_archive_json()
+        self.dearch._save_archive_url('www.example.com', '000001')
+        fname = '000001'
+        fpath = self.dearch.directory + '/archive/' + fname
+        with open(fpath, 'wb') as f: f.write(b'Some contents')
+
+        self.dearch.load_archive_pages('www.example.com')
+        #assert_equal
+
+    def test__get_filename(self):
+        self.dearch._load_archive_json()
+        fname = '000001'
+        fpath = self.dearch.directory + '/archive/' + fname
+        with open(fpath, 'wb') as f: f.write(b'Some contents')
+
+        self.dearch._save_archive_url('www.example.com', fname)
+        assert_equals(self.dearch._get_filename('www.example.com'), fname)
