@@ -87,9 +87,6 @@ class Dearchiver(object):
     """
 
     directory = 'data_dearchiver/'
-    archive_json_file = directory + 'archive.json'
-    scanned_json_file = directory + 'scanned.json'
-    article_json_file = directory + 'article.json'
     archive_meta = None
     article_data = None
     url_queue = []
@@ -99,9 +96,10 @@ class Dearchiver(object):
 
     def __init__(self, archive, directory = None):
         if directory is not None:
-            self.archive_json_file = directory + 'archive.json'
-            self.scanned_json_file = directory + 'scanned.json'
-            self.article_json_file = directory + 'article.json'
+            self.directory = directory
+        self.archive_json_file = self.directory + 'archive.json'
+        self.scanned_json_file = self.directory + 'scanned.json'
+        self.article_json_file = self.directory + 'article.json'
         self._load_archive_json()
         self._load_scanned_json()
         self._load_article_json()
