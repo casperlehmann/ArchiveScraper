@@ -124,10 +124,18 @@ class Dearchiver(object):
             json.dump(self.archive_meta, open(self.archive_json_file, 'w'))
 
     def _save_archive_url(self, url, fname):
+        if not isinstance (url, str):
+            raise TypeError
+        if not isinstance (fname, str):
+            raise TypeError
         self.archive_meta[url]['f'] = fname
         json.dump(self.archive_meta, open(self.archive_json_file, 'w'))
 
     def _save_archive_links(self, url, links):
+        if not isinstance (url, str):
+            raise TypeError
+        if not isinstance (links, list):
+            raise TypeError
         self.archive_meta[url]['l'] = links
         json.dump(self.archive_meta, open(self.archive_json_file, 'w'))
 
