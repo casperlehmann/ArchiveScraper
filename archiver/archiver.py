@@ -108,10 +108,6 @@ class Dearchiver(object):
         self._load_scanned_json(silent = silent)
         self._load_article_json(silent = silent)
 
-    def load_archive(self, archive):
-        for url in archive[:10]:
-            self.load_archive_pages(url)
-
     # JSON
     def _load_archive_json(self, silent = False):
         try:
@@ -193,6 +189,10 @@ class Dearchiver(object):
             if not silent: print ('Deleting: ' + f)
             os.remove(f)
         if not silent: print()
+
+    def load_archive(self, archive):
+        for url in archive[:2]:
+            self.load_archive_pages(url)
 
     def load_archive_pages(self, url):
         if url in self.archive_meta:
