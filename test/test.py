@@ -163,7 +163,7 @@ class TestDearchiver(object):
         assert_equals(self.dearch.archive_meta, {})
 
     def test__load_archive_json_contents(self):
-        # Init file:
+        # Manually construct and save the file:
         json.dump(
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
             open(self.dearch.archive_json_file, 'w'))
@@ -174,19 +174,30 @@ class TestDearchiver(object):
             self.dearch.archive_meta,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
-    def test__save_load_archive_json_contents(self):
-        # Init archive_meta:
-        self.dearch._load_archive_json()
-        # Now the dict is set and empty. Let's put something in there:
-        assert_equals(self.dearch.archive_meta, {})
+    def test__save_archive_url(self):
+        # Init file:
         self.dearch._save_archive_url('www.example.com', '000001')
-        # Content of the dict is now set and saved to file. File exists:
-        assert_true(os.path.isfile(self.dearch.archive_json_file))
-        # We remove item from dict, while leaving file intact. Dict now empty:
-        del self.dearch.archive_meta['www.example.com']
-        assert_equals(self.dearch.archive_meta, {})
-        # We reload the dict from file and see that it is unchanged:
-        self.dearch._load_archive_json()
+
+        # Manually load the dict from file and compare:
         assert_equals(
-            self.dearch.archive_meta, {'www.example.com': {'f': '000001'}})
-        # The save function therefore works as intended.
+            json.load(open(self.dearch.archive_json_file)),
+            {'www.example.com': {'f': '000001'}})
+
+    def test__save_archive_links(self):
+        # Init file:
+        self.dearch._save_archive_links('www.example.com', ['www.link.com'])
+
+        # Manually load the dict from file and compare:
+        assert_equals(
+            json.load(open(self.dearch.archive_json_file)),
+            {'www.example.com': {'l': ['www.link.com']}})
+
+    def test__save_archive_url_and_links(self):
+        # Init file:
+        self.dearch._save_archive_url('www.example.com', '000001')
+        self.dearch._save_archive_links('www.example.com', ['www.link.com'])
+
+        # Manually load the dict from file and compare:
+        assert_equals(
+            json.load(open(self.dearch.archive_json_file)),
+            {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
