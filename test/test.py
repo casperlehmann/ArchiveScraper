@@ -162,9 +162,10 @@ class TestDearchiver(object):
         assert_equals(self.dearch.archive_meta, {})
 
     def test__save_load_archive_json_contents(self):
+        # Init archive_meta:
         self.dearch._load_archive_json()
-        assert_equals(self.dearch.archive_meta, {})
         # Now the dict is set and empty. Let's put something in there:
+        assert_equals(self.dearch.archive_meta, {})
         self.dearch._save_archive_url('www.example.com', '000001')
         # Content of the dict is now set and saved to file. File exists:
         assert_true(os.path.isfile(self.dearch.archive_json_file))
