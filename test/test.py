@@ -122,13 +122,11 @@ class TestDearchiver(object):
         os.rmdir(cls.temp_dir)
 
     def setup(self):
-        print ('setup')
         self.dearch = archiver.Dearchiver(
-            self.archive, directory = self.temp_dir)
+            self.archive, directory = self.temp_dir, silent = True)
 
     def teardown(self):
-        print ('teardown')
-        self.dearch.clean()
+        self.dearch.clean(silent = True)
 
     def test_isdir_temp(self):
         assert_true(os.path.isdir(self.temp_dir))

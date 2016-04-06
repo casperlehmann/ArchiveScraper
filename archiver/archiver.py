@@ -94,7 +94,7 @@ class Dearchiver(object):
     scanned = []
     links = {}
 
-    def __init__(self, archive, directory = None):
+    def __init__(self, archive, directory = None, silent = False):
         if directory is not None:
             # check if string
             # check if exists
@@ -102,22 +102,22 @@ class Dearchiver(object):
         self.archive_json_file = self.directory + 'archive.json'
         self.scanned_json_file = self.directory + 'scanned.json'
         self.article_json_file = self.directory + 'article.json'
-        self._load_archive_json()
-        self._load_scanned_json()
-        self._load_article_json()
+        self._load_archive_json(silent = silent)
+        self._load_scanned_json(silent = silent)
+        self._load_article_json(silent = silent)
 
     def load_archive(self):
         for url in archive[:10]:
             self.load_archive_pages(url)
 
     # JSON
-    def _load_archive_json(self):
+    def _load_archive_json(self, silent = False):
         try:
             self.archive_meta = dd(
                 lambda: dict(),
                 json.load(open(self.archive_json_file)))
         except FileNotFoundError as e:
-            print ('Creating new file: ' + self.archive_json_file)
+            if not silent: print ('Creating new file:', self.archive_json_file)
             self.archive_meta = dd(lambda: dict())
             json.dump(self.archive_meta, open(self.archive_json_file, 'w'))
 
@@ -130,13 +130,13 @@ class Dearchiver(object):
         json.dump(self.archive_meta, open(self.archive_json_file, 'w'))
 
     # Articles
-    def _load_article_json(self):
+    def _load_article_json(self, silent = False):
         try:
             self.article_data = dd(
                 lambda: dict(),
                 json.load(open(self.article_json_file)))
         except FileNotFoundError as e:
-            print ('Creating new file: ' + self.article_json_file)
+            if not silent: print ('Creating new file:', self.article_json_file)
             self.article_data = dd(lambda: dict())
             json.dump(self.article_data, open(self.article_json_file, 'w'))
 
@@ -149,11 +149,11 @@ class Dearchiver(object):
         json.dump(self.article_data, open(self.article_json_file, 'w'))
 
     # Scanned
-    def _load_scanned_json(self):
+    def _load_scanned_json(self, silent = False):
         try:
             self.scanned = list(json.load(open(self.scanned_json_file)))
         except FileNotFoundError as e:
-            print ('Creating new file: ' + self.scanned_json_file)
+            if not silent: print ('Creating new file:', self.scanned_json_file)
             self.scanned = []
             json.dump(self.scanned, open(self.scanned_json_file, 'w'))
 
@@ -162,27 +162,27 @@ class Dearchiver(object):
         json.dump(self.scanned, open(self.scanned_json_file, 'w'))
 
     # Data
-    def clean(self):
-        print ('Cleaning...')
-        if os.path.exists(self.archive_json_file):
-            print ('Deleting: ' + self.archive_json_file)
+    def clean(self, silent = False):
+        if not silent: print ('Cleaning...')
+        try:
+            if not silent: print ('Deleting: ' + self.archive_json_file + '...')
             os.remove(self.archive_json_file)
-        else:
-            print ('self.archive_json_file does not exist.')
-        if os.path.exists(self.article_json_file):
-            print ('Deleting: ' + self.article_json_file)
+        except FileNotFoundError:
+            if not silent: print (self.archive_json_file, 'does not exist.')
+        try:
+            if not silent: print ('Deleting: ' + self.article_json_file + '...')
             os.remove(self.article_json_file)
-        else:
-            print ('self.article_json_file does not exist.')
-        if os.path.exists(self.scanned_json_file):
-            print ('Deleting: ' + self.scanned_json_file)
+        except FileNotFoundError:
+            if not silent: print (self.article_json_file, 'does not exist.')
+        try:
+            if not silent: print ('Deleting: ' + self.scanned_json_file + '...')
             os.remove(self.scanned_json_file)
-        else:
-            print ('self.scanned_json_file does not exist.')
-        for file in glob('data_dearchiver/*/*.html'):
-            print ('Deleting: ' + file)
-            os.remove(file)
-        print()
+        except FileNotFoundError:
+            if not silent: print (self.scanned_json_file, 'does not exist.')
+        for f in glob('data_dearchiver/*/*.html'):
+            if not silent: print ('Deleting: ' + f)
+            os.remove(f)
+        if not silent: print()
 
     def load_archive_pages(self, url):
         if url in self.archive_meta:
