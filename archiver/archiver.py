@@ -94,7 +94,7 @@ class Dearchiver(object):
     scanned = []
     links = {}
 
-    def __init__(self, archive, directory = None, silent = False):
+    def __init__(self, directory = None, silent = False):
         if directory is not None:
             if not isinstance (directory, str):
                 raise TypeError
@@ -108,7 +108,7 @@ class Dearchiver(object):
         self._load_scanned_json(silent = silent)
         self._load_article_json(silent = silent)
 
-    def load_archive(self):
+    def load_archive(self, archive):
         for url in archive[:10]:
             self.load_archive_pages(url)
 

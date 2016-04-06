@@ -121,7 +121,7 @@ class TestDearchiver(object):
 
     def setup(self):
         self.dearch = archiver.Dearchiver(
-            self.archive, directory = self.temp_dir, silent = True)
+            directory = self.temp_dir, silent = True)
 
     def teardown(self):
         self.dearch.clean(silent = True)
@@ -129,12 +129,12 @@ class TestDearchiver(object):
     def test_init_dir_not_string(self):
         assert_raises(
             TypeError, archiver.Dearchiver,
-            self.archive, directory = 1, silent = True)
+            directory = 1, silent = True)
 
     def test_init_dir_not_path(self):
         assert_raises(
             ValueError, archiver.Dearchiver,
-            self.archive, directory = '', silent = True)
+            directory = '', silent = True)
 
     def test_isdir_temp(self):
         assert_true(os.path.isdir(self.temp_dir))
