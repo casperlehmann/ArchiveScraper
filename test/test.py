@@ -1,6 +1,7 @@
 from nose.tools import assert_equals, assert_not_equals
 from nose.tools import assert_is_instance
 from nose.tools import assert_raises, raises
+from nose.tools import assert_true, assert_false
 
 import datetime
 import tempfile
@@ -108,25 +109,38 @@ class TestDearchiver(object):
 
     @classmethod
     def setup_class(cls):
-        _, cls.temp_dir = tempfile.mkstemp()
+        cls.temp_dir = tempfile.mkdtemp()
         cls.archive = archiver.get_archive_urls(
             from_date = '2016-04-01',
             earliest_date='2012-02-06',
             url = 'http://politics.people.com.cn/GB/70731/review/{}.html'
         )
 
-        cls.dearch = archiver.Dearchiver(cls.archive)
-
     @classmethod
     def teardown_class(cls):
         #cls.dearch._.close()
-        os.remove(cls.temp_dir)
+        os.rmdir(cls.temp_dir)
 
     def setup(self):
-        pass
+        print ('setup')
+        self.dearch = archiver.Dearchiver(
+            self.archive, directory = self.temp_dir)
 
     def teardown(self):
-        pass
+        print ('teardown')
+        self.dearch.clean()
+
+    def test_isdir_temp(self):
+        assert_true(os.path.isdir(self.temp_dir))
+
+    def test_isfile_archive_json_file(self):
+        assert_true(os.path.isfile(self.dearch.archive_json_file))
+
+    def test_isfile_scanned_json_file(self):
+        assert_true(os.path.isfile(self.dearch.scanned_json_file))
+
+    def test_isfile_article_json_file(self):
+        assert_true(os.path.isfile(self.dearch.article_json_file))
 
     def test_len_of_archive(self):
         assert_equals(len(self.archive), 1517)
@@ -134,3 +148,5 @@ class TestDearchiver(object):
     #def test_lol(self):
     #    assert_equals(self.dearch, 1)
 
+    def test_clean(self):
+        pass
