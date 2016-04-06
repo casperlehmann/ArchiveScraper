@@ -2,6 +2,7 @@ from nose.tools import assert_equals, assert_not_equals
 from nose.tools import assert_is_instance
 from nose.tools import assert_raises, raises
 from nose.tools import assert_true, assert_false
+import nose
 
 import datetime
 import tempfile
@@ -124,6 +125,16 @@ class TestDearchiver(object):
     def teardown(self):
         self.dearch.clean(silent = True)
 
+    def test_init_dir_not_string(self):
+        assert_raises(
+            TypeError, archiver.Dearchiver,
+            self.archive, directory = 1, silent = True)
+
+    def test_init_dir_not_path(self):
+        assert_raises(
+            ValueError, archiver.Dearchiver,
+            self.archive, directory = '', silent = True)
+
     def test_isdir_temp(self):
         assert_true(os.path.isdir(self.temp_dir))
 
@@ -139,8 +150,8 @@ class TestDearchiver(object):
     def test_len_of_archive(self):
         assert_equals(len(self.archive), 1517)
 
-    #def test_lol(self):
-    #    assert_equals(self.dearch, 1)
-
     def test_clean(self):
-        pass
+        self.dearch.clean(silent = True)
+        assert_false(os.path.isfile(self.dearch.archive_json_file))
+        assert_false(os.path.isfile(self.dearch.scanned_json_file))
+        assert_false(os.path.isfile(self.dearch.article_json_file))

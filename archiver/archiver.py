@@ -96,8 +96,10 @@ class Dearchiver(object):
 
     def __init__(self, archive, directory = None, silent = False):
         if directory is not None:
-            # check if string
-            # check if exists
+            if not isinstance (directory, str):
+                raise TypeError
+            if not os.path.isdir(directory):
+                raise ValueError
             self.directory = directory
         self.archive_json_file = self.directory + 'archive.json'
         self.scanned_json_file = self.directory + 'scanned.json'
