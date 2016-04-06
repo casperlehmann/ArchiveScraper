@@ -7,6 +7,7 @@ import nose
 import datetime
 import tempfile
 import os
+import json
 
 import archiver
 
@@ -160,6 +161,18 @@ class TestDearchiver(object):
         self.dearch._load_archive_json()
         assert_is_instance(self.dearch.archive_meta, dict)
         assert_equals(self.dearch.archive_meta, {})
+
+    def test__load_archive_json_contents(self):
+        # Init file:
+        json.dump(
+            {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
+            open(self.dearch.archive_json_file, 'w'))
+
+        # Load file:
+        self.dearch._load_archive_json()
+        assert_equals(
+            self.dearch.archive_meta,
+            {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__save_load_archive_json_contents(self):
         # Init archive_meta:
