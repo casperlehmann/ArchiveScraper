@@ -7,7 +7,7 @@ import datetime
 import tempfile
 import os
 
-from archiver import archiver
+import archiver
 
 class TestGetArchiveUrls(object):
     @classmethod
