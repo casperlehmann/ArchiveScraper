@@ -86,7 +86,7 @@ class Dearchiver(object):
 
     """
 
-    directory = 'data_dearchiver/'
+    directory = 'data_dearchiver'
     archive_meta = None
     article_data = None
     url_queue = []
@@ -101,9 +101,9 @@ class Dearchiver(object):
             if not os.path.isdir(directory):
                 raise ValueError
             self.directory = directory
-        self.archive_json_file = self.directory + 'archive.json'
-        self.scanned_json_file = self.directory + 'scanned.json'
-        self.article_json_file = self.directory + 'article.json'
+        self.archive_json_file = self.directory + '/archive.json'
+        self.scanned_json_file = self.directory + '/scanned.json'
+        self.article_json_file = self.directory + '/article.json'
         self._load_archive_json(silent = silent)
         self._load_scanned_json(silent = silent)
         self._load_article_json(silent = silent)
@@ -185,7 +185,10 @@ class Dearchiver(object):
             os.remove(self.scanned_json_file)
         except FileNotFoundError:
             if not silent: print (self.scanned_json_file, 'does not exist.')
-        for f in glob('data_dearchiver/*/*.html'):
+        for f in glob(self.directory  + '/*/*.html'):
+            if not silent: print ('Deleting: ' + f)
+            os.remove(f)
+        for f in glob(self.directory  + '/archive/*'):
             if not silent: print ('Deleting: ' + f)
             os.remove(f)
         if not silent: print()
@@ -195,18 +198,18 @@ class Dearchiver(object):
             self.load_archive_pages(url)
 
     def load_archive_pages(self, url):
-        if url in self.archive_meta:
-            print ('Alredy here')
+        try:
             self._get_filename(url)
-        else:
+            print ('Alredy here')
+        except IOError:
             self._fetch_archive_page(url)
             self._get_filename(url)
 
     def _fetch_archive_page(self, url):
         with urllib.request.urlopen(url) as url_obj:
-            if not os.path.exists('data_dearchiver/archive'):
-                os.mkdir('data_dearchiver/archive')
-            fname = 'data_dearchiver/archive/'+str(
+            if not os.path.exists(self.directory + '/archive'):
+                os.mkdir(self.directory + '/archive')
+            fname = self.directory + '/archive/'+str(
                 len(self.archive_meta)).zfill(6)+'.html'
             with open(fname, 'wb') as f:
                 print ('Writing file: {}'.format(fname))
@@ -216,17 +219,17 @@ class Dearchiver(object):
     def load_article_pages(self, *urls):
         for url in urls:
             if url in self.article_data:
-                print ('Alredy here')
                 self._get_filename(url)
+                print ('Alredy here')
             else:
                 self._fetch_article_page(url)
                 self._get_filename(url)
 
     def _fetch_article_page(self, url):
         with urllib.request.urlopen(url) as url_obj:
-            if not os.path.exists('data_dearchiver/articles'):
-                os.mkdir('data_dearchiver/articles')
-            fname = 'data_dearchiver/articles/'+str(
+            if not os.path.exists(self.directory + '/articles'):
+                os.mkdir(self.directory + '/articles')
+            fname = self.directory + '/articles/'+str(
                 len(self.article_data)).zfill(6)+'.html'
             with open(fname, 'wb') as f:
                 print ('Writing file: {}'.format(fname))
@@ -241,12 +244,23 @@ class Dearchiver(object):
                 return bs(fobj.read(), 'html.parser')
 
     # 
+    def _get_filepath(self, url):
+        if not isinstance (url, str):
+            raise TypeError
+        if not url in self.archive_meta:
+            raise KeyError
+        return self._get_filename(url)
+
     def _get_filename(self, url):
+        if not isinstance (url, str):
+            raise TypeError
+        if not url in self.archive_meta:
+            raise KeyError
         fname = self.archive_meta[url]['f']
-        if os.path.isfile(fname):
+        if os.path.isfile(self.directory + '/archive/' + fname):
             return fname
         else:
-            print ('File {} does not exist.'.format(fname))
+            raise IOError(('File {} does not exist.'.format(fname)))
 
     # Analysis
     def count_links(self, counter = None, links = None, domain = None):
