@@ -10,7 +10,6 @@ import os
 from archiver import archiver
 
 class TestGetArchiveUrls(object):
-
     @classmethod
     def setup_class(cls):
         cls.data = archiver.get_archive_urls(
@@ -43,7 +42,6 @@ class TestGetArchiveUrls(object):
         assert_raises(ValueError, archiver.get_archive_urls, '2016-4-1')
 
 class TestGetDateStringeGenerator(object):
-
     def setup(self):
         self.dates = archiver.get_date_string_generator(
             from_date = '2015-04-01',
@@ -66,7 +64,6 @@ class TestGetDateStringeGenerator(object):
             assert_equals(generator_item, number)
 
 class TestGetDateAsString(object):
-
     def test_input_not_date_time(self):
         assert_raises(
             TypeError,
@@ -106,7 +103,6 @@ class TestGetDate(object):
         assert_raises(ValueError, archiver.get_date, '06=06-2016')
 
 class TestDearchiver(object):
-
     @classmethod
     def setup_class(cls):
         cls.temp_dir = tempfile.mkdtemp()
