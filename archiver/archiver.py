@@ -96,6 +96,8 @@ class Dearchiver(object):
 
     def __init__(self, archive, directory = None):
         if directory is not None:
+            # check if string
+            # check if exists
             self.directory = directory
         self.archive_json_file = self.directory + 'archive.json'
         self.scanned_json_file = self.directory + 'scanned.json'
@@ -160,15 +162,23 @@ class Dearchiver(object):
         json.dump(self.scanned, open(self.scanned_json_file, 'w'))
 
     # Data
-    @classmethod
     def clean(self):
         print ('Cleaning...')
-        print ('Deleting: ' + self.archive_json_file)
-        os.remove(self.archive_json_file)
-        print ('Deleting: ' + self.archive_json_file)
-        os.remove(self.article_json_file)
-        print ('Deleting: ' + self.scanned_json_file)
-        os.remove(self.scanned_json_file)
+        if os.path.exists(self.archive_json_file):
+            print ('Deleting: ' + self.archive_json_file)
+            os.remove(self.archive_json_file)
+        else:
+            print ('self.archive_json_file does not exist.')
+        if os.path.exists(self.article_json_file):
+            print ('Deleting: ' + self.article_json_file)
+            os.remove(self.article_json_file)
+        else:
+            print ('self.article_json_file does not exist.')
+        if os.path.exists(self.scanned_json_file):
+            print ('Deleting: ' + self.scanned_json_file)
+            os.remove(self.scanned_json_file)
+        else:
+            print ('self.scanned_json_file does not exist.')
         for file in glob('data_dearchiver/*/*.html'):
             print ('Deleting: ' + file)
             os.remove(file)
