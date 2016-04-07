@@ -262,10 +262,7 @@ class Dearchiver(object):
         if not url in self.archive_meta:
             raise KeyError
         fname = self.archive_meta[url]['f']
-        if os.path.isfile(self.directory + '/archive/' + fname):
-            return fname
-        else:
-            raise IOError(('File {} does not exist.'.format(fname)))
+        return fname
 
     # Analysis
     def count_links(self, counter = None, links = None, domain = None):
