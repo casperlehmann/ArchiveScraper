@@ -205,16 +205,39 @@ class TestDearchiver(object):
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__get_filename_wrong_type(self):
-        assert_raises(TypeError, self.dearch._get_filename, ['list of strings'])
+        assert_raises(TypeError, self.dearch._get_filename, ['not a string'])
 
     def test__get_filename_key_not_registered(self):
         self.dearch._load_archive_json()
         assert_raises(KeyError, self.dearch._get_filename, 'www.example.com')
 
-    def test__get_filename_file_does_not_exist(self):
+    def test__get_filename(self):
+        self.dearch._load_archive_json()
+        fname = '000001'
+        fpath = self.dearch.directory + '/archive/' + fname
+        with open(fpath, 'wb') as f: f.write(b'Some contents')
+        self.dearch._save_archive_url('www.example.com', fname)
+        assert_equals(self.dearch._get_filename('www.example.com'), fname)
+
+    def test__get_filepath_wrong_type(self):
+        assert_raises(TypeError, self.dearch._get_filepath, ['not a string'])
+
+    def test__get_filepath_key_not_registered(self):
+        self.dearch._load_archive_json()
+        assert_raises(KeyError, self.dearch._get_filepath, 'www.example.com')
+
+    def test__get_filepath_file_does_not_exist(self):
         self.dearch._load_archive_json()
         self.dearch._save_archive_url('www.example.com', '000001')
-        assert_raises(IOError, self.dearch._get_filename, 'www.example.com')
+        assert_raises(IOError, self.dearch._get_filepath, 'www.example.com')
+
+    def test__get_filepath(self):
+        self.dearch._load_archive_json()
+        fname = '000001'
+        fpath = self.dearch.directory + '/archive/' + fname
+        with open(fpath, 'wb') as f: f.write(b'Some contents')
+        self.dearch._save_archive_url('www.example.com', fname)
+        assert_equals(self.dearch._get_filepath('www.example.com'), fname)
 
     def test__load_archive_pages(self):
         self.dearch._load_archive_json()
@@ -226,11 +249,18 @@ class TestDearchiver(object):
         self.dearch.load_archive_pages('www.example.com')
         #assert_equal
 
-    def test__get_filename(self):
+
+    def test__get_filepath(self):
+        pass
+
+    def test_get_soup_file_not_exists(self):
+        assert_raises(IOError, self.dearch.get_soup, '000001')
+
+    def test_get_soup(self):
         self.dearch._load_archive_json()
         fname = '000001'
         fpath = self.dearch.directory + '/archive/' + fname
         with open(fpath, 'wb') as f: f.write(b'Some contents')
-
         self.dearch._save_archive_url('www.example.com', fname)
-        assert_equals(self.dearch._get_filename('www.example.com'), fname)
+        soup = self.dearch.get_soup(fpath)
+        assert_equals(soup.text, 'Some contents')
