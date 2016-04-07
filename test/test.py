@@ -264,3 +264,12 @@ class TestDearchiver(object):
         self.dearch._save_archive_url('www.example.com', fname)
         soup = self.dearch.get_soup(fpath)
         assert_equals(soup.text, 'Some contents')
+
+    def test_get_soup_filename_not_a_string(self):
+        not_a_string = 1
+        assert_raises(TypeError, self.dearch.get_soup, not_a_string)
+
+    def test_get_soup_url_not_a_string(self):
+        string = '000001'
+        not_a_string = 1
+        assert_raises(TypeError, self.dearch.get_soup, string, not_a_string)
