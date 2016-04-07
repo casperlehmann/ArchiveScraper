@@ -201,7 +201,7 @@ class Dearchiver(object):
         try:
             self._get_filename(url)
             print ('Alredy here')
-        except IOError:
+        except IOError('URL not in archive'):
             self._fetch_archive_page(url)
             self._get_filename(url)
 
