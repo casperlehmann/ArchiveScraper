@@ -236,12 +236,12 @@ class Dearchiver(object):
                 f.write(url_obj.read())
                 self._save_archive_url(url, fname)
 
-    def get_soup(self, url):
-        fname = self._get_filename(url)
-        if fname is not None:
-            print ('Loading & Souping file: {} for url {}'.format(fname, url))
-            with open(fname, 'rb') as fobj:
-                return bs(fobj.read(), 'html.parser')
+    def get_soup(self, fname):
+        if fnmae is None:
+            raise IOError # test this
+        print ('Loading & Souping file: {} for url {}'.format(fname, url))
+        with open(fname, 'rb') as fobj:
+            return bs(fobj.read(), 'html.parser')
 
     # 
     def _get_filepath(self, url):
@@ -282,7 +282,8 @@ class Dearchiver(object):
         for url in set(self.archive_meta.keys()):
             if url in self.scanned: continue
             links = []
-            for a in self.get_soup(url).find_all('a'):
+            fname = self._get_filename(url)
+            for a in self.get_soup(fname).find_all('a'):
                 if a.has_attr('href'):
                     link = a.attrs['href'].strip()
                     links.append(link)
