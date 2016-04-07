@@ -239,15 +239,18 @@ class TestDearchiver(object):
         self.dearch._save_archive_url('www.example.com', fname)
         assert_equals(self.dearch._get_filepath('www.example.com'), fname)
 
-    def test__load_archive_pages(self):
-        self.dearch._load_archive_json()
-        self.dearch._save_archive_url('www.example.com', '000001')
+    def test__load_archive_pages_fname_not_in_archive(self):
         fname = '000001'
         fpath = self.dearch.directory + '/archive/' + fname
-        with open(fpath, 'wb') as f: f.write(b'Some contents')
+        assert_raises(
+            KeyError, self.dearch.load_archive_pages, 'www.example.com')
 
-        self.dearch.load_archive_pages('www.example.com')
-        #assert_equal
+    def test__load_archive_pages(self):
+        fname = '000001'
+        fpath = self.dearch.directory + '/archive/' + fname
+        self.dearch._save_archive_url('www.example.com', '000001')
+        fname = self.dearch.load_archive_pages('www.example.com')
+        assert_equals('000001', fname)
 
 
     def test__get_filepath(self):
