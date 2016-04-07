@@ -236,10 +236,12 @@ class Dearchiver(object):
                 f.write(url_obj.read())
                 self._save_archive_url(url, fname)
 
-    def get_soup(self, fname):
-        if fnmae is None:
-            raise IOError # test this
-        print ('Loading & Souping file: {} for url {}'.format(fname, url))
+    def get_soup(self, fname, url = 'not supplied'):
+        if fname is None or not isinstance(fname, str):
+            raise TypeError("fname must be a string.")
+        if url is None or not isinstance(url, str):
+            raise TypeError("url must be a string.")
+        print ('Loading & Souping file: [{}] for url: [{}]'.format(fname, url))
         with open(fname, 'rb') as fobj:
             return bs(fobj.read(), 'html.parser')
 
@@ -249,7 +251,10 @@ class Dearchiver(object):
             raise TypeError
         if not url in self.archive_meta:
             raise KeyError
-        return self._get_filename(url)
+        fname = self._get_filename(url)
+        if not os.path.isfile(self.directory + '/archive/' + fname):
+            raise IOError(('File {} does not exist.'.format(fname)))
+        return self.directory + '/archive/' + fname
 
     def _get_filename(self, url):
         if not isinstance (url, str):
