@@ -199,11 +199,12 @@ class Dearchiver(object):
 
     def load_archive_pages(self, url):
         try:
-            self._get_filename(url)
+            fname = self._get_filename(url)
             print ('Alredy here')
-        except IOError('URL not in archive'):
+        except IOError:
             self._fetch_archive_page(url)
-            self._get_filename(url)
+            fname = self._get_filename(url)
+        return fname
 
     def _fetch_archive_page(self, url):
         with urllib.request.urlopen(url) as url_obj:
