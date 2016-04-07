@@ -236,15 +236,6 @@ class Dearchiver(object):
                 f.write(url_obj.read())
                 self._save_archive_url(url, fname)
 
-    def get_soup(self, fname, url = 'not supplied'):
-        if fname is None or not isinstance(fname, str):
-            raise TypeError("fname must be a string.")
-        if url is None or not isinstance(url, str):
-            raise TypeError("url must be a string.")
-        print ('Loading & Souping file: [{}] for url: [{}]'.format(fname, url))
-        with open(fname, 'rb') as fobj:
-            return bs(fobj.read(), 'html.parser')
-
     # 
     def _get_filepath(self, url):
         if not isinstance (url, str):
@@ -279,6 +270,15 @@ class Dearchiver(object):
             if domain in link:
                 counter[link] += 1
         return counter
+
+    def get_soup(self, fname, url = 'not supplied'):
+        if fname is None or not isinstance(fname, str):
+            raise TypeError("fname must be a string.")
+        if url is None or not isinstance(url, str):
+            raise TypeError("url must be a string.")
+        print ('Loading & Souping file: [{}] for url: [{}]'.format(fname, url))
+        with open(fname, 'rb') as fobj:
+            return bs(fobj.read(), 'html.parser')
 
     def find_links(self):
         for url in set(self.archive_meta.keys()):
