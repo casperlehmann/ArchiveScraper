@@ -345,3 +345,6 @@ class TestDearchiver(object):
         assert_false(os.path.isdir(os.path.join(self.temp_dir, 'test')))
         self.dearch._get_archive_folder('test')
         assert_true(os.path.isdir(os.path.join(self.temp_dir, 'test')))
+
+    def test__fetch_archive_page_url_not_string(self):
+        assert_raises(TypeError, self.dearch._get_archive_folder, 1)

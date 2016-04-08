@@ -260,6 +260,8 @@ class Dearchiver(object):
         return self.archive_folder
 
     def _fetch_archive_page(self, url):
+        if not isinstance(str, url):
+            raise TypeError('url must be a string')
         if not url.startswith('http'):
             url = 'http://' + url
         with urllib.request.urlopen(url) as url_obj:
