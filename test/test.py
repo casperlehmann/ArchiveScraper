@@ -233,6 +233,16 @@ class TestDearchiver(object):
             json.load(open(self.dearch.archive_json_file)),
             {'www.example.com': {'f': '000001'}})
 
+    def test__save_archive_url_url_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch._save_archive_url,
+            url = 1, fname = '000001')
+
+    def test__save_archive_url_fname_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch._save_archive_url,
+            url = 'www.example.com', fname = 1)
+
     def test__save_archive_links(self):
         # Init file:
         self.dearch._save_archive_links('www.example.com', ['www.link.com'])
