@@ -206,7 +206,7 @@ class Dearchiver(object):
             os.remove(self.scanned_json_file)
         except FileNotFoundError:
             if not silent: print (self.scanned_json_file, 'does not exist.')
-        for f in glob(os.path.join(self.directory, '/*/*.html')):
+        for f in glob(os.path.join(self.directory, '*/*.html')):
             if not silent: print ('Deleting: ' + f)
             os.remove(f)
         for f in glob(os.path.join(self._get_archive_folder(), '*')):
