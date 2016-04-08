@@ -171,13 +171,18 @@ class TestDearchiver(object):
         assert_equals(len(self.archive), 1517)
 
     def test_clean(self):
+        fname = '000001.html'
+        fpath = os.path.join(self.dearch.directory, 'archive', fname)
+        with open(fpath, 'wb') as f: f.write(b'Some contents')
         assert_true(os.path.isfile(self.dearch.archive_json_file))
         assert_true(os.path.isfile(self.dearch.scanned_json_file))
         assert_true(os.path.isfile(self.dearch.article_json_file))
+        assert_true(os.path.isfile(fpath))
         self.dearch.clean(silent = True)
         assert_false(os.path.isfile(self.dearch.archive_json_file))
         assert_false(os.path.isfile(self.dearch.scanned_json_file))
         assert_false(os.path.isfile(self.dearch.article_json_file))
+        assert_false(os.path.isfile(fpath))
 
     def test__load_archive_json_creation(self):
         self.dearch._load_archive_json()
