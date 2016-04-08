@@ -85,31 +85,32 @@ class TestGetDateStringeGenerator(object):
             assert_equals(generator_item, number)
 
 class TestGetDateAsString(object):
-    def test_input_not_date_time(self):
+    def test_input_not_date_time_YYYY_mm_dd(self):
         assert_raises(
             TypeError,
             archiver.get_date_as_string_YYYY_mm_dd,
             '2015-09-01')
 
-    def test_input_date_time(self):
+    def test_input_date_time_YYYY_mm_dd(self):
         date_string = '2015-09-01'
         assert_equals(
             archiver.get_date_as_string_YYYY_mm_dd(
                 datetime.datetime.strptime(date_string, '%Y-%m-%d')),
             date_string)
 
-    def test_input_not_date_time(self):
+    def test_input_not_date_time_YYYYmmdd(self):
         assert_raises(
             TypeError,
             archiver.get_date_as_string_YYYYmmdd,
             '2015-09-01')
 
-    def test_input_date_time(self):
+    def test_input_date_time_YYYYmmdd(self):
         date_string = '20150901'
         assert_equals(
             archiver.get_date_as_string_YYYYmmdd(
                 datetime.datetime.strptime(date_string, '%Y%m%d')),
             date_string)
+
 
 class TestGetDate(object):
     def test_date(self):
@@ -131,8 +132,7 @@ class TestDearchiver(object):
         cls.archive = archiver.get_archive_urls(
             from_date = '2016-04-01',
             earliest_date='2012-02-06',
-            schema = 'http://politics.people.com.cn/GB/70731/review/{}.html'
-        )
+            schema = 'http://politics.people.com.cn/GB/70731/review/{}.html')
 
     @classmethod
     def teardown_class(cls):
