@@ -195,6 +195,7 @@ class Dearchiver(object):
         self.clean_json_article(silent=silent)
         self.clean_json_scanned(silent=silent)
         self.clean_archive(silent=silent)
+        self.clean_project_root(silent=silent)
         if not silent: print()
 
     def clean_json_archive(self, silent = False):
@@ -222,6 +223,11 @@ class Dearchiver(object):
         for f in glob(os.path.join(self._get_archive_folder(), '*')):
             if not silent: print ('Deleting: ' + f)
             os.remove(f)
+
+    def clean_project_root(self, silent = False):
+        for f in glob(os.path.join(self.directory, '*')):
+            if not silent: print ('Deleting: ' + f)
+            os.rmdir(f)
 
     def load_archive(self, archive):
         for url in archive[:2]:

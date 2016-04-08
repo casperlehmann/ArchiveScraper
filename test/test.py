@@ -9,6 +9,7 @@ import tempfile
 import os
 import json
 import shutil
+from glob import glob
 
 import archiver
 
@@ -171,18 +172,37 @@ class TestDearchiver(object):
         assert_equals(len(self.archive), 1517)
 
     def test_clean(self):
+        # We've only got the project root directory:
+        assert_true(os.path.isdir(self.dearch.directory))
+        # Which contains three json files:
+        assert_equals(3, len(glob(os.path.join(self.dearch.directory,'*'))))
+        # Let's create some contents to delete:
         fname = '000001.html'
-        fpath = os.path.join(self.dearch.directory, 'archive', fname)
+        archive = self.dearch._get_archive_folder(
+            archive_folder_name = 'archive')
+        fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
+        # Content has been created:
         assert_true(os.path.isfile(self.dearch.archive_json_file))
         assert_true(os.path.isfile(self.dearch.scanned_json_file))
         assert_true(os.path.isfile(self.dearch.article_json_file))
+        assert_true(os.path.isdir(self.dearch.archive_folder))
         assert_true(os.path.isfile(fpath))
+        # Delete it:
         self.dearch.clean(silent = True)
+        # Aaaaaand, it's gone:
         assert_false(os.path.isfile(self.dearch.archive_json_file))
         assert_false(os.path.isfile(self.dearch.scanned_json_file))
         assert_false(os.path.isfile(self.dearch.article_json_file))
+        assert_false(os.path.isdir(self.dearch.archive_folder))
         assert_false(os.path.isfile(fpath))
+        # Everything has been deleted, except for the project root directory:
+        assert_true(os.path.isdir(self.dearch.directory))
+        # Which is empty:
+        assert_equals(0, len(glob(os.path.join(self.dearch.directory,'*'))))
+        # But we can simply start over:
+        self.dearch = archiver.Dearchiver(
+            directory = self.temp_dir, silent = True)
 
     def test__load_archive_json_creation(self):
         self.dearch._load_archive_json()
@@ -239,7 +259,9 @@ class TestDearchiver(object):
     def test__get_filename(self):
         self.dearch._load_archive_json()
         fname = '000001'
-        fpath = os.path.join(self.dearch.directory, 'archive', fname)
+        archive = self.dearch._get_archive_folder(
+            archive_folder_name = 'archive')
+        fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
         self.dearch._save_archive_url('www.example.com', fname)
         assert_equals(self.dearch._get_filename('www.example.com'), fname)
@@ -259,7 +281,9 @@ class TestDearchiver(object):
     def test__get_filepath(self):
         self.dearch._load_archive_json()
         fname = '000001'
-        fpath = os.path.join(self.dearch.directory, 'archive', fname)
+        archive = self.dearch._get_archive_folder(
+            archive_folder_name = 'archive')
+        fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
         self.dearch._save_archive_url('www.example.com', fname)
         assert_equals(self.dearch._get_filepath('www.example.com'), fpath)
@@ -271,13 +295,17 @@ class TestDearchiver(object):
     # Goes online
     #def test__load_archive_pages_fname_not_in_archive(self):
     #    fname = '000001'
-    #    fpath = os.path.join(self.dearch.directory, 'archive', fname)
+    #    archive = self.dearch._get_archive_folder(
+    #        archive_folder_name = 'archive')
+    #    fpath = os.path.join(archive, fname)
     #    assert_raises(
     #        KeyError, self.dearch.load_archive_pages, 'www.example.com')
 
     def test__load_archive_pages(self):
         fname = '000001'
-        fpath = os.path.join(self.dearch.directory, 'archive', fname)
+        archive = self.dearch._get_archive_folder(
+            archive_folder_name = 'archive')
+        fpath = os.path.join(archive, fname)
         self.dearch._save_archive_url('www.example.com', '000001')
         fname = self.dearch.load_archive_pages('www.example.com')
         assert_equals('000001', fname)
@@ -288,7 +316,9 @@ class TestDearchiver(object):
     def test_get_soup(self):
         self.dearch._load_archive_json()
         fname = '000001'
-        fpath = os.path.join(self.dearch.directory, 'archive', fname)
+        archive = self.dearch._get_archive_folder(
+            archive_folder_name = 'archive')
+        fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
         self.dearch._save_archive_url('www.example.com', fname)
         soup = self.dearch.get_soup(fpath)
