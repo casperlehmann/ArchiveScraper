@@ -42,10 +42,10 @@ class TestGetArchiveUrls(object):
             self.data[-1],
             'http://politics.people.com.cn/GB/70731/review/20120206.html')
 
-    def test_from_date_not_string(self):
+    def test_from_date_raises_TypeError(self):
         assert_raises(TypeError, archiver.get_archive_urls, 20160401)
 
-    def test_from_date_string_wrong_format(self):
+    def test_from_date_raises_ValueError(self):
         assert_raises(ValueError, archiver.get_archive_urls, '2016-4-1')
 
     def test_earliest_date_not_string(self):
@@ -59,7 +59,7 @@ class TestGetArchiveUrls(object):
     def test_earliest_date_string_wrong_format(self):
         assert_raises(ValueError, archiver.get_archive_urls, '2016-4-1')
 
-    def test_schema_date_not_string(self):
+    def test_schema_raises_TypeError(self):
         assert_raises(TypeError, archiver.get_archive_urls, schema = 1)
 
     def test_schema_date_string_wrong_format(self):
@@ -122,7 +122,7 @@ class TestGetDate(object):
             archiver.get_date('2016-06-06'),
             datetime.datetime.strptime('20160606', '%Y%m%d'))
 
-    def test_not_string(self):
+    def test_date_string_raises_TypeError(self):
         assert_raises(TypeError, archiver.get_date, 20160606)
 
     def test_wrong_format(self):
@@ -253,7 +253,7 @@ class TestDearchiver(object):
             json.load(open(self.dearch.archive_json_file)),
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
-    def test__get_filename_wrong_type(self):
+    def test__get_filename_url_raises_TypeError(self):
         assert_raises(TypeError, self.dearch._get_filename, ['not a string'])
 
     def test__get_filename_key_not_registered(self):
@@ -270,7 +270,7 @@ class TestDearchiver(object):
         self.dearch._save_archive_url('www.example.com', fname)
         assert_equals(self.dearch._get_filename('www.example.com'), fname)
 
-    def test__get_filepath_wrong_type(self):
+    def test__get_filepath_url_raises_TypeError(self):
         assert_raises(TypeError, self.dearch._get_filepath, ['not a string'])
 
     def test__get_filepath_key_not_registered(self):
@@ -328,27 +328,29 @@ class TestDearchiver(object):
         soup = self.dearch.get_soup(fpath)
         assert_equals(soup.text, 'Some contents')
 
-    def test_get_soup_filename_not_a_string(self):
-        not_a_string = 1
-        assert_raises(TypeError, self.dearch.get_soup, not_a_string)
+    def test_get_soup_filename_raises_TypeError(self):
+        assert_raises(TypeError, self.dearch.get_soup, fname=1, url='string')
 
-    def test_get_soup_url_not_a_string(self):
+    def test_get_soup_url_raises_TypeError(self):
         string = '000001'
-        not_a_string = 1
-        assert_raises(TypeError, self.dearch.get_soup, string, not_a_string)
+        not_string = 1
+        assert_raises(
+            TypeError, self.dearch.get_soup, fname=string, url=not_string)
 
     def test__get_archive_folder_sets_folder_name(self):
         self.dearch._get_archive_folder('test')
         assert_equals(
             self.dearch.archive_folder, os.path.join(self.temp_dir, 'test'))
 
-    def test__get_archive_folder_wrong_type(self):
-        assert_raises(TypeError, self.dearch._get_archive_folder, 1)
+    def test__get_archive_folder_archive_folder_name_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch._get_archive_folder,
+            archive_folder_name=1)
 
     def test__get_archive_folder_creates_folder(self):
         assert_false(os.path.isdir(os.path.join(self.temp_dir, 'test')))
         self.dearch._get_archive_folder('test')
         assert_true(os.path.isdir(os.path.join(self.temp_dir, 'test')))
 
-    def test__fetch_archive_page_url_not_string(self):
+    def test__fetch_archive_page_url_raises_TypeError(self):
         assert_raises(TypeError, self.dearch._get_archive_folder, 1)
