@@ -52,6 +52,10 @@ class TestGetArchiveUrls(object):
         assert_raises(
             TypeError, archiver.get_archive_urls, earliest_date=20160401)
 
+    def test_earliest_date_raises_value_error(self):
+        assert_raises(
+            ValueError, archiver.get_archive_urls, earliest_date='20160401')
+
     def test_earliest_date_string_wrong_format(self):
         assert_raises(ValueError, archiver.get_archive_urls, '2016-4-1')
 
