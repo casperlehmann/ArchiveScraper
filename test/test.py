@@ -15,9 +15,12 @@ import archiver
 class TestGetArchiveUrls(object):
     @classmethod
     def setup_class(cls):
+        """Generate urls for the politics.people.com.cn archive (2012-2016).
+        """
         cls.data = archiver.get_archive_urls(
             from_date = '2016-04-01',
-            url = 'http://politics.people.com.cn/GB/70731/review/{}.html')
+            earliest_date='2012-02-06',
+            schema = 'http://politics.people.com.cn/GB/70731/review/{}.html')
 
     def test_type_urls(self):
         assert_is_instance(self.data, (list,))
@@ -43,6 +46,20 @@ class TestGetArchiveUrls(object):
 
     def test_from_date_string_wrong_format(self):
         assert_raises(ValueError, archiver.get_archive_urls, '2016-4-1')
+
+    def test_earliest_date_not_string(self):
+        assert_raises(
+            TypeError, archiver.get_archive_urls, earliest_date=20160401)
+
+    def test_earliest_date_string_wrong_format(self):
+        assert_raises(ValueError, archiver.get_archive_urls, '2016-4-1')
+
+    def test_schema_date_not_string(self):
+        assert_raises(TypeError, archiver.get_archive_urls, schema = 1)
+
+    def test_schema_date_string_wrong_format(self):
+        assert_raises(ValueError, archiver.get_archive_urls, schema = '[]')
+
 
 class TestGetDateStringeGenerator(object):
     def setup(self):
@@ -113,7 +130,7 @@ class TestDearchiver(object):
         cls.archive = archiver.get_archive_urls(
             from_date = '2016-04-01',
             earliest_date='2012-02-06',
-            url = 'http://politics.people.com.cn/GB/70731/review/{}.html'
+            schema = 'http://politics.people.com.cn/GB/70731/review/{}.html'
         )
 
     @classmethod
