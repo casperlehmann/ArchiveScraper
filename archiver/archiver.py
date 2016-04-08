@@ -89,7 +89,7 @@ def get_archive_urls(
     return out
 
 class Dearchiver(object):
-    """Starts from a list of archieve urls and crawls links.
+    """Starts from a list of archive urls and crawls links.
 
     """
 
