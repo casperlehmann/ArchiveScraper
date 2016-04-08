@@ -56,14 +56,16 @@ class TestGetArchiveUrls(object):
         assert_raises(
             ValueError, archiver.get_archive_urls, earliest_date='20160401')
 
-    def test_earliest_date_string_wrong_format(self):
+    def test_earliest_date_string_raises_ValueError(self):
         assert_raises(ValueError, archiver.get_archive_urls, '2016-4-1')
 
     def test_schema_raises_TypeError(self):
         assert_raises(TypeError, archiver.get_archive_urls, schema = 1)
 
-    def test_schema_date_string_wrong_format(self):
-        assert_raises(ValueError, archiver.get_archive_urls, schema = '[]')
+    def test_schema_raises_ValueError(self):
+        assert_raises(
+            ValueError, archiver.get_archive_urls, from_date='today',
+            earliest_date='2012-02-06', schema = '[]')
 
 
 class TestGetDateStringeGenerator(object):
@@ -115,7 +117,6 @@ class TestGetDateAsString(object):
                 datetime.datetime.strptime(date_string, '%Y%m%d')),
             date_string)
 
-
 class TestGetDate(object):
     def test_date(self):
         assert_equals(
@@ -125,8 +126,8 @@ class TestGetDate(object):
     def test_date_string_raises_TypeError(self):
         assert_raises(TypeError, archiver.get_date, 20160606)
 
-    def test_wrong_format(self):
-        assert_raises(ValueError, archiver.get_date, '06=06-2016')
+    def test_date_string_raises_ValueError(self):
+        assert_raises(ValueError, archiver.get_date, date_string='06=06-2016')
 
 class TestDearchiver(object):
     @classmethod
