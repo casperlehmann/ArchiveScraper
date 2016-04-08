@@ -239,6 +239,10 @@ class TestDearchiver(object):
         self.dearch._save_archive_url('www.example.com', fname)
         assert_equals(self.dearch._get_filepath('www.example.com'), fname)
 
+    def test__load_archive_pages_url_not_a_string(self):
+        assert_raises(
+            TypeError, self.dearch.load_archive_pages, 1)
+
     def test__load_archive_pages_fname_not_in_archive(self):
         fname = '000001'
         fpath = self.dearch.directory + '/archive/' + fname

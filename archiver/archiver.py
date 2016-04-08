@@ -198,15 +198,20 @@ class Dearchiver(object):
             self.load_archive_pages(url)
 
     def load_archive_pages(self, url):
+        if not isinstance (url, str):
+            raise TypeError('url must be a string')
         try:
             fname = self._get_filename(url)
-            print ('Alredy here')
-        except IOError:
+            print ('Alredy here: {}'.format(url))
+        except KeyError:
+            print ('Fetching...: {}'.format(url))
             self._fetch_archive_page(url)
             fname = self._get_filename(url)
         return fname
 
     def _fetch_archive_page(self, url):
+        if not url.startswith('http'):
+            url = 'http://' + url
         with urllib.request.urlopen(url) as url_obj:
             if not os.path.exists(self.directory + '/archive'):
                 os.mkdir(self.directory + '/archive')
