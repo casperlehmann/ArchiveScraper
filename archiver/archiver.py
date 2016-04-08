@@ -102,9 +102,9 @@ class Dearchiver(object):
             if not os.path.isdir(directory):
                 raise ValueError
             self.directory = directory
-        self.archive_json_file = self.directory + '/archive.json'
-        self.scanned_json_file = self.directory + '/scanned.json'
-        self.article_json_file = self.directory + '/article.json'
+        self.archive_json_file = os.path.join(self.directory, 'archive.json')
+        self.scanned_json_file = os.path.join(self.directory, 'scanned.json')
+        self.article_json_file = os.path.join(self.directory, 'article.json')
         self._load_archive_json(silent = silent)
         self._load_scanned_json(silent = silent)
         self._load_article_json(silent = silent)
@@ -186,10 +186,10 @@ class Dearchiver(object):
             os.remove(self.scanned_json_file)
         except FileNotFoundError:
             if not silent: print (self.scanned_json_file, 'does not exist.')
-        for f in glob(self.directory  + '/*/*.html'):
+        for f in glob(os.path.join(self.directory, '/*/*.html')):
             if not silent: print ('Deleting: ' + f)
             os.remove(f)
-        for f in glob(self.directory  + '/archive/*'):
+        for f in glob(os.path.join(self._get_archive_folder(), '*')):
             if not silent: print ('Deleting: ' + f)
             os.remove(f)
         if not silent: print()
@@ -210,9 +210,9 @@ class Dearchiver(object):
             fname = self._get_filename(url)
         return fname
 
-    def _get_archive_folder(self, folder_name = None):
-        if not folder_name is None:
-            archive_folder_name = folder_name
+    def _get_archive_folder(self, archive_folder_name = None):
+        if not archive_folder_name is None:
+            archive_folder_name = archive_folder_name
         elif archive_folder_name is None:
                 archive_folder_name = 'archive'
         if not isinstance(archive_folder_name, str):
@@ -228,8 +228,9 @@ class Dearchiver(object):
         if not url.startswith('http'):
             url = 'http://' + url
         with urllib.request.urlopen(url) as url_obj:
-            fname = self.directory + '/archive/'+str(
-                len(self.archive_meta)).zfill(6)+'.html'
+            fname = os.path.join(
+                self._get_archive_folder(),
+                str(len(self.archive_meta)).zfill(6) + '.html')
             with open(fname, 'wb') as f:
                 print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
@@ -246,10 +247,11 @@ class Dearchiver(object):
 
     def _fetch_article_page(self, url):
         with urllib.request.urlopen(url) as url_obj:
-            if not os.path.exists(self.directory + '/articles'):
-                os.mkdir(self.directory + '/articles')
-            fname = self.directory + '/articles/'+str(
-                len(self.article_data)).zfill(6)+'.html'
+            if not os.path.exists(os.path.join(self.directory, 'articles')):
+                os.mkdir(os.path.join(self.directory, 'articles'))
+            fname = os.path.join(
+                self.directory, 'articles',
+                str(len(self.article_data)).zfill(6) + '.html')
             with open(fname, 'wb') as f:
                 print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
@@ -262,9 +264,9 @@ class Dearchiver(object):
         if not url in self.archive_meta:
             raise KeyError
         fname = self._get_filename(url)
-        if not os.path.isfile(self.directory + '/archive/' + fname):
+        if not os.path.isfile(os.path.join(self._get_archive_folder(), fname)):
             raise IOError(('File {} does not exist.'.format(fname)))
-        return self.directory + '/archive/' + fname
+        return os.path.join(self._get_archive_folder(), fname)
 
     def _get_filename(self, url):
         if not isinstance (url, str):
