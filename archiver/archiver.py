@@ -93,7 +93,7 @@ class Dearchiver(object):
 
     """
 
-    directory = 'data_dearchiver'
+    _directory = None
     archive_folder = None
     archive_meta = None
     article_data = None
@@ -103,18 +103,31 @@ class Dearchiver(object):
     links = {}
 
     def __init__(self, directory = None, silent = False):
-        if directory is not None:
-            if not isinstance (directory, str):
-                raise TypeError
-            if not os.path.isdir(directory):
-                raise ValueError
-            self.directory = directory
+        self.directory = directory
         self.archive_json_file = os.path.join(self.directory, 'archive.json')
         self.scanned_json_file = os.path.join(self.directory, 'scanned.json')
         self.article_json_file = os.path.join(self.directory, 'article.json')
         self._load_archive_json(silent = silent)
         self._load_scanned_json(silent = silent)
         self._load_article_json(silent = silent)
+
+    @property
+    def directory(self):
+        return self._directory
+
+    @directory.setter
+    def directory(self, directory):
+        if directory is not None:
+            if not isinstance (directory, str):
+                raise TypeError
+            if not os.path.isdir(directory):
+                raise ValueError
+            self._directory = directory
+        elif self._directory is None:
+            self._directory = 'data_dearchiver'
+        else:
+            # self._directory already has a value
+            pass
 
     # JSON
     def _load_archive_json(self, silent = False):
