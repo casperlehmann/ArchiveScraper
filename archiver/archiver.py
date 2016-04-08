@@ -220,6 +220,8 @@ class Dearchiver(object):
                 'Name of archive folder must be a string, not {}'.format(
                     archive_folder_name))
         self.archive_folder = os.path.join(self.directory, archive_folder_name)
+        if not os.path.exists(self.archive_folder):
+            os.mkdir(self.archive_folder)
         return self.archive_folder
 
     def _fetch_archive_page(self, url):

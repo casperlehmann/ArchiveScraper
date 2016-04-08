@@ -284,3 +284,8 @@ class TestDearchiver(object):
 
     def test__get_archive_folder_wrong_type(self):
         assert_raises(TypeError, self.dearch._get_archive_folder, 1)
+
+    def test__get_archive_folder_creates_folder(self):
+        assert_false(os.path.isdir(os.path.join(self.temp_dir, 'test')))
+        self.dearch._get_archive_folder('test')
+        assert_true(os.path.isdir(os.path.join(self.temp_dir, 'test')))
