@@ -276,3 +276,10 @@ class TestDearchiver(object):
         string = '000001'
         not_a_string = 1
         assert_raises(TypeError, self.dearch.get_soup, string, not_a_string)
+
+    def test__get_archive_folder_sets_folder_name(self):
+        self.dearch._get_archive_folder('test')
+        assert_equals(self.dearch.archive_folder, self.temp_dir+'/test')
+
+    def test__get_archive_folder_wrong_type(self):
+        assert_raises(TypeError, self.dearch._get_archive_folder, 1)

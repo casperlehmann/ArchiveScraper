@@ -87,6 +87,7 @@ class Dearchiver(object):
     """
 
     directory = 'data_dearchiver'
+    archive_folder = None
     archive_meta = None
     article_data = None
     url_queue = []
@@ -209,12 +210,22 @@ class Dearchiver(object):
             fname = self._get_filename(url)
         return fname
 
+    def _get_archive_folder(self, folder_name = None):
+        if not folder_name is None:
+            archive_folder_name = folder_name
+        elif archive_folder_name is None:
+                archive_folder_name = 'archive'
+        if not isinstance(archive_folder_name, str):
+            raise TypeError(
+                'Name of archive folder must be a string, not {}'.format(
+                    archive_folder_name))
+        self.archive_folder = os.path.join(self.directory, archive_folder_name)
+        return self.archive_folder
+
     def _fetch_archive_page(self, url):
         if not url.startswith('http'):
             url = 'http://' + url
         with urllib.request.urlopen(url) as url_obj:
-            if not os.path.exists(self.directory + '/archive'):
-                os.mkdir(self.directory + '/archive')
             fname = self.directory + '/archive/'+str(
                 len(self.archive_meta)).zfill(6)+'.html'
             with open(fname, 'wb') as f:
