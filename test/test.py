@@ -237,7 +237,7 @@ class TestDearchiver(object):
         fpath = self.dearch.directory + '/archive/' + fname
         with open(fpath, 'wb') as f: f.write(b'Some contents')
         self.dearch._save_archive_url('www.example.com', fname)
-        assert_equals(self.dearch._get_filepath('www.example.com'), fname)
+        assert_equals(self.dearch._get_filepath('www.example.com'), fpath)
 
     def test__load_archive_pages_url_not_a_string(self):
         assert_raises(
@@ -255,10 +255,6 @@ class TestDearchiver(object):
         self.dearch._save_archive_url('www.example.com', '000001')
         fname = self.dearch.load_archive_pages('www.example.com')
         assert_equals('000001', fname)
-
-
-    def test__get_filepath(self):
-        pass
 
     def test_get_soup_file_not_exists(self):
         assert_raises(IOError, self.dearch.get_soup, '000001')
