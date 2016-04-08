@@ -243,11 +243,12 @@ class TestDearchiver(object):
         assert_raises(
             TypeError, self.dearch.load_archive_pages, 1)
 
-    def test__load_archive_pages_fname_not_in_archive(self):
-        fname = '000001'
-        fpath = self.dearch.directory + '/archive/' + fname
-        assert_raises(
-            KeyError, self.dearch.load_archive_pages, 'www.example.com')
+    # Goes online
+    #def test__load_archive_pages_fname_not_in_archive(self):
+    #    fname = '000001'
+    #    fpath = self.dearch.directory + '/archive/' + fname
+    #    assert_raises(
+    #        KeyError, self.dearch.load_archive_pages, 'www.example.com')
 
     def test__load_archive_pages(self):
         fname = '000001'
