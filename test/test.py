@@ -171,6 +171,9 @@ class TestDearchiver(object):
         assert_equals(len(self.archive), 1517)
 
     def test_clean(self):
+        assert_true(os.path.isfile(self.dearch.archive_json_file))
+        assert_true(os.path.isfile(self.dearch.scanned_json_file))
+        assert_true(os.path.isfile(self.dearch.article_json_file))
         self.dearch.clean(silent = True)
         assert_false(os.path.isfile(self.dearch.archive_json_file))
         assert_false(os.path.isfile(self.dearch.scanned_json_file))

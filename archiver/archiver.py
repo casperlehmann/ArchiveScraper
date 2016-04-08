@@ -191,28 +191,43 @@ class Dearchiver(object):
     # Data
     def clean(self, silent = False):
         if not silent: print ('Cleaning...')
+        self.clean_json_archive(silent=silent)
+        self.clean_json_article(silent=silent)
+        self.clean_json_scanned(silent=silent)
+        self.clean_html(silent=silent)
+        self.clean_archive(silent=silent)
+        if not silent: print()
+
+    def clean_json_archive(self, silent = False):
         try:
             if not silent: print ('Deleting: ' + self.archive_json_file + '...')
             os.remove(self.archive_json_file)
         except FileNotFoundError:
-            if not silent: print (self.archive_json_file, 'does not exist.')
+            if not silent: print ('Does not exist: ' + self.archive_json_file)
+
+    def clean_json_article(self, silent = False):
         try:
             if not silent: print ('Deleting: ' + self.article_json_file + '...')
             os.remove(self.article_json_file)
         except FileNotFoundError:
-            if not silent: print (self.article_json_file, 'does not exist.')
+            if not silent: print ('Does not exist: ' + self.article_json_file)
+
+    def clean_json_scanned(self, silent = False):
         try:
             if not silent: print ('Deleting: ' + self.scanned_json_file + '...')
             os.remove(self.scanned_json_file)
         except FileNotFoundError:
-            if not silent: print (self.scanned_json_file, 'does not exist.')
+            if not silent: print ('Does not exist: ' + self.scanned_json_file)
+
+    def clean_html(self, silent = False):
         for f in glob(os.path.join(self.directory, '*/*.html')):
             if not silent: print ('Deleting: ' + f)
             os.remove(f)
+
+    def clean_archive(self, silent = False):
         for f in glob(os.path.join(self._get_archive_folder(), '*')):
             if not silent: print ('Deleting: ' + f)
             os.remove(f)
-        if not silent: print()
 
     def load_archive(self, archive):
         for url in archive[:2]:
