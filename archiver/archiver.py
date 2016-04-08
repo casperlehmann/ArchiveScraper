@@ -194,7 +194,6 @@ class Dearchiver(object):
         self.clean_json_archive(silent=silent)
         self.clean_json_article(silent=silent)
         self.clean_json_scanned(silent=silent)
-        self.clean_html(silent=silent)
         self.clean_archive(silent=silent)
         if not silent: print()
 
@@ -218,11 +217,6 @@ class Dearchiver(object):
             os.remove(self.scanned_json_file)
         except FileNotFoundError:
             if not silent: print ('Does not exist: ' + self.scanned_json_file)
-
-    def clean_html(self, silent = False):
-        for f in glob(os.path.join(self.directory, '*/*.html')):
-            if not silent: print ('Deleting: ' + f)
-            os.remove(f)
 
     def clean_archive(self, silent = False):
         for f in glob(os.path.join(self._get_archive_folder(), '*')):
