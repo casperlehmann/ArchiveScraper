@@ -92,7 +92,6 @@ class Dearchiver(object):
     """Starts from a list of archive urls and crawls links.
 
     """
-
     _directory = None
     archive_folder = None
     archive_meta = None
