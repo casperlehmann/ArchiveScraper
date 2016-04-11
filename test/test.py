@@ -369,6 +369,47 @@ class TestDearchiver(object):
             TypeError, self.dearch._save_article_links,
             url = 'www.example.com', links = None)
 
+    # Scanned
+    def test__load_scanned_json_silent_raises_TypeError(self):
+        assert_raises(TypeError, self.dearch._load_scanned_json, silent = 2)
+
+    def test__load_scanned_json_reads_contents_from_file(self):
+        json.dump(
+            ['url_1', 'url_2', 'url_3'],
+            open(self.dearch.scanned_json_file, 'w'))
+        assert_equals(self.dearch.scanned, [])
+
+        self.dearch._load_scanned_json()
+        assert_equals(self.dearch.scanned, ['url_1', 'url_2', 'url_3'])
+
+    def test__load_scanned_json_creation(self):
+        self.dearch.scanned = None
+        assert_is_none(self.dearch.scanned)
+        self.dearch._load_scanned_json()
+        assert_is_instance(self.dearch.scanned, list)
+        assert_equals(self.dearch.scanned, [])
+
+    def test__load_scanned_json_load_file(self):
+        with open(os.path.join(self.temp_dir, 'scanned.json'), 'w') as f:
+            f.write(json.dumps(['url_1', 'url_2', 'url_3']))
+
+        self.dearch.scanned = None
+        assert_is_none(self.dearch.scanned)
+
+        self.dearch._load_scanned_json()
+        assert_is_instance(self.dearch.scanned, list)
+        assert_equals(self.dearch.scanned, ['url_1', 'url_2', 'url_3'])
+
+    def test__save_scanned_url(self):
+        self.dearch._save_scanned('www.example.com')
+        assert_equals(
+            json.load(open(self.dearch.scanned_json_file)),
+            ['www.example.com'])
+
+    def test__save_scanned_url_raises_TypeError(self):
+        assert_raises(TypeError, self.dearch._save_scanned, url = 1)
+
+    #
     def test__get_filename_url_raises_TypeError(self):
         assert_raises(
             TypeError, self.dearch._get_filename, url=['not a string'])
