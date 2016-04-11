@@ -290,6 +290,85 @@ class TestDearchiver(object):
             TypeError, self.dearch._save_archive_links,
             url = 'www.example.com', links = None)
 
+    # Articles
+    def test__load_article_json_silent_raises_TypeError(self):
+        assert_raises(TypeError, self.dearch._load_article_json, silent = 2)
+
+    def test__load_article_json_reads_contents_from_file(self):
+        json.dump(
+            {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
+            open(self.dearch.article_json_file, 'w'))
+        assert_equals(self.dearch.article_data, {})
+
+        self.dearch._load_article_json()
+        assert_equals(
+            self.dearch.article_data,
+            {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
+
+    def test__load_article_json_creation(self):
+        self.dearch.article_data = None
+        assert_is_none(self.dearch.article_data)
+        self.dearch._load_article_json()
+        assert_is_instance(self.dearch.article_data, dict)
+        assert_equals(self.dearch.article_data, {})
+
+    def test__load_article_json_load_file(self):
+        with open(os.path.join(self.temp_dir, 'article.json'), 'w') as f:
+            f.write(json.dumps(
+                {'www.example.com': {'f': '000001', 'l': ['www.link.com']}}))
+
+        self.dearch.article_data = None
+        assert_is_none(self.dearch.article_data)
+
+        self.dearch._load_article_json()
+        assert_is_instance(self.dearch.article_data, dict)
+        assert_equals(
+            self.dearch.article_data,
+            {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
+
+    def test__save_article_url(self):
+        self.dearch._save_article_url('www.example.com', '000001')
+        assert_equals(
+            json.load(open(self.dearch.article_json_file)),
+            {'www.example.com': {'f': '000001'}})
+
+    def test__save_article_url_url_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch._save_article_url,
+            url = 1, fname = '000001')
+
+    def test__save_article_url_fname_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch._save_article_url,
+            url = 'www.example.com', fname = 1)
+
+    def test__save_article_url_and_links(self):
+        # We make sure that one doesn't overwrite the other:
+        self.dearch._save_article_url('www.example.com', '000001')
+        self.dearch._save_article_links('www.example.com', ['www.link.com'])
+        # Manually load the dict from file and compare:
+        assert_equals(
+            json.load(open(self.dearch.article_json_file)),
+            {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
+
+    def test__save_article_links(self):
+        # Init file:
+        self.dearch._save_article_links('www.example.com', ['www.link.com'])
+        # Manually load the dict from file and compare:
+        assert_equals(
+            json.load(open(self.dearch.article_json_file)),
+            {'www.example.com': {'l': ['www.link.com']}})
+
+    def test__save_article_links_url_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch._save_article_links,
+            url = 1, links = None)
+
+    def test__save_article_links_fname_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch._save_article_links,
+            url = 'www.example.com', links = None)
+
     def test__get_filename_url_raises_TypeError(self):
         assert_raises(
             TypeError, self.dearch._get_filename, url=['not a string'])
