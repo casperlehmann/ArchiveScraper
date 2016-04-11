@@ -215,22 +215,22 @@ class TestDearchiver(object):
         assert_is_instance(self.dearch.archive_meta, dict)
         assert_equals(self.dearch.archive_meta, {})
 
-    def test__load_archive_json_contents(self):
-        # Manually construct and save the file:
+    def test__load_archive_json_silent_raises_TypeError(self):
+        assert_raises(TypeError, self.dearch._load_archive_json, silent = 2)
+
+    def test__load_archive_json_reads_contents_from_file(self):
         json.dump(
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
             open(self.dearch.archive_json_file, 'w'))
+        assert_equals(self.dearch.archive_meta, {})
 
-        # Load file:
         self.dearch._load_archive_json()
         assert_equals(
             self.dearch.archive_meta,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__save_archive_url(self):
-        # Init file:
         self.dearch._save_archive_url('www.example.com', '000001')
-        # Manually load the dict from file and compare:
         assert_equals(
             json.load(open(self.dearch.archive_json_file)),
             {'www.example.com': {'f': '000001'}})
