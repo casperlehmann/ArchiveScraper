@@ -179,39 +179,6 @@ class TestDearchiver(object):
     def test_len_of_archive(self):
         assert_equals(len(self.archive), 1517)
 
-    def test_clean(self):
-        # We've only got the project root directory:
-        assert_true(os.path.isdir(self.dearch.directory))
-        # Which contains three json files:
-        assert_equals(3, len(glob(os.path.join(self.dearch.directory,'*'))))
-        # Let's create some contents to delete:
-        fname = '000001.html'
-        archive = self.dearch._get_archive_folder(
-            archive_folder_name = 'archive')
-        fpath = os.path.join(archive, fname)
-        with open(fpath, 'wb') as f: f.write(b'Some contents')
-        # Content has been created:
-        assert_true(os.path.isfile(self.dearch.archive_json_file))
-        assert_true(os.path.isfile(self.dearch.scanned_json_file))
-        assert_true(os.path.isfile(self.dearch.article_json_file))
-        assert_true(os.path.isdir(self.dearch.archive_folder))
-        assert_true(os.path.isfile(fpath))
-        # Delete it:
-        self.dearch.clean(silent = True)
-        # Aaaaaand, it's gone:
-        assert_false(os.path.isfile(self.dearch.archive_json_file))
-        assert_false(os.path.isfile(self.dearch.scanned_json_file))
-        assert_false(os.path.isfile(self.dearch.article_json_file))
-        assert_false(os.path.isdir(self.dearch.archive_folder))
-        assert_false(os.path.isfile(fpath))
-        # Everything has been deleted, except for the project root directory:
-        assert_true(os.path.isdir(self.dearch.directory))
-        # Which is empty:
-        assert_equals(0, len(glob(os.path.join(self.dearch.directory,'*'))))
-        # But we can simply start over:
-        self.dearch = archiver.Dearchiver(
-            directory = self.temp_dir, silent = True)
-
     # Archive
     def test__load_archive_json_silent_raises_TypeError(self):
         assert_raises(TypeError, self.dearch._load_archive_json, silent = 2)
@@ -409,6 +376,40 @@ class TestDearchiver(object):
 
     def test__save_scanned_url_raises_TypeError(self):
         assert_raises(TypeError, self.dearch._save_scanned, url = 1)
+
+    # Cleaning
+    def test_clean(self):
+        # We've only got the project root directory:
+        assert_true(os.path.isdir(self.dearch.directory))
+        # Which contains three json files:
+        assert_equals(3, len(glob(os.path.join(self.dearch.directory,'*'))))
+        # Let's create some contents to delete:
+        fname = '000001.html'
+        archive = self.dearch._get_archive_folder(
+            archive_folder_name = 'archive')
+        fpath = os.path.join(archive, fname)
+        with open(fpath, 'wb') as f: f.write(b'Some contents')
+        # Content has been created:
+        assert_true(os.path.isfile(self.dearch.archive_json_file))
+        assert_true(os.path.isfile(self.dearch.scanned_json_file))
+        assert_true(os.path.isfile(self.dearch.article_json_file))
+        assert_true(os.path.isdir(self.dearch.archive_folder))
+        assert_true(os.path.isfile(fpath))
+        # Delete it:
+        self.dearch.clean(silent = True)
+        # Aaaaaand, it's gone:
+        assert_false(os.path.isfile(self.dearch.archive_json_file))
+        assert_false(os.path.isfile(self.dearch.scanned_json_file))
+        assert_false(os.path.isfile(self.dearch.article_json_file))
+        assert_false(os.path.isdir(self.dearch.archive_folder))
+        assert_false(os.path.isfile(fpath))
+        # Everything has been deleted, except for the project root directory:
+        assert_true(os.path.isdir(self.dearch.directory))
+        # Which is empty:
+        assert_equals(0, len(glob(os.path.join(self.dearch.directory,'*'))))
+        # But we can simply start over:
+        self.dearch = archiver.Dearchiver(
+            directory = self.temp_dir, silent = True)
 
     #
     def test__get_filename_url_raises_TypeError(self):
