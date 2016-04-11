@@ -2,6 +2,7 @@ from nose.tools import assert_equals, assert_not_equals
 from nose.tools import assert_is_instance, assert_is_none
 from nose.tools import assert_raises, raises
 from nose.tools import assert_true, assert_false
+from nose.plugins.skip import SkipTest
 import nose
 
 import datetime
@@ -133,6 +134,8 @@ class TestGetArchiveUrls(object):
             earliest_date='2012-02-06', schema = '[]')
 
 class TestDearchiver(object):
+
+    skip_online_tests = True
 
     @classmethod
     def setup_class(cls):
@@ -456,14 +459,15 @@ class TestDearchiver(object):
         assert_raises(
             TypeError, self.dearch.load_archive_pages, url = 1)
 
-    # Goes online
-    #def test__load_archive_pages_raises_KeyError(self):
-    #    fname = '000001'
-    #    archive = self.dearch._get_archive_folder(
-    #        archive_folder_name = 'archive')
-    #    fpath = os.path.join(archive, fname)
-    #    assert_raises(
-    #        KeyError, self.dearch.load_archive_pages, url = 'www.example.com')
+    def test__load_archive_pages_raises_KeyError(self):
+        if self.skip_online_tests is True:
+            raise SkipTest
+        fname = '000001'
+        archive = self.dearch._get_archive_folder(
+            archive_folder_name = 'archive')
+        fpath = os.path.join(archive, fname)
+        assert_raises(
+            KeyError, self.dearch.load_archive_pages, url = 'www.example.com')
 
     def test__load_archive_pages(self):
         fname = '000001'
