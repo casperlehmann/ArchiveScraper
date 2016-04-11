@@ -294,7 +294,7 @@ class Dearchiver(object):
         return self.archive_folder
 
     def _fetch_archive_page(self, url):
-        if not isinstance(str, url):
+        if not isinstance(url, str):
             raise TypeError('url must be a string')
         if not url.startswith('http'):
             url = 'http://' + url
