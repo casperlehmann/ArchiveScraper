@@ -460,8 +460,7 @@ class TestDearchiver(object):
             TypeError, self.dearch.load_archive_pages, url = 1)
 
     def test__load_archive_pages_raises_KeyError(self):
-        if self.skip_online_tests is True:
-            raise SkipTest
+        if self.skip_online_tests is True: raise SkipTest
         fname = '000001'
         archive = self.dearch._get_archive_folder(
             archive_folder_name = 'archive')
