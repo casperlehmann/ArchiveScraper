@@ -212,7 +212,6 @@ class TestDearchiver(object):
             directory = self.temp_dir, silent = True)
 
     def test__load_archive_json_creation(self):
-        self.dearch._load_archive_json()
         assert_is_instance(self.dearch.archive_meta, dict)
         assert_equals(self.dearch.archive_meta, {})
 
@@ -278,12 +277,10 @@ class TestDearchiver(object):
             TypeError, self.dearch._get_filename, url=['not a string'])
 
     def test__get_filename_url_raises_KeyError(self):
-        self.dearch._load_archive_json()
         assert_raises(
             KeyError, self.dearch._get_filename, url='www.example.com')
 
     def test__get_filename(self):
-        self.dearch._load_archive_json()
         fname = '000001'
         archive = self.dearch._get_archive_folder(
             archive_folder_name = 'archive')
@@ -297,18 +294,15 @@ class TestDearchiver(object):
             TypeError, self.dearch._get_filepath, url = ['not a string'])
 
     def test__get_filepath_url_raises_KeyError(self):
-        self.dearch._load_archive_json()
         assert_raises(
             KeyError, self.dearch._get_filepath, url='www.example.com')
 
     def test__get_filepath_file_raises_IOError(self):
-        self.dearch._load_archive_json()
         self.dearch._save_archive_url('www.example.com', '000001')
         assert_raises(
             IOError, self.dearch._get_filepath, url='www.example.com')
 
     def test__get_filepath(self):
-        self.dearch._load_archive_json()
         fname = '000001'
         archive = self.dearch._get_archive_folder(
             archive_folder_name = 'archive')
@@ -343,7 +337,6 @@ class TestDearchiver(object):
         assert_raises(IOError, self.dearch.get_soup, '000001')
 
     def test_get_soup(self):
-        self.dearch._load_archive_json()
         fname = '000001'
         archive = self.dearch._get_archive_folder(
             archive_folder_name = 'archive')
