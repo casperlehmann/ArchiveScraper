@@ -90,7 +90,6 @@ def get_archive_urls(
 
 class Dearchiver(object):
     """Starts from a list of archive urls and crawls links.
-
     """
     _directory = None
     archive_folder = None
@@ -128,8 +127,10 @@ class Dearchiver(object):
             # self._directory already has a value
             pass
 
-    # JSON
+    # Archive
     def _load_archive_json(self, silent = False):
+        if not isinstance(silent, bool):
+            raise TypeError('Parameter \'silent\' must be of type bool')
         try:
             self.archive_meta = dd(
                 lambda: dict(),
@@ -157,6 +158,8 @@ class Dearchiver(object):
 
     # Articles
     def _load_article_json(self, silent = False):
+        if not isinstance(silent, bool):
+            raise TypeError('Parameter \'silent\' must be of type bool')
         try:
             self.article_data = dd(
                 lambda: dict(),
@@ -167,15 +170,25 @@ class Dearchiver(object):
             json.dump(self.article_data, open(self.article_json_file, 'w'))
 
     def _save_article_url(self, url, fname):
+        if not isinstance (url, str):
+            raise TypeError
+        if not isinstance (fname, str):
+            raise TypeError
         self.article_data[url]['f'] = fname
-        json.dump(self.article_mdata, open(self.article_json_file, 'w'))
+        json.dump(self.article_data, open(self.article_json_file, 'w'))
 
     def _save_article_links(self, url, links):
+        if not isinstance (url, str):
+            raise TypeError
+        if not isinstance (links, list):
+            raise TypeError
         self.article_data[url]['l'] = links
         json.dump(self.article_data, open(self.article_json_file, 'w'))
 
     # Scanned
     def _load_scanned_json(self, silent = False):
+        if not isinstance(silent, bool):
+            raise TypeError('Parameter \'silent\' must be of type bool')
         try:
             self.scanned = list(json.load(open(self.scanned_json_file)))
         except FileNotFoundError as e:
@@ -184,6 +197,8 @@ class Dearchiver(object):
             json.dump(self.scanned, open(self.scanned_json_file, 'w'))
 
     def _save_scanned(self, url):
+        if not isinstance (url, str):
+            raise TypeError
         self.scanned.append(url)
         json.dump(self.scanned, open(self.scanned_json_file, 'w'))
 
