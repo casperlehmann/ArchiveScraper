@@ -1,5 +1,5 @@
 from nose.tools import assert_equals, assert_not_equals
-from nose.tools import assert_is_instance
+from nose.tools import assert_is_instance, assert_is_none
 from nose.tools import assert_raises, raises
 from nose.tools import assert_true, assert_false
 import nose
@@ -211,10 +211,6 @@ class TestDearchiver(object):
         self.dearch = archiver.Dearchiver(
             directory = self.temp_dir, silent = True)
 
-    def test__load_archive_json_creation(self):
-        assert_is_instance(self.dearch.archive_meta, dict)
-        assert_equals(self.dearch.archive_meta, {})
-
     def test__load_archive_json_silent_raises_TypeError(self):
         assert_raises(TypeError, self.dearch._load_archive_json, silent = 2)
 
@@ -225,6 +221,27 @@ class TestDearchiver(object):
         assert_equals(self.dearch.archive_meta, {})
 
         self.dearch._load_archive_json()
+        assert_equals(
+            self.dearch.archive_meta,
+            {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
+
+    def test__load_archive_json_creation(self):
+        self.dearch.archive_meta = None
+        assert_is_none(self.dearch.archive_meta)
+        self.dearch._load_archive_json()
+        assert_is_instance(self.dearch.archive_meta, dict)
+        assert_equals(self.dearch.archive_meta, {})
+
+    def test__load_archive_json_load_file(self):
+        with open(os.path.join(self.temp_dir, 'archive.json'), 'w') as f:
+            f.write(json.dumps(
+                {'www.example.com': {'f': '000001', 'l': ['www.link.com']}}))
+
+        self.dearch.archive_meta = None
+        assert_is_none(self.dearch.archive_meta)
+
+        self.dearch._load_archive_json()
+        assert_is_instance(self.dearch.archive_meta, dict)
         assert_equals(
             self.dearch.archive_meta,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
