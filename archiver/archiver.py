@@ -243,6 +243,25 @@ class Dearchiver(object):
             if not silent: print ('Deleting: ' + f)
             os.rmdir(f)
 
+    # File names and paths
+    def _get_filepath(self, url):
+        if not isinstance (url, str):
+            raise TypeError
+        if not url in self.archive_meta:
+            raise KeyError
+        fname = self._get_filename(url)
+        if not os.path.isfile(os.path.join(self._get_archive_folder(), fname)):
+            raise IOError(('File {} does not exist.'.format(fname)))
+        return os.path.join(self._get_archive_folder(), fname)
+
+    def _get_filename(self, url):
+        if not isinstance (url, str):
+            raise TypeError
+        if not url in self.archive_meta:
+            raise KeyError
+        fname = self.archive_meta[url]['f']
+        return fname
+
     # Data
     def load_archive(self, archive):
         for url in archive[:2]:
@@ -308,25 +327,6 @@ class Dearchiver(object):
                 print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
                 self._save_archive_url(url, fname)
-
-    # 
-    def _get_filepath(self, url):
-        if not isinstance (url, str):
-            raise TypeError
-        if not url in self.archive_meta:
-            raise KeyError
-        fname = self._get_filename(url)
-        if not os.path.isfile(os.path.join(self._get_archive_folder(), fname)):
-            raise IOError(('File {} does not exist.'.format(fname)))
-        return os.path.join(self._get_archive_folder(), fname)
-
-    def _get_filename(self, url):
-        if not isinstance (url, str):
-            raise TypeError
-        if not url in self.archive_meta:
-            raise KeyError
-        fname = self.archive_meta[url]['f']
-        return fname
 
     # Analysis
     def count_links(self, counter = None, links = None, domain = None):
