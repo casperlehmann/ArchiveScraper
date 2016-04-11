@@ -211,6 +211,7 @@ class TestDearchiver(object):
         self.dearch = archiver.Dearchiver(
             directory = self.temp_dir, silent = True)
 
+    # Archive
     def test__load_archive_json_silent_raises_TypeError(self):
         assert_raises(TypeError, self.dearch._load_archive_json, silent = 2)
 
