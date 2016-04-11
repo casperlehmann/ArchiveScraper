@@ -411,6 +411,46 @@ class TestDearchiver(object):
         self.dearch = archiver.Dearchiver(
             directory = self.temp_dir, silent = True)
 
+    # File names and paths
+    def test__get_filename_url_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch._get_filename, url=['not a string'])
+
+    def test__get_filename_url_raises_KeyError(self):
+        assert_raises(
+            KeyError, self.dearch._get_filename, url='www.example.com')
+
+    def test__get_filename(self):
+        fname = '000001'
+        archive = self.dearch._get_archive_folder(
+            archive_folder_name = 'archive')
+        fpath = os.path.join(archive, fname)
+        with open(fpath, 'wb') as f: f.write(b'Some contents')
+        self.dearch._save_archive_url('www.example.com', fname)
+        assert_equals(self.dearch._get_filename('www.example.com'), fname)
+
+    def test__get_filepath_url_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch._get_filepath, url = ['not a string'])
+
+    def test__get_filepath_url_raises_KeyError(self):
+        assert_raises(
+            KeyError, self.dearch._get_filepath, url='www.example.com')
+
+    def test__get_filepath_file_raises_IOError(self):
+        self.dearch._save_archive_url('www.example.com', '000001')
+        assert_raises(
+            IOError, self.dearch._get_filepath, url='www.example.com')
+
+    def test__get_filepath(self):
+        fname = '000001'
+        archive = self.dearch._get_archive_folder(
+            archive_folder_name = 'archive')
+        fpath = os.path.join(archive, fname)
+        with open(fpath, 'wb') as f: f.write(b'Some contents')
+        self.dearch._save_archive_url('www.example.com', fname)
+        assert_equals(self.dearch._get_filepath('www.example.com'), fpath)
+
     # Data
     def test__load_archive_pages_url_raises_TypeError(self):
         assert_raises(
@@ -451,45 +491,6 @@ class TestDearchiver(object):
 
     def test__fetch_archive_page_url_raises_TypeError(self):
         assert_raises(TypeError, self.dearch._get_archive_folder, 1)
-
-    def test__get_filename_url_raises_TypeError(self):
-        assert_raises(
-            TypeError, self.dearch._get_filename, url=['not a string'])
-
-    def test__get_filename_url_raises_KeyError(self):
-        assert_raises(
-            KeyError, self.dearch._get_filename, url='www.example.com')
-
-    def test__get_filename(self):
-        fname = '000001'
-        archive = self.dearch._get_archive_folder(
-            archive_folder_name = 'archive')
-        fpath = os.path.join(archive, fname)
-        with open(fpath, 'wb') as f: f.write(b'Some contents')
-        self.dearch._save_archive_url('www.example.com', fname)
-        assert_equals(self.dearch._get_filename('www.example.com'), fname)
-
-    def test__get_filepath_url_raises_TypeError(self):
-        assert_raises(
-            TypeError, self.dearch._get_filepath, url = ['not a string'])
-
-    def test__get_filepath_url_raises_KeyError(self):
-        assert_raises(
-            KeyError, self.dearch._get_filepath, url='www.example.com')
-
-    def test__get_filepath_file_raises_IOError(self):
-        self.dearch._save_archive_url('www.example.com', '000001')
-        assert_raises(
-            IOError, self.dearch._get_filepath, url='www.example.com')
-
-    def test__get_filepath(self):
-        fname = '000001'
-        archive = self.dearch._get_archive_folder(
-            archive_folder_name = 'archive')
-        fpath = os.path.join(archive, fname)
-        with open(fpath, 'wb') as f: f.write(b'Some contents')
-        self.dearch._save_archive_url('www.example.com', fname)
-        assert_equals(self.dearch._get_filepath('www.example.com'), fpath)
 
     def test_get_soup_file_raises_IOError(self):
         assert_raises(IOError, self.dearch.get_soup, '000001')
