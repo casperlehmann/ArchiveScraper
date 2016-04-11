@@ -202,7 +202,7 @@ class Dearchiver(object):
         self.scanned.append(url)
         json.dump(self.scanned, open(self.scanned_json_file, 'w'))
 
-    # Data
+    # Cleaning
     def clean(self, silent = False):
         if not silent: print ('Cleaning...')
         self.clean_json_archive(silent=silent)
@@ -243,6 +243,7 @@ class Dearchiver(object):
             if not silent: print ('Deleting: ' + f)
             os.rmdir(f)
 
+    # Data
     def load_archive(self, archive):
         for url in archive[:2]:
             self.load_archive_pages(url)

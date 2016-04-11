@@ -155,6 +155,7 @@ class TestDearchiver(object):
     def teardown(self):
         self.dearch.clean(silent = True)
 
+    # __init__
     def test_directory_raises_TypeError(self):
         assert_raises(
             TypeError, archiver.Dearchiver, directory = 1, silent = True)
