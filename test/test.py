@@ -485,8 +485,7 @@ class TestDearchiver(object):
         assert_raises(
             KeyError, self.dearch.load_archive_pages, url = 'www.example.com')
         self.dearch._save_archive_url('www.example.com', '000001')
-        assert_raises(
-            KeyError, self.dearch.load_archive_pages, url = 'www.example.com')
+        self.dearch.load_archive_pages(url = 'www.example.com')
 
     def test__load_archive_pages(self):
         fname = '000001'
