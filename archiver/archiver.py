@@ -334,6 +334,8 @@ class Dearchiver(object):
             raise OSError
 
     def find_links_in_page(self, url, silent = False):
+        if not isinstance(url, str):
+            raise TypeError
         links = []
         try:
             fname = self._get_filename(url)

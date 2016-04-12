@@ -587,3 +587,6 @@ class TestDearchiver(object):
             OSError,
             self.dearch.find_links_in_page,
             url = 'www.example.com')
+
+    def test_find_links_in_page_url_raises_TypeError(self):
+        assert_raises(TypeError, self.dearch.find_links_in_page, 1)
