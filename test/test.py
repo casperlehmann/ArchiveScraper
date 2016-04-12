@@ -454,6 +454,27 @@ class TestDearchiver(object):
         self.dearch._save_archive_url('www.example.com', fname)
         assert_equals(self.dearch._get_filepath('www.example.com'), fpath)
 
+    def test__get_archive_folder_supply_archive_folder_name(self):
+        assert_equals(
+            self.dearch._get_archive_folder(archive_folder_name = 'afn'),
+            os.path.join(self.temp_dir, 'afn'))
+
+    def test__get_archive_folder_default_archive_folder_name(self):
+        self.dearch.archive_folder = None
+        assert_equals(
+            self.dearch._get_archive_folder(),
+            os.path.join(self.temp_dir, 'archive'))
+
+    def test__get_archive_folder_archive_folder_name_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch._get_archive_folder, archive_folder_name=1)
+
+    def test__get_archive_folder_creates_dirs(self):
+        test_dir = os.path.join(self.temp_dir, 'test_dir')
+        assert_false(os.path.exists(test_dir))
+        self.dearch._get_archive_folder(archive_folder_name=test_dir)
+        assert_true(os.path.exists(test_dir))
+
     # Data
     def test__load_archive_pages_url_raises_TypeError(self):
         assert_raises(
