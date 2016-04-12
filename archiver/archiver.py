@@ -316,22 +316,6 @@ class Dearchiver(object):
                 f.write(url_obj.read())
                 self._save_archive_url(url, fname)
 
-    # Analysis
-    def count_links(self, counter = None, links = None, domain = None):
-        if counter is None:
-            counter = dd(int)
-        if links is None:
-            #links = {_ for key, item in self.archive_meta.items()
-            #        for _ in item['l']}
-            links = [_ for key, item in self.archive_meta.items()
-                     for _ in item['l']]
-        if domain is None: domain = ''
-        if domain == '': domain = 'politics.people.com.cn'
-        for link in links:
-            if domain in link:
-                counter[link] += 1
-        return counter
-
     def get_soup(self, fname, url = 'not supplied'):
         if fname is None or not isinstance(fname, str):
             raise TypeError("fname must be a string.")
@@ -352,6 +336,22 @@ class Dearchiver(object):
                     links.append(link)
             self._save_article_links(url, links)
             self._save_scanned(url)
+
+    # Analysis
+    def count_links(self, counter = None, links = None, domain = None):
+        if counter is None:
+            counter = dd(int)
+        if links is None:
+            #links = {_ for key, item in self.archive_meta.items()
+            #        for _ in item['l']}
+            links = [_ for key, item in self.archive_meta.items()
+                     for _ in item['l']]
+        if domain is None: domain = ''
+        if domain == '': domain = 'politics.people.com.cn'
+        for link in links:
+            if domain in link:
+                counter[link] += 1
+        return counter
 
     def get_queue(self, filtr):
         queue = []
