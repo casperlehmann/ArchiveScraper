@@ -1,24 +1,12 @@
-import urllib, re, json
-from collections import defaultdict as dd
-import numpy as np
-import os
-from glob import glob
-
-# https://www.reddit.com/r/Python/comments/2uc7y5/greek_letters_in_matplotlib/
-import matplotlib
-from matplotlib.font_manager import FontProperties
-fp = FontProperties('Simsun', 'normal', weight=14)
-#plt.xlabel('This is a test 古', fontproperties=fp)
-
-# http://matplotlib.org/examples/pylab_examples/tex_unicode_demo.html
-#matplotlib.rcParams['text.usetex'] = True
-#matplotlib.rcParams['text.latex.unicode'] = True
-#import matplotlib.pyplot as plt
-
-from bs4 import BeautifulSoup as bs
-#%matplotlib inline
-
 import datetime
+import json
+import os
+import re
+import urllib
+
+from collections import defaultdict as dd
+from bs4 import BeautifulSoup as bs
+from glob import glob
 
 def get_date_as_string_YYYY_mm_dd(date):
     if not isinstance (date, datetime.datetime):
@@ -385,13 +373,3 @@ class Dearchiver(object):
                 refiltered_count.items(),
                 key=lambda x: x[0]):
             print (href)
-
-if __name__ == '__main__':
-    archive = get_archive_urls()
-
-    dearch = Dearchiver(archive)
-
-    #dearch.clean()
-    dearch.find_links()
-    print( len(dearch.archive_meta))
-
