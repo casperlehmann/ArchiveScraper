@@ -262,6 +262,21 @@ class Dearchiver(object):
         fname = self.archive_meta[url]['f']
         return fname
 
+    def _get_archive_folder(self, archive_folder_name = None):
+        if not archive_folder_name is None:
+            archive_folder_name = archive_folder_name
+        elif archive_folder_name is None:
+            archive_folder_name = 'archive'
+        if not isinstance(archive_folder_name, str):
+            raise TypeError(
+                'Name of archive folder must be a string, not {}'.format(
+                    archive_folder_name))
+        self.archive_folder = os.path.join(self.directory, archive_folder_name)
+        if not os.path.exists(self.archive_folder):
+            os.mkdir(self.archive_folder)
+        return self.archive_folder
+
+
     # Data
     def load_archive(self, archive):
         for url in archive[:2]:
@@ -278,20 +293,6 @@ class Dearchiver(object):
             self._fetch_archive_page(url)
             fname = self._get_filename(url)
         return fname
-
-    def _get_archive_folder(self, archive_folder_name = None):
-        if not archive_folder_name is None:
-            archive_folder_name = archive_folder_name
-        elif archive_folder_name is None:
-                archive_folder_name = 'archive'
-        if not isinstance(archive_folder_name, str):
-            raise TypeError(
-                'Name of archive folder must be a string, not {}'.format(
-                    archive_folder_name))
-        self.archive_folder = os.path.join(self.directory, archive_folder_name)
-        if not os.path.exists(self.archive_folder):
-            os.mkdir(self.archive_folder)
-        return self.archive_folder
 
     def _fetch_archive_page(self, url):
         if not isinstance(url, str):
