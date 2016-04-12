@@ -454,10 +454,17 @@ class TestDearchiver(object):
         self.dearch._save_archive_url('www.example.com', fname)
         assert_equals(self.dearch._get_filepath('www.example.com'), fpath)
 
-    def test__get_archive_folder_supply_archive_folder_name(self):
+    def test__get_archive_folder_sets_folder_name(self):
+        assert_is_none(self.dearch.archive_folder)
+        self.dearch._get_archive_folder('test')
+        assert_equals(
+            self.dearch.archive_folder,
+            os.path.join(self.temp_dir, 'test'))
+
+    def test__get_archive_folder_returns_self_archive_folder(self):
         assert_equals(
             self.dearch._get_archive_folder(archive_folder_name = 'afn'),
-            os.path.join(self.temp_dir, 'afn'))
+            self.dearch.archive_folder)
 
     def test__get_archive_folder_default_archive_folder_name(self):
         self.dearch.archive_folder = None
@@ -467,7 +474,9 @@ class TestDearchiver(object):
 
     def test__get_archive_folder_archive_folder_name_raises_TypeError(self):
         assert_raises(
-            TypeError, self.dearch._get_archive_folder, archive_folder_name=1)
+            TypeError,
+            self.dearch._get_archive_folder,
+            archive_folder_name=1)
 
     def test__get_archive_folder_creates_dirs(self):
         test_dir = os.path.join(self.temp_dir, 'test_dir')
@@ -507,25 +516,6 @@ class TestDearchiver(object):
         expected_path = os.path.join(self.dearch.archive_folder, '000000.html')
         expected_archive_meta = {'http://www.example.com': {'f': expected_path}}
         assert_equals(self.dearch.archive_meta, expected_archive_meta)
-
-
-    def test__get_archive_folder_sets_folder_name(self):
-        self.dearch._get_archive_folder('test')
-        assert_equals(
-            self.dearch.archive_folder, os.path.join(self.temp_dir, 'test'))
-
-    def test__get_archive_folder_archive_folder_name_raises_TypeError(self):
-        assert_raises(
-            TypeError, self.dearch._get_archive_folder,
-            archive_folder_name=1)
-
-    def test__get_archive_folder_creates_folder(self):
-        assert_false(os.path.isdir(os.path.join(self.temp_dir, 'test')))
-        self.dearch._get_archive_folder('test')
-        assert_true(os.path.isdir(os.path.join(self.temp_dir, 'test')))
-
-    def test__get_archive_folder_url_raises_TypeError(self):
-        assert_raises(TypeError, self.dearch._get_archive_folder, url = 1)
 
     def test_get_soup_file_raises_IOError(self):
         assert_raises(IOError, self.dearch.get_soup, '000001')
