@@ -105,9 +105,9 @@ class Dearchiver(object):
     def directory(self, directory):
         if directory is not None:
             if not isinstance (directory, str):
-                raise TypeError
+                raise TypeError('directory must be a string.')
             if not os.path.isdir(directory):
-                raise ValueError
+                raise ValueError('directory is not a directory.')
             self._directory = directory
         elif self._directory is None:
             self._directory = 'data_dearchiver'
@@ -269,7 +269,7 @@ class Dearchiver(object):
 
     # Data
     def load_archive(self, archive, silent = False):
-        for url in archive[:2]:
+        for url in archive:
             self.load_archive_pages(url, silent = silent)
 
     def load_archive_pages(self, url, silent = False):
@@ -356,13 +356,10 @@ class Dearchiver(object):
 
     # Analysis
     def count_links(self, counter = None, links = None, domain = None):
-        if counter is None:
-            counter = dd(int)
         if links is None:
-            #links = {_ for key, item in self.archive_meta.items()
-            #        for _ in item['l']}
             links = [_ for key, item in self.archive_meta.items()
                      for _ in item['l']]
+        if counter is None: counter = dd(int)
         if domain is None: domain = ''
         if domain == '': domain = 'politics.people.com.cn'
         for link in links:
