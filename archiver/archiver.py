@@ -274,8 +274,7 @@ class Dearchiver(object):
                 'Name of archive folder must be a string, not {}'.format(
                     archive_folder_name))
         self.archive_folder = os.path.join(self.directory, archive_folder_name)
-        if not os.path.exists(self.archive_folder):
-            os.mkdir(self.archive_folder)
+        os.makedirs(self.archive_folder, exist_ok=True)
         return self.archive_folder
 
     # Data
@@ -320,8 +319,7 @@ class Dearchiver(object):
 
     def _fetch_article_page(self, url):
         with urllib.request.urlopen(url) as url_obj:
-            if not os.path.exists(os.path.join(self.directory, 'articles')):
-                os.mkdir(os.path.join(self.directory, 'articles'))
+            os.makedirs(os.path.join(self.directory, 'articles'), exist_ok=True)
             fname = os.path.join(
                 self.directory, 'articles',
                 str(len(self.article_data)).zfill(6) + '.html')
