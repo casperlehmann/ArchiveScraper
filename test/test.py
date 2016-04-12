@@ -539,3 +539,7 @@ class TestDearchiver(object):
         assert_raises(
             TypeError, self.dearch.get_soup, fname=string, url=not_string)
 
+    def test_get_soup_raises_IOError(self):
+        string = '000001'
+        assert_raises(
+            IOError, self.dearch.get_soup, fname=string, url=string)
