@@ -244,6 +244,14 @@ class Dearchiver(object):
             os.rmdir(f)
 
     # File names and paths
+    def _get_filename(self, url):
+        if not isinstance (url, str):
+            raise TypeError
+        if not url in self.archive_meta:
+            raise KeyError
+        fname = self.archive_meta[url]['f']
+        return fname
+
     def _get_filepath(self, url):
         if not isinstance (url, str):
             raise TypeError
@@ -253,14 +261,6 @@ class Dearchiver(object):
         if not os.path.isfile(os.path.join(self._get_archive_folder(), fname)):
             raise IOError(('File {} does not exist.'.format(fname)))
         return os.path.join(self._get_archive_folder(), fname)
-
-    def _get_filename(self, url):
-        if not isinstance (url, str):
-            raise TypeError
-        if not url in self.archive_meta:
-            raise KeyError
-        fname = self.archive_meta[url]['f']
-        return fname
 
     def _get_archive_folder(self, archive_folder_name = None):
         if archive_folder_name is None:
