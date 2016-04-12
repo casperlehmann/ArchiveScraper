@@ -376,9 +376,17 @@ class TestDearchiver(object):
         assert_equals(
             json.load(open(self.dearch.scanned_json_file)),
             ['www.example.com'])
+        self.dearch._save_scanned('www.example2.com')
+        assert_equals(
+            json.load(open(self.dearch.scanned_json_file)),
+            ['www.example.com', 'www.example2.com'])
 
     def test__save_scanned_url_raises_TypeError(self):
         assert_raises(TypeError, self.dearch._save_scanned, url = 1)
+
+    def test__save_scanned_self_scanned_raises_TypeError(self):
+        self.dearch.scanned = ''
+        assert_raises(TypeError, self.dearch._save_scanned, url = 'a')
 
     # Cleaning
     def test_clean(self):

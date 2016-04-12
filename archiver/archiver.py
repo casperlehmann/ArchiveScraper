@@ -186,7 +186,9 @@ class Dearchiver(object):
 
     def _save_scanned(self, url):
         if not isinstance (url, str):
-            raise TypeError
+            raise TypeError('url needs to be of type string.')
+        if not isinstance (self.scanned, list):
+            raise TypeError('self.scanned needs to be a list.')
         self.scanned.append(url)
         json.dump(self.scanned, open(self.scanned_json_file, 'w'))
 
