@@ -554,3 +554,25 @@ class TestDearchiver(object):
         assert_raises(
             IOError, self.dearch.get_soup, fname=string, url=string,
             silent = True)
+
+    def test_find_links_in_page_loads_from_disk(self):
+        fname = '000001'
+        archive = os.path.join(self.temp_dir, 'archive')
+        fpath = os.path.join(archive, fname)
+        html_contents = (b'<html><head></head><body>'
+                         b'<a href="www.link.com">string</a>'
+                         b'</body></html>')
+        os.makedirs(archive, exist_ok=True)
+        with open(fpath, 'wb') as f: f.write(html_contents)
+        url = 'www.example.com'
+        self.dearch.archive_meta[url]['f'] = fname
+        json.dump(
+            self.dearch.archive_meta, open(self.dearch.archive_json_file, 'w'))
+
+        self.dearch.find_links_in_page(url, silent = True)
+        assert_equals(
+            self.dearch.article_data,
+            {'www.example.com': {'l': ['www.link.com']}})
+
+    def test_find_links_in_page_raises_FileNotFoundError(self):
+        self.dearch.find_links_in_page
