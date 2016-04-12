@@ -247,7 +247,7 @@ class Dearchiver(object):
             raise KeyError
         fname = self._get_filename(url)
         if not os.path.isfile(os.path.join(self._get_archive_folder(), fname)):
-            raise IOError(('File {} does not exist.'.format(fname)))
+            raise OSError(('File {} does not exist.'.format(fname)))
         return os.path.join(self._get_archive_folder(), fname)
 
     def _get_archive_folder(self, archive_folder_name = None):
@@ -329,7 +329,7 @@ class Dearchiver(object):
             with open(fname, 'rb') as fobj:
                 return bs(fobj.read(), 'html.parser')
         except FileNotFoundError:
-            raise IOError
+            raise OSError
 
     def find_links_in_page(self, url, silent = False):
         links = []

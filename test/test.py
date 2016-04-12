@@ -440,10 +440,10 @@ class TestDearchiver(object):
         assert_raises(
             KeyError, self.dearch._get_filepath, url='www.example.com')
 
-    def test__get_filepath_file_raises_IOError(self):
+    def test__get_filepath_file_raises_OSError(self):
         self.dearch._save_archive_url('www.example.com', '000001')
         assert_raises(
-            IOError, self.dearch._get_filepath, url='www.example.com')
+            OSError, self.dearch._get_filepath, url='www.example.com')
 
     def test__get_filepath(self):
         fname = '000001'
@@ -523,9 +523,9 @@ class TestDearchiver(object):
     def test__fetch_article_page(self):
         pass
 
-    def test_get_soup_file_raises_IOError(self):
+    def test_get_soup_file_raises_OSError(self):
         assert_raises(
-            IOError, self.dearch.get_soup, fname = '000001', silent = True)
+            OSError, self.dearch.get_soup, fname = '000001', silent = True)
 
     def test_get_soup(self):
         fname = '000001'
@@ -549,10 +549,10 @@ class TestDearchiver(object):
             TypeError, self.dearch.get_soup, fname=string, url=not_string,
             silent = True)
 
-    def test_get_soup_raises_IOError(self):
+    def test_get_soup_raises_OSError(self):
         string = '000001'
         assert_raises(
-            IOError, self.dearch.get_soup, fname=string, url=string,
+            OSError, self.dearch.get_soup, fname=string, url=string,
             silent = True)
 
     def test_find_links_in_page_loads_from_disk(self):
@@ -575,4 +575,7 @@ class TestDearchiver(object):
             {'www.example.com': {'l': ['www.link.com']}})
 
     def test_find_links_in_page_raises_FileNotFoundError(self):
-        self.dearch.find_links_in_page
+        assert_raises(
+            OSError,
+            self.dearch.find_links_in_page,
+            url = 'www.example.com')
