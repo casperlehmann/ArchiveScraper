@@ -481,7 +481,7 @@ class TestDearchiver(object):
             TypeError, self.dearch.load_archive_pages, url = 1)
 
     def test__load_archive_pages_raises_KeyError_when_page_not_saved(self):
-        if self.skip_online_tests is True: raise SkipTest
+        if self.skip_online_tests: raise SkipTest
         assert_raises(
             KeyError, self.dearch.load_archive_pages, url = 'www.example.com')
         self.dearch._save_archive_url('www.example.com', '000001')
@@ -495,6 +495,19 @@ class TestDearchiver(object):
         self.dearch._save_archive_url('www.example.com', '000001')
         fname = self.dearch.load_archive_pages(url = 'www.example.com')
         assert_equals('000001', fname)
+
+    def test__fetch_archive_page_url_raises_TypeError(self):
+        if self.skip_online_tests: raise SkipTest
+        assert_raises(TypeError, self.dearch._fetch_archive_page, url = 1)
+
+    def test__fetch_archive_page_writes_file(self):
+        if self.skip_online_tests: raise SkipTest
+        assert_equals(self.dearch.archive_meta, {})
+        self.dearch._fetch_archive_page(url = 'www.example.com')
+        expected_path = os.path.join(self.dearch.archive_folder, '000000.html')
+        expected_archive_meta = {'http://www.example.com': {'f': expected_path}}
+        assert_equals(self.dearch.archive_meta, expected_archive_meta)
+
 
     def test__get_archive_folder_sets_folder_name(self):
         self.dearch._get_archive_folder('test')
@@ -511,8 +524,8 @@ class TestDearchiver(object):
         self.dearch._get_archive_folder('test')
         assert_true(os.path.isdir(os.path.join(self.temp_dir, 'test')))
 
-    def test__fetch_archive_page_url_raises_TypeError(self):
-        assert_raises(TypeError, self.dearch._get_archive_folder, 1)
+    def test__get_archive_folder_url_raises_TypeError(self):
+        assert_raises(TypeError, self.dearch._get_archive_folder, url = 1)
 
     def test_get_soup_file_raises_IOError(self):
         assert_raises(IOError, self.dearch.get_soup, '000001')
