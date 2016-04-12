@@ -480,12 +480,11 @@ class TestDearchiver(object):
         assert_raises(
             TypeError, self.dearch.load_archive_pages, url = 1)
 
-    def test__load_archive_pages_raises_KeyError(self):
+    def test__load_archive_pages_raises_KeyError_when_page_not_saved(self):
         if self.skip_online_tests is True: raise SkipTest
-        fname = '000001'
-        archive = self.dearch._get_archive_folder(
-            archive_folder_name = 'archive')
-        fpath = os.path.join(archive, fname)
+        assert_raises(
+            KeyError, self.dearch.load_archive_pages, url = 'www.example.com')
+        self.dearch._save_archive_url('www.example.com', '000001')
         assert_raises(
             KeyError, self.dearch.load_archive_pages, url = 'www.example.com')
 
