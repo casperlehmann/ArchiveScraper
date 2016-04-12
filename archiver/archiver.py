@@ -335,7 +335,11 @@ class Dearchiver(object):
 
     def find_links_in_page(self, url, silent = False):
         links = []
-        fname = self._get_filename(url)
+        try:
+            fname = self._get_filename(url)
+        except KeyError:
+            raise FileNotFoundError(
+                'File does not exist for url: {}'.format(url))
         for a in self.get_soup(fname, silent = silent).find_all('a'):
             if a.has_attr('href'):
                 link = a.attrs['href'].strip()
