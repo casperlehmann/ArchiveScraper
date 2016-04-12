@@ -487,14 +487,15 @@ class TestDearchiver(object):
     # Data
     def test__load_archive_pages_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.dearch.load_archive_pages, url = 1)
+            TypeError, self.dearch.load_archive_pages, url = 1, silent = True)
 
     def test__load_archive_pages_raises_KeyError_when_page_not_saved(self):
         if self.skip_online_tests: raise SkipTest
         assert_raises(
-            KeyError, self.dearch.load_archive_pages, url = 'www.example.com')
+            KeyError, self.dearch.load_archive_pages, url = 'www.example.com',
+            silent = True)
         self.dearch._save_archive_url('www.example.com', '000001')
-        self.dearch.load_archive_pages(url = 'www.example.com')
+        self.dearch.load_archive_pages(url = 'www.example.com', silent = True)
 
     def test__load_archive_pages(self):
         fname = '000001'
@@ -502,23 +503,29 @@ class TestDearchiver(object):
             archive_folder_name = 'archive')
         fpath = os.path.join(archive, fname)
         self.dearch._save_archive_url('www.example.com', '000001')
-        fname = self.dearch.load_archive_pages(url = 'www.example.com')
+        fname = self.dearch.load_archive_pages(
+            url = 'www.example.com', silent = True)
         assert_equals('000001', fname)
 
     def test__fetch_archive_page_url_raises_TypeError(self):
         if self.skip_online_tests: raise SkipTest
-        assert_raises(TypeError, self.dearch._fetch_archive_page, url = 1)
+        assert_raises(
+            TypeError, self.dearch._fetch_archive_page, url = 1, silent = True)
 
     def test__fetch_archive_page_writes_file(self):
         if self.skip_online_tests: raise SkipTest
         assert_equals(self.dearch.archive_meta, {})
-        self.dearch._fetch_archive_page(url = 'www.example.com')
+        self.dearch._fetch_archive_page(url = 'www.example.com', silent = True)
         expected_path = os.path.join(self.dearch.archive_folder, '000000.html')
         expected_archive_meta = {'http://www.example.com': {'f': expected_path}}
         assert_equals(self.dearch.archive_meta, expected_archive_meta)
 
+    def test__fetch_article_page(self):
+        pass
+
     def test_get_soup_file_raises_IOError(self):
-        assert_raises(IOError, self.dearch.get_soup, '000001')
+        assert_raises(
+            IOError, self.dearch.get_soup, fname = '000001', silent = True)
 
     def test_get_soup(self):
         fname = '000001'
@@ -527,19 +534,23 @@ class TestDearchiver(object):
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
         self.dearch._save_archive_url('www.example.com', fname)
-        soup = self.dearch.get_soup(fpath)
+        soup = self.dearch.get_soup(fpath, silent = True)
         assert_equals(soup.text, 'Some contents')
 
     def test_get_soup_filename_raises_TypeError(self):
-        assert_raises(TypeError, self.dearch.get_soup, fname=1, url='string')
+        assert_raises(
+            TypeError, self.dearch.get_soup, fname=1, url='string',
+            silent = True)
 
     def test_get_soup_url_raises_TypeError(self):
         string = '000001'
         not_string = 1
         assert_raises(
-            TypeError, self.dearch.get_soup, fname=string, url=not_string)
+            TypeError, self.dearch.get_soup, fname=string, url=not_string,
+            silent = True)
 
     def test_get_soup_raises_IOError(self):
         string = '000001'
         assert_raises(
-            IOError, self.dearch.get_soup, fname=string, url=string)
+            IOError, self.dearch.get_soup, fname=string, url=string,
+            silent = True)

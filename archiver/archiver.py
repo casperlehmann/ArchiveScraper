@@ -266,23 +266,23 @@ class Dearchiver(object):
         return self.archive_folder
 
     # Data
-    def load_archive(self, archive):
+    def load_archive(self, archive, silent = False):
         for url in archive[:2]:
-            self.load_archive_pages(url)
+            self.load_archive_pages(url, silent = silent)
 
-    def load_archive_pages(self, url):
+    def load_archive_pages(self, url, silent = False):
         if not isinstance (url, str):
             raise TypeError('url must be a string')
         try:
             fname = self._get_filename(url)
-            print ('Alredy here: {}'.format(url))
+            if not silent: print ('Alredy here: {}'.format(url))
         except KeyError:
-            print ('Fetching...: {}'.format(url))
-            self._fetch_archive_page(url)
+            if not silent: print ('Fetching...: {}'.format(url))
+            self._fetch_archive_page(url, silent = silent)
             fname = self._get_filename(url)
         return fname
 
-    def _fetch_archive_page(self, url):
+    def _fetch_archive_page(self, url, silent = False):
         if not isinstance(url, str):
             raise TypeError('url must be a string')
         if not url.startswith('http'):
@@ -292,50 +292,59 @@ class Dearchiver(object):
                 self._get_archive_folder(),
                 str(len(self.archive_meta)).zfill(6) + '.html')
             with open(fname, 'wb') as f:
-                print ('Writing file: {}'.format(fname))
+                if not silent: print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
                 self._save_archive_url(url, fname)
 
-    def load_article_pages(self, *urls):
+    def load_article_pages(self, *urls, silent = False):
         for url in urls:
             if url in self.article_data:
                 self._get_filename(url)
-                print ('Alredy here')
+                if not silent: print ('Alredy here')
             else:
-                self._fetch_article_page(url)
+                self._fetch_article_page(url, silent = silent)
                 self._get_filename(url)
 
-    def _fetch_article_page(self, url):
+    def _fetch_article_page(self, url, silent = False):
         with urllib.request.urlopen(url) as url_obj:
             os.makedirs(os.path.join(self.directory, 'articles'), exist_ok=True)
             fname = os.path.join(
                 self.directory, 'articles',
                 str(len(self.article_data)).zfill(6) + '.html')
             with open(fname, 'wb') as f:
-                print ('Writing file: {}'.format(fname))
+                if not silent: print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
                 self._save_archive_url(url, fname)
 
-    def get_soup(self, fname, url = 'not supplied'):
+    def get_soup(self, fname, url = 'not supplied', silent = False):
         if fname is None or not isinstance(fname, str):
             raise TypeError("fname must be a string.")
         if url is None or not isinstance(url, str):
             raise TypeError("url must be a string.")
-        print ('Loading & Souping file: [{}] for url: [{}]'.format(fname, url))
-        with open(fname, 'rb') as fobj:
-            return bs(fobj.read(), 'html.parser')
+        if not silent:
+            print ('Loading & Souping file: [{}] for url: [{}]'.format(
+                fname, url))
+        try:
+            fname = os.path.join(self._get_archive_folder(), fname)
+            with open(fname, 'rb') as fobj:
+                return bs(fobj.read(), 'html.parser')
+        except FileNotFoundError:
+            raise IOError
 
-    def find_links(self):
+    def find_links_in_page(self, url, silent = False):
+        links = []
+        fname = self._get_filename(url)
+        for a in self.get_soup(fname, silent = silent).find_all('a'):
+            if a.has_attr('href'):
+                link = a.attrs['href'].strip()
+                links.append(link)
+        self._save_article_links(url, links)
+        self._save_scanned(url)
+
+    def find_links_in_archive(self, silent = False):
         for url in set(self.archive_meta.keys()):
-            if url in self.scanned: continue
-            links = []
-            fname = self._get_filename(url)
-            for a in self.get_soup(fname).find_all('a'):
-                if a.has_attr('href'):
-                    link = a.attrs['href'].strip()
-                    links.append(link)
-            self._save_article_links(url, links)
-            self._save_scanned(url)
+            if not url in self.scanned:
+                self.find_links_in_page(url, silent = silent)
 
     # Analysis
     def count_links(self, counter = None, links = None, domain = None):
@@ -362,7 +371,7 @@ class Dearchiver(object):
         return filtr
 
     # Feedback
-    def show_counter(self, counter, filtr = None):
+    def show_counter(self, counter, filtr = None, silent = False):
         if filtr is None:
             filtr = r'/[1-2][09][901][0-9]/'
         refiltered_count = {}
@@ -372,4 +381,4 @@ class Dearchiver(object):
         for href, count in sorted(
                 refiltered_count.items(),
                 key=lambda x: x[0]):
-            print (href)
+            if not silent: print (href)
