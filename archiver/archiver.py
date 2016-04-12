@@ -263,10 +263,12 @@ class Dearchiver(object):
         return fname
 
     def _get_archive_folder(self, archive_folder_name = None):
-        if not archive_folder_name is None:
-            archive_folder_name = archive_folder_name
-        elif archive_folder_name is None:
-            archive_folder_name = 'archive'
+        if archive_folder_name is None:
+            current = self.archive_folder
+            if isinstance(current, str):
+                archive_folder_name = current
+            else:
+                archive_folder_name = 'archive'
         if not isinstance(archive_folder_name, str):
             raise TypeError(
                 'Name of archive folder must be a string, not {}'.format(
@@ -275,7 +277,6 @@ class Dearchiver(object):
         if not os.path.exists(self.archive_folder):
             os.mkdir(self.archive_folder)
         return self.archive_folder
-
 
     # Data
     def load_archive(self, archive):
