@@ -252,18 +252,20 @@ class Dearchiver(object):
             raise OSError(('File {} does not exist.'.format(fname)))
         return os.path.join(self._get_archive_folder(), fname)
 
-    def _get_archive_folder(self, archive_folder_name = None):
-        if archive_folder_name is None:
+    def _get_archive_folder(self, archive_folder = None):
+        if archive_folder is None:
             current = self.archive_folder
             if isinstance(current, str):
-                archive_folder_name = current
+                archive_folder = current
             else:
-                archive_folder_name = 'archive'
-        if not isinstance(archive_folder_name, str):
+                archive_folder = os.path.join(self.directory, 'archive')
+        else:
+            archive_folder = os.path.join(self.directory, archive_folder)
+        if not isinstance(archive_folder, str):
             raise TypeError(
                 'Name of archive folder must be a string, not {}'.format(
-                    archive_folder_name))
-        self.archive_folder = os.path.join(self.directory, archive_folder_name)
+                    archive_folder))
+        self.archive_folder = archive_folder
         os.makedirs(self.archive_folder, exist_ok=True)
         return self.archive_folder
 
