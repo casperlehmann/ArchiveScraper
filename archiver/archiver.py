@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 import re
+import shutil
 import urllib.request
 
 from collections import defaultdict as dd
@@ -231,7 +232,7 @@ class Dearchiver(object):
     def clean_project_root(self, silent = False):
         for f in glob(os.path.join(self.directory, '*')):
             if not silent: print ('Deleting: ' + f)
-            os.rmdir(f)
+            shutil.rmtree(f)
 
     # File names and paths
     def _get_filename(self, url):
