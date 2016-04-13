@@ -9,6 +9,7 @@ if __name__ == '__main__':
     #archive
 
     #dearch.clean()
+    #dearch.load_data_files(silent = silent)
     try:
         dearch.load_archive(archive)
     except httplib.IncompleteRead as e:

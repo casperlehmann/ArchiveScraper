@@ -94,9 +94,14 @@ class Dearchiver(object):
         self.archive_json_file = os.path.join(self.directory, 'archive.json')
         self.scanned_json_file = os.path.join(self.directory, 'scanned.json')
         self.article_json_file = os.path.join(self.directory, 'article.json')
+        self.load_data_files(silent = silent)
+
+    def load_data_files(self, silent = False):
+        if not silent: print ('Loading data files...')
         self._load_archive_json(silent = silent)
         self._load_scanned_json(silent = silent)
         self._load_article_json(silent = silent)
+        if not silent: print ()
 
     @property
     def directory(self):
@@ -201,6 +206,9 @@ class Dearchiver(object):
         self.clean_json_scanned(silent=silent)
         self.clean_archive(silent=silent)
         self.clean_project_root(silent=silent)
+        self.archive_meta = None
+        self.article_data = None
+        self.scanned = None
         if not silent: print()
 
     def clean_json_archive(self, silent = False):

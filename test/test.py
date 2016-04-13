@@ -167,6 +167,15 @@ class TestDearchiver(object):
         assert_raises(
             ValueError, archiver.Dearchiver, directory = '', silent = True)
 
+    def test_load_data_files_sets_json(self):
+        self.dearch.archive_meta = None
+        self.dearch.article_data = None
+        self.dearch.scanned = None
+        self.dearch.load_data_files(silent = True)
+        assert_equals(self.dearch.archive_meta, {})
+        assert_equals(self.dearch.article_data, {})
+        assert_equals(self.dearch.scanned, [])
+
     def test_isdir_temp(self):
         assert_true(os.path.isdir(self.temp_dir))
 
