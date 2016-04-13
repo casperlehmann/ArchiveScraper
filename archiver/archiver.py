@@ -2,7 +2,7 @@ import datetime
 import json
 import os
 import re
-import urllib
+import urllib.request
 
 from collections import defaultdict as dd
 from bs4 import BeautifulSoup as bs
