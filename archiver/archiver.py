@@ -301,9 +301,7 @@ class Dearchiver(object):
         if not url.startswith('http'):
             url = 'http://' + url
         with urllib.request.urlopen(url) as url_obj:
-            fname = os.path.join(
-                self._get_archive_folder(),
-                str(len(self.archive_meta)).zfill(6) + '.html')
+            fname = str(len(self.archive_meta)).zfill(6)
             with open(fname, 'wb') as f:
                 if not silent: print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
@@ -321,9 +319,7 @@ class Dearchiver(object):
     def _fetch_article_page(self, url, silent = False):
         with urllib.request.urlopen(url) as url_obj:
             os.makedirs(os.path.join(self.directory, 'articles'), exist_ok=True)
-            fname = os.path.join(
-                self.directory, 'articles',
-                str(len(self.article_data)).zfill(6) + '.html')
+            fname = str(len(self.archive_meta)).zfill(6)
             with open(fname, 'wb') as f:
                 if not silent: print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
@@ -338,11 +334,11 @@ class Dearchiver(object):
             print ('Loading & Souping file: [{}] for url: [{}]'.format(
                 fname, url))
         try:
-            fname = os.path.join(self._get_archive_folder(), fname)
+            fname = os.path.join(self._get_archive_folder(), fname + '.html')
             with open(fname, 'rb') as fobj:
                 return bs(fobj.read(), 'html.parser')
         except FileNotFoundError:
-            raise OSError
+            raise OSError('File not found: {}'.format(fname))
 
     def find_links_in_page(self, url, silent = False):
         if not isinstance(url, str):

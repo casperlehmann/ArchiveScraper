@@ -447,7 +447,7 @@ class TestDearchiver(object):
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
         self.dearch._save_archive_url('www.example.com', fname)
-        assert_equals(self.dearch._get_filename('www.example.com'), fname)
+        assert_equals(self.dearch._get_filename('www.example.com'), '000001')
 
     def test__get_filepath_url_raises_TypeError(self):
         assert_raises(
@@ -556,10 +556,10 @@ class TestDearchiver(object):
         fname = '000001'
         archive = self.dearch._get_archive_folder(
             archive_folder = 'archive')
-        fpath = os.path.join(archive, fname)
+        fpath = os.path.join(archive, fname+'.html')
         with open(fpath, 'wb') as f: f.write(b'Some contents')
         self.dearch._save_archive_url('www.example.com', fname)
-        soup = self.dearch.get_soup(fpath, silent = True)
+        soup = self.dearch.get_soup(fname, silent = True)
         assert_equals(soup.text, 'Some contents')
 
     def test_get_soup_filename_raises_TypeError(self):
@@ -583,7 +583,7 @@ class TestDearchiver(object):
     def test_find_links_in_page_loads_from_disk(self):
         fname = '000001'
         archive = os.path.join(self.temp_dir, 'archive')
-        fpath = os.path.join(archive, fname)
+        fpath = os.path.join(archive, fname+'.html')
         html_contents = (b'<html><head></head><body>'
                          b'<a href="www.link.com">string</a>'
                          b'</body></html>')
