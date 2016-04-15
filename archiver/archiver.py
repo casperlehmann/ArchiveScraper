@@ -362,13 +362,17 @@ class Dearchiver(object):
                 self.find_links_in_page(url, silent = silent)
 
     # Analysis
-    def count_links(self, counter = None, links = None, domain = None):
+    def count_links(
+            self, counter = None, links = None, domain = None):
+        if counter is None: counter = dd(int)
         if links is None:
             links = [_ for key, item in self.article_data.items()
                      for _ in item['l']]
-        if counter is None: counter = dd(int)
-        if domain is None: domain = ''
-        if domain == '': domain = 'politics.people.com.cn'
+        if domain is None:
+            domain = 'politics.people.com.cn'
+        if not isinstance(domain, str):
+            raise TypeError('Parameter \'domain\' must be a string')
+
         for link in links:
             if domain in link:
                 counter[link] += 1
