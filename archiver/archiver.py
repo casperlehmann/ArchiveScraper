@@ -84,10 +84,7 @@ class Dearchiver(object):
     archive_folder = None
     archive_meta = None
     article_data = None
-    url_queue = []
-    pages = []
     scanned = []
-    links = {}
 
     def __init__(self, directory = None, silent = False):
         self.directory = directory
