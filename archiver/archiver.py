@@ -82,7 +82,7 @@ class Dearchiver(object):
     """
     _directory = None
     archive_folder = None
-    archive_meta = None
+    archive_data = None
     article_data = None
     scanned = []
 
@@ -123,29 +123,29 @@ class Dearchiver(object):
         if not isinstance(silent, bool):
             raise TypeError('Parameter \'silent\' must be of type bool')
         try:
-            self.archive_meta = dd(
+            self.archive_data = dd(
                 lambda: dict(),
                 json.load(open(self.archive_json_file)))
         except FileNotFoundError as e:
             if not silent: print ('Creating new file:', self.archive_json_file)
-            self.archive_meta = dd(lambda: dict())
-            json.dump(self.archive_meta, open(self.archive_json_file, 'w'))
+            self.archive_data = dd(lambda: dict())
+            json.dump(self.archive_data, open(self.archive_json_file, 'w'))
 
     def _save_archive_url(self, url, fname):
         if not isinstance (url, str):
             raise TypeError
         if not isinstance (fname, str):
             raise TypeError
-        self.archive_meta[url]['f'] = fname
-        json.dump(self.archive_meta, open(self.archive_json_file, 'w'))
+        self.archive_data[url]['f'] = fname
+        json.dump(self.archive_data, open(self.archive_json_file, 'w'))
 
     def _save_archive_links(self, url, links):
         if not isinstance (url, str):
             raise TypeError
         if not isinstance (links, list):
             raise TypeError
-        self.archive_meta[url]['l'] = links
-        json.dump(self.archive_meta, open(self.archive_json_file, 'w'))
+        self.archive_data[url]['l'] = links
+        json.dump(self.archive_data, open(self.archive_json_file, 'w'))
 
     # Articles
     def _load_article_json(self, silent = False):
@@ -203,7 +203,7 @@ class Dearchiver(object):
         self.clean_json_scanned(silent=silent)
         self.clean_archive(silent=silent)
         self.clean_project_root(silent=silent)
-        self.archive_meta = None
+        self.archive_data = None
         self.article_data = None
         self.scanned = None
         if not silent: print()
@@ -243,15 +243,15 @@ class Dearchiver(object):
     def _get_filename(self, url):
         if not isinstance (url, str):
             raise TypeError
-        if not url in self.archive_meta:
+        if not url in self.archive_data:
             raise KeyError
-        fname = self.archive_meta[url]['f']
+        fname = self.archive_data[url]['f']
         return fname
 
     def _get_filepath(self, url):
         if not isinstance (url, str):
             raise TypeError
-        if not url in self.archive_meta:
+        if not url in self.archive_data:
             raise KeyError
         fname = self._get_filename(url)
         if not os.path.isfile(os.path.join(self._get_archive_folder(), fname)):
@@ -298,7 +298,7 @@ class Dearchiver(object):
         if not url.startswith('http'):
             url = 'http://' + url
         with urllib.request.urlopen(url) as url_obj:
-            fname = str(len(self.archive_meta)).zfill(6)
+            fname = str(len(self.archive_data)).zfill(6)
             with open(fname, 'wb') as f:
                 if not silent: print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
@@ -316,7 +316,7 @@ class Dearchiver(object):
     def _fetch_article_page(self, url, silent = False):
         with urllib.request.urlopen(url) as url_obj:
             os.makedirs(os.path.join(self.directory, 'articles'), exist_ok=True)
-            fname = str(len(self.archive_meta)).zfill(6)
+            fname = str(len(self.archive_data)).zfill(6)
             with open(fname, 'wb') as f:
                 if not silent: print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
@@ -354,7 +354,7 @@ class Dearchiver(object):
         self._save_scanned(url)
 
     def find_links_in_archive(self, silent = False):
-        for url in set(self.archive_meta.keys()):
+        for url in set(self.archive_data.keys()):
             if not url in self.scanned:
                 self.find_links_in_page(url, silent = silent)
 
@@ -377,7 +377,7 @@ class Dearchiver(object):
 
     def get_queue(self, filtr):
         queue = []
-        for url, data in self.archive_meta.items():
+        for url, data in self.archive_data.items():
             if url in self.scanned:
                 queue.extend(data['l'])
         filtr = [_ for _ in queue if filtr in _]

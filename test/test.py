@@ -168,11 +168,11 @@ class TestDearchiver(object):
             ValueError, archiver.Dearchiver, directory = '', silent = True)
 
     def test_load_data_files_sets_json(self):
-        self.dearch.archive_meta = None
+        self.dearch.archive_data = None
         self.dearch.article_data = None
         self.dearch.scanned = None
         self.dearch.load_data_files(silent = True)
-        assert_equals(self.dearch.archive_meta, {})
+        assert_equals(self.dearch.archive_data, {})
         assert_equals(self.dearch.article_data, {})
         assert_equals(self.dearch.scanned, [])
 
@@ -199,32 +199,32 @@ class TestDearchiver(object):
         json.dump(
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
             open(self.dearch.archive_json_file, 'w'))
-        assert_equals(self.dearch.archive_meta, {})
+        assert_equals(self.dearch.archive_data, {})
 
         self.dearch._load_archive_json()
         assert_equals(
-            self.dearch.archive_meta,
+            self.dearch.archive_data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__load_archive_json_creation(self):
-        self.dearch.archive_meta = None
-        assert_is_none(self.dearch.archive_meta)
+        self.dearch.archive_data = None
+        assert_is_none(self.dearch.archive_data)
         self.dearch._load_archive_json()
-        assert_is_instance(self.dearch.archive_meta, dict)
-        assert_equals(self.dearch.archive_meta, {})
+        assert_is_instance(self.dearch.archive_data, dict)
+        assert_equals(self.dearch.archive_data, {})
 
     def test__load_archive_json_load_file(self):
         with open(os.path.join(self.temp_dir, 'archive.json'), 'w') as f:
             f.write(json.dumps(
                 {'www.example.com': {'f': '000001', 'l': ['www.link.com']}}))
 
-        self.dearch.archive_meta = None
-        assert_is_none(self.dearch.archive_meta)
+        self.dearch.archive_data = None
+        assert_is_none(self.dearch.archive_data)
 
         self.dearch._load_archive_json()
-        assert_is_instance(self.dearch.archive_meta, dict)
+        assert_is_instance(self.dearch.archive_data, dict)
         assert_equals(
-            self.dearch.archive_meta,
+            self.dearch.archive_data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__save_archive_url(self):
@@ -539,11 +539,11 @@ class TestDearchiver(object):
 
     def test__fetch_archive_page_writes_file(self):
         if self.skip_online_tests: raise SkipTest
-        assert_equals(self.dearch.archive_meta, {})
+        assert_equals(self.dearch.archive_data, {})
         self.dearch._fetch_archive_page(url = 'www.example.com', silent = True)
         expected_path = os.path.join(self.dearch.archive_folder, '000000.html')
-        expected_archive_meta = {'http://www.example.com': {'f': expected_path}}
-        assert_equals(self.dearch.archive_meta, expected_archive_meta)
+        expected_archive_data = {'http://www.example.com': {'f': expected_path}}
+        assert_equals(self.dearch.archive_data, expected_archive_data)
 
     def test__fetch_article_page(self):
         pass
@@ -590,9 +590,9 @@ class TestDearchiver(object):
         os.makedirs(archive, exist_ok=True)
         with open(fpath, 'wb') as f: f.write(html_contents)
         url = 'www.example.com'
-        self.dearch.archive_meta[url]['f'] = fname
+        self.dearch.archive_data[url]['f'] = fname
         json.dump(
-            self.dearch.archive_meta, open(self.dearch.archive_json_file, 'w'))
+            self.dearch.archive_data, open(self.dearch.archive_json_file, 'w'))
 
         self.dearch.find_links_in_page(url, silent = True)
         assert_equals(
