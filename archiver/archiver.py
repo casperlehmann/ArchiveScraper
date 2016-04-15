@@ -364,7 +364,7 @@ class Dearchiver(object):
     # Analysis
     def count_links(self, counter = None, links = None, domain = None):
         if links is None:
-            links = [_ for key, item in self.archive_meta.items()
+            links = [_ for key, item in self.article_data.items()
                      for _ in item['l']]
         if counter is None: counter = dd(int)
         if domain is None: domain = ''
