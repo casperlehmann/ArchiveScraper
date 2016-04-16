@@ -361,7 +361,7 @@ class Dearchiver(object):
             if a.has_attr('href'):
                 link = a.attrs['href'].strip()
                 links.append(link)
-        self._save_article_links(url, links)
+        self._save_archive_links(url, links)
         self._save_scanned(url)
 
     def find_links_in_archive(
@@ -380,7 +380,7 @@ class Dearchiver(object):
     def count_links(self, counter = None, links = None, domain = None):
         if counter is None: counter = dd(int)
         if links is None:
-            links = [_ for key, item in self.article_data.items()
+            links = [_ for key, item in self.archive_data.items()
                      for _ in item['l']]
         if domain is None:
             domain = 'politics.people.com.cn'
