@@ -16,3 +16,13 @@ if __name__ == '__main__':
 
     #dearch.find_links_in_archive(
     #    target_element = 'ul', target_class = 'list_16')
+
+    c = dearch.count_links()
+
+    def stripper(href):
+        return href.strip().replace('GB/index.html','').strip('/')
+
+    c = {href:count for href, count in c.items()
+                if not (stripper(href).split('.')[-1] in ['cn', 'com', ''])}
+
+    dearch.show_counter(counter = c, root = 'http://politics.people.com.cn')
