@@ -382,8 +382,7 @@ class Dearchiver(object):
         if links is None:
             links = [_ for key, item in self.archive_data.items()
                      for _ in item['l']]
-        if domain is None:
-            domain = 'politics.people.com.cn'
+        if domain is None: domain = 'politics.people.com.cn'
         if not isinstance(domain, str):
             raise TypeError('Parameter \'domain\' must be a string')
 
