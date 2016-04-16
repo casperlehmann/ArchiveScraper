@@ -14,5 +14,5 @@ if __name__ == '__main__':
     #except httplib.IncompleteRead as e:
     #    print (e.partial)
 
-    #dearch.find_links_in_archive()
-    #print( len(dearch.archive_meta))
+    #dearch.find_links_in_archive(
+    #    target_element = 'ul', target_class = 'list_16')
