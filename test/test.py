@@ -596,8 +596,8 @@ class TestDearchiver(object):
 
         self.dearch.find_links_in_page(url, silent = True)
         assert_equals(
-            self.dearch.article_data,
-            {'www.example.com': {'l': ['www.link.com']}})
+            self.dearch.archive_data,
+            {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test_find_links_in_page_raises_FileNotFoundError(self):
         assert_raises(
