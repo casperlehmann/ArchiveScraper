@@ -337,30 +337,47 @@ class Dearchiver(object):
         except FileNotFoundError:
             raise OSError('File not found: {}'.format(fname))
 
-    def find_links_in_page(self, url, silent = False):
-        if not isinstance(url, str):
-            raise TypeError
-        links = []
+    def find_links_in_page(
+            self, url, silent = False,
+            target_element = None, target_class = None, target_id = None):
+        if not isinstance(url, str): raise TypeError
         try:
             fname = self._get_filename(url)
         except KeyError:
             raise FileNotFoundError(
                 'File does not exist for url: {}'.format(url))
-        for a in self.get_soup(fname, silent = silent).find_all('a'):
+        if target_element is None: target_element = ''
+        if not isinstance(target_element, str):
+            raise TypeError('Parameter \'target_element\' must be a string.')
+        if target_class is None: target_class = ''
+        if not isinstance(target_class, str):
+            raise TypeError('Parameter \'target_class\' must be a string.')
+        if target_id is None: target_id = ''
+        if not isinstance(target_id, str):
+            raise TypeError('Parameter \'target_id\' must be a string.')
+
+        links = []
+        for a in soup.find_all('a'):
             if a.has_attr('href'):
                 link = a.attrs['href'].strip()
                 links.append(link)
         self._save_article_links(url, links)
         self._save_scanned(url)
 
-    def find_links_in_archive(self, silent = False):
+    def find_links_in_archive(
+            self, silent = False,
+            target_element = None, target_class = None, target_id = None):
         for url in set(self.archive_data.keys()):
             if not url in self.scanned:
-                self.find_links_in_page(url, silent = silent)
+                self.find_links_in_page(
+                    url,
+                    silent = silent,
+                    target_element = target_element,
+                    target_class = target_class,
+                    target_id = target_id)
 
     # Analysis
-    def count_links(
-            self, counter = None, links = None, domain = None):
+    def count_links(self, counter = None, links = None, domain = None):
         if counter is None: counter = dd(int)
         if links is None:
             links = [_ for key, item in self.article_data.items()
