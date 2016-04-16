@@ -356,8 +356,10 @@ class Dearchiver(object):
         if not isinstance(target_id, str):
             raise TypeError('Parameter \'target_id\' must be a string.')
 
+        soup = self.get_soup(fname, silent = silent)
+        target = soup.find(target_element, class_=target_class, id=target_id)
         links = []
-        for a in soup.find_all('a'):
+        for a in target.find_all('a'):
             if a.has_attr('href'):
                 link = a.attrs['href'].strip()
                 links.append(link)
@@ -387,7 +389,9 @@ class Dearchiver(object):
             raise TypeError('Parameter \'domain\' must be a string')
 
         for link in links:
-            if domain in link:
+            if domain in link or link[0] == '/':
+                counter[link] += 1
+            else:
                 counter[link] += 1
         return counter
 
