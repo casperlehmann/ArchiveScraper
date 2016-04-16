@@ -400,14 +400,23 @@ class Dearchiver(object):
         return filtr
 
     # Feedback
-    def show_counter(self, counter, filtr = None, silent = False):
+    def show_counter(self, counter, filtr = None, silent = False, root = None):
+        if not isinstance(root, str):
+            raise TypeError('Parameter \'root\' must be a string.')
         if filtr is None:
-            filtr = r'/[1-2][09][901][0-9]/'
+            filtr = r'/'
+            #filtr = r'/[1-2][09][901][0-9]/'
         refiltered_count = {}
         for item in counter:
             if re.search(filtr, item) is not None:
                 refiltered_count[item] = counter[item]
         for href, count in sorted(
                 refiltered_count.items(),
-                key=lambda x: x[0]):
-            if not silent: print (href)
+                key=lambda x: x[1]):
+            stripped = href.strip('/').strip('GB/index.html').strip('/')
+            if (stripped.endswith('.com') or stripped.endswith('.cn')):
+                continue
+            if href.startswith('/'):
+                if not silent: print ('{:>8} {}'.format(count, root+href))
+            else:
+                if not silent: print ('{:>8} {}'.format(count, href))
