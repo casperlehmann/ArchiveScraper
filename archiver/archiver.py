@@ -132,9 +132,9 @@ class Dearchiver(object):
     # Cleaning
     def clean(self, silent = False):
         if not silent: print ('Cleaning...')
-        self.clean_json_archive(silent=silent)
-        self.clean_json_article(silent=silent)
-        self.clean_json_scanned(silent=silent)
+        self.clean_json(target = self.archive_json_file, silent=silent)
+        self.clean_json(target = self.article_json_file, silent=silent)
+        self.clean_json(target = self.scanned_json_file, silent=silent)
         self.clean_archive(silent=silent)
         self.clean_project_root(silent=silent)
         self.archive_data = None
@@ -142,26 +142,12 @@ class Dearchiver(object):
         self.scanned = None
         if not silent: print()
 
-    def clean_json_archive(self, silent = False):
+    def clean_json(self, target, silent = False):
         try:
-            if not silent: print ('Deleting: ' + self.archive_json_file + '...')
-            os.remove(self.archive_json_file)
+            if not silent: print ('Deleting: ' + target + '...')
+            os.remove(target)
         except FileNotFoundError:
-            if not silent: print ('Does not exist: ' + self.archive_json_file)
-
-    def clean_json_article(self, silent = False):
-        try:
-            if not silent: print ('Deleting: ' + self.article_json_file + '...')
-            os.remove(self.article_json_file)
-        except FileNotFoundError:
-            if not silent: print ('Does not exist: ' + self.article_json_file)
-
-    def clean_json_scanned(self, silent = False):
-        try:
-            if not silent: print ('Deleting: ' + self.scanned_json_file + '...')
-            os.remove(self.scanned_json_file)
-        except FileNotFoundError:
-            if not silent: print ('Does not exist: ' + self.scanned_json_file)
+            if not silent: print ('Does not exist: ' + target)
 
     def clean_archive(self, silent = False):
         for f in glob(os.path.join(self._get_archive_folder(), '*')):
