@@ -672,11 +672,9 @@ class TestArticleScanner(object):
             archive_data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
-    def test_find_links_in_page_raises_FileNotFoundError(self):
+    def test_find_links_in_page_raises_KeyError(self):
         assert_raises(
-            OSError,
-            self.dearch.find_links_in_page,
-            url = 'www.example.com')
+            KeyError, self.dearch.find_links_in_page, url = 'www.example.com')
 
     def test_find_links_in_page_url_raises_TypeError(self):
         assert_raises(TypeError, self.dearch.find_links_in_page, 1)
