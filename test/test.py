@@ -384,97 +384,97 @@ class TestArticleGetter(object):
         shutil.rmtree(cls.temp_dir)
 
     def setup(self):
-        self.dearch = archiver.ArticleGetter(
+        self.artget = archiver.ArticleGetter(
             directory = self.temp_dir, silent = True)
 
     def teardown(self):
-        self.dearch.clean(silent = True)
+        self.artget.clean(silent = True)
 
     def test_load_data_files_sets_json(self):
-        self.dearch.data = None
-        self.dearch.load_data_files(silent = True)
-        assert_equals(self.dearch.data, {})
+        self.artget.data = None
+        self.artget.load_data_files(silent = True)
+        assert_equals(self.artget.data, {})
 
     def test_isfile_article_json_file(self):
-        assert_true(os.path.isfile(self.dearch.article_json_file))
+        assert_true(os.path.isfile(self.artget.article_json_file))
 
     # Articles
     def test__load_article_json_silent_raises_TypeError(self):
-        assert_raises(TypeError, self.dearch._load_article_json, silent = 2)
+        assert_raises(TypeError, self.artget._load_article_json, silent = 2)
 
     def test__load_article_json_reads_contents_from_file(self):
         json.dump(
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
-            open(self.dearch.article_json_file, 'w'))
-        assert_equals(self.dearch.data, {})
+            open(self.artget.article_json_file, 'w'))
+        assert_equals(self.artget.data, {})
 
-        self.dearch._load_article_json()
+        self.artget._load_article_json()
         assert_equals(
-            self.dearch.data,
+            self.artget.data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__load_article_json_creation(self):
-        self.dearch.data = None
-        assert_is_none(self.dearch.data)
-        self.dearch._load_article_json()
-        assert_is_instance(self.dearch.data, dict)
-        assert_equals(self.dearch.data, {})
+        self.artget.data = None
+        assert_is_none(self.artget.data)
+        self.artget._load_article_json()
+        assert_is_instance(self.artget.data, dict)
+        assert_equals(self.artget.data, {})
 
     def test__load_article_json_load_file(self):
         with open(os.path.join(self.temp_dir, 'article.json'), 'w') as f:
             f.write(json.dumps(
                 {'www.example.com': {'f': '000001', 'l': ['www.link.com']}}))
 
-        self.dearch.data = None
-        assert_is_none(self.dearch.data)
+        self.artget.data = None
+        assert_is_none(self.artget.data)
 
-        self.dearch._load_article_json()
-        assert_is_instance(self.dearch.data, dict)
+        self.artget._load_article_json()
+        assert_is_instance(self.artget.data, dict)
         assert_equals(
-            self.dearch.data,
+            self.artget.data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__save_article_url(self):
-        self.dearch._save_article_url('www.example.com', '000001')
+        self.artget._save_article_url('www.example.com', '000001')
         assert_equals(
-            json.load(open(self.dearch.article_json_file)),
+            json.load(open(self.artget.article_json_file)),
             {'www.example.com': {'f': '000001'}})
 
     def test__save_article_url_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.dearch._save_article_url,
+            TypeError, self.artget._save_article_url,
             url = 1, fname = '000001')
 
     def test__save_article_url_fname_raises_TypeError(self):
         assert_raises(
-            TypeError, self.dearch._save_article_url,
+            TypeError, self.artget._save_article_url,
             url = 'www.example.com', fname = 1)
 
     def test__save_article_url_and_links(self):
         # We make sure that one doesn't overwrite the other:
-        self.dearch._save_article_url('www.example.com', '000001')
-        self.dearch._save_article_links('www.example.com', ['www.link.com'])
+        self.artget._save_article_url('www.example.com', '000001')
+        self.artget._save_article_links('www.example.com', ['www.link.com'])
         # Manually load the dict from file and compare:
         assert_equals(
-            json.load(open(self.dearch.article_json_file)),
+            json.load(open(self.artget.article_json_file)),
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__save_article_links(self):
         # Init file:
-        self.dearch._save_article_links('www.example.com', ['www.link.com'])
+        self.artget._save_article_links('www.example.com', ['www.link.com'])
         # Manually load the dict from file and compare:
         assert_equals(
-            json.load(open(self.dearch.article_json_file)),
+            json.load(open(self.artget.article_json_file)),
             {'www.example.com': {'l': ['www.link.com']}})
 
     def test__save_article_links_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.dearch._save_article_links,
+            TypeError, self.artget._save_article_links,
             url = 1, links = None)
 
     def test__save_article_links_fname_raises_TypeError(self):
         assert_raises(
-            TypeError, self.dearch._save_article_links,
+            TypeError, self.artget._save_article_links,
             url = 'www.example.com', links = None)
 
     # Cleaning
@@ -484,18 +484,18 @@ class TestArticleGetter(object):
 
         # Only one file article_json_file:
         assert_true(os.path.isfile(article_json_file))
-        assert_equals(1, len(glob(os.path.join(self.dearch.directory,'*'))))
+        assert_equals(1, len(glob(os.path.join(self.artget.directory,'*'))))
 
         # Delete it:
-        self.dearch.clean(silent = True)
+        self.artget.clean(silent = True)
 
         # Files and dir are gone:
         assert_false(os.path.isfile(article_json_file))
         # Root directory is empty:
-        assert_equals(0, len(glob(os.path.join(self.dearch.directory,'*'))))
+        assert_equals(0, len(glob(os.path.join(self.artget.directory,'*'))))
 
         # Recreate, so teardown doesn't fail:
-        self.dearch = archiver.Dearchiver(
+        self.artget = archiver.Dearchiver(
             directory = self.temp_dir, silent = True)
 
 class TestArticleScanner(object):
@@ -512,42 +512,42 @@ class TestArticleScanner(object):
         shutil.rmtree(cls.temp_dir)
 
     def setup(self):
-        self.dearch = archiver.ArticleScanner(
+        self.artscan = archiver.ArticleScanner(
             directory = self.temp_dir, silent = True)
 
     def teardown(self):
-        self.dearch.clean(silent = True)
+        self.artscan.clean(silent = True)
 
     def test_load_data_files_sets_json(self):
-        self.dearch.data = None
-        self.dearch.load_data_files(silent = True)
-        assert_equals(self.dearch.data, {})
+        self.artscan.data = None
+        self.artscan.load_data_files(silent = True)
+        assert_equals(self.artscan.data, {})
 
     def test_isfile_scanned_json_file(self):
-        assert_true(os.path.isfile(self.dearch.scanned_json_file))
+        assert_true(os.path.isfile(self.artscan.scanned_json_file))
 
     # Scanned
     def test__load_scanned_json_silent_raises_TypeError(self):
-        assert_raises(TypeError, self.dearch._load_scanned_json, silent = 2)
+        assert_raises(TypeError, self.artscan._load_scanned_json, silent = 2)
 
     def test__load_scanned_json_reads_contents_from_file(self):
         with open(os.path.join(self.temp_dir, 'scanned.json'), 'w') as f:
             json.dump(
                 {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'},
                 f)
-        assert_equals(self.dearch.data, {})
+        assert_equals(self.artscan.data, {})
 
-        self.dearch._load_scanned_json()
+        self.artscan._load_scanned_json()
         assert_equals(
-            self.dearch.data,
+            self.artscan.data,
             {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
 
     def test__load_scanned_json_creation(self):
-        self.dearch.data = None
-        assert_is_none(self.dearch.data)
-        self.dearch._load_scanned_json()
-        assert_is_instance(self.dearch.data, dict)
-        assert_equals(self.dearch.data, {})
+        self.artscan.data = None
+        assert_is_none(self.artscan.data)
+        self.artscan._load_scanned_json()
+        assert_is_instance(self.artscan.data, dict)
+        assert_equals(self.artscan.data, {})
 
     def test__load_scanned_json_load_file(self):
         with open(os.path.join(self.temp_dir, 'scanned.json'), 'w') as f:
@@ -555,48 +555,48 @@ class TestArticleScanner(object):
                 {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'},
                 f)
 
-        self.dearch.data = None
-        assert_is_none(self.dearch.data)
+        self.artscan.data = None
+        assert_is_none(self.artscan.data)
 
-        self.dearch._load_scanned_json()
-        assert_is_instance(self.dearch.data, dict)
+        self.artscan._load_scanned_json()
+        assert_is_instance(self.artscan.data, dict)
         assert_equals(
-            self.dearch.data,
+            self.artscan.data,
             {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
 
     def test__save_scanned_links(self):
-        self.dearch._save_scanned_links('www.example.com', ['link_1'])
+        self.artscan._save_scanned_links('www.example.com', ['link_1'])
         assert_equals(
-            json.load(open(self.dearch.scanned_json_file)),
+            json.load(open(self.artscan.scanned_json_file)),
             {'www.example.com': ['link_1']})
-        self.dearch._save_scanned_links('www.example2.com', ['link_2'])
+        self.artscan._save_scanned_links('www.example2.com', ['link_2'])
         assert_equals(
-            json.load(open(self.dearch.scanned_json_file)),
+            json.load(open(self.artscan.scanned_json_file)),
             {'www.example.com': ['link_1'], 'www.example2.com': ['link_2']})
 
     def test__save_scanned_url_raises_TypeError(self):
-        assert_raises(TypeError, self.dearch._save_scanned_links, url = 1)
+        assert_raises(TypeError, self.artscan._save_scanned_links, url = 1)
 
     def test__save_scanned_self_scanned_raises_TypeError(self):
-        self.dearch.data = ''
-        assert_raises(TypeError, self.dearch._save_scanned_links, url = 'a')
+        self.artscan.data = ''
+        assert_raises(TypeError, self.artscan._save_scanned_links, url = 'a')
 
     def test__save_archive_links(self):
         # Init file:
-        self.dearch._save_scanned_links('www.example.com', ['www.link.com'])
+        self.artscan._save_scanned_links('www.example.com', ['www.link.com'])
         # Manually load the dict from file and compare:
         assert_equals(
-            json.load(open(self.dearch.scanned_json_file)),
+            json.load(open(self.artscan.scanned_json_file)),
             {'www.example.com': ['www.link.com']})
 
     def test__save_archive_links_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.dearch._save_scanned_links,
+            TypeError, self.artscan._save_scanned_links,
             url = 1, links = None)
 
     def test__save_archive_links_fname_raises_TypeError(self):
         assert_raises(
-            TypeError, self.dearch._save_scanned_links,
+            TypeError, self.artscan._save_scanned_links,
             url = 'www.example.com', links = None)
 
     # Cleaning
@@ -606,50 +606,50 @@ class TestArticleScanner(object):
 
         # Only one file scanned_json_file:
         assert_true(os.path.isfile(scanned_json_file))
-        assert_equals(1, len(glob(os.path.join(self.dearch.directory,'*'))))
+        assert_equals(1, len(glob(os.path.join(self.artscan.directory,'*'))))
 
         # Delete it:
-        self.dearch.clean(silent = True)
+        self.artscan.clean(silent = True)
 
         # Files and dir are gone:
         assert_false(os.path.isfile(scanned_json_file))
         # Root directory is empty:
-        assert_equals(0, len(glob(os.path.join(self.dearch.directory,'*'))))
+        assert_equals(0, len(glob(os.path.join(self.artscan.directory,'*'))))
 
         # Recreate, so teardown doesn't fail:
-        self.dearch = archiver.Dearchiver(
+        self.artscan = archiver.Dearchiver(
             directory = self.temp_dir, silent = True)
 
     def test_get_soup_file_raises_OSError(self):
         assert_raises(
-            OSError, self.dearch.get_soup, fname = '000001', silent = True)
+            OSError, self.artscan.get_soup, fname = '000001', silent = True)
 
     def test_get_soup(self):
         fname = '000001'
-        archive = self.dearch._get_archive_folder(
+        archive = self.artscan._get_archive_folder(
             archive_folder = 'archive')
         fpath = os.path.join(archive, fname+'.html')
         with open(fpath, 'wb') as f: f.write(b'Some contents')
 
-        soup = self.dearch.get_soup(fname, silent = True)
+        soup = self.artscan.get_soup(fname, silent = True)
         assert_equals(soup.text, 'Some contents')
 
     def test_get_soup_filename_raises_TypeError(self):
         assert_raises(
-            TypeError, self.dearch.get_soup, fname=1, url='string',
+            TypeError, self.artscan.get_soup, fname=1, url='string',
             silent = True)
 
     def test_get_soup_url_raises_TypeError(self):
         string = '000001'
         not_string = 1
         assert_raises(
-            TypeError, self.dearch.get_soup, fname=string, url=not_string,
+            TypeError, self.artscan.get_soup, fname=string, url=not_string,
             silent = True)
 
     def test_get_soup_raises_OSError(self):
         string = '000001'
         assert_raises(
-            OSError, self.dearch.get_soup, fname=string, url=string,
+            OSError, self.artscan.get_soup, fname=string, url=string,
             silent = True)
 
     def test_find_links_in_page_loads_from_disk(self):
@@ -666,17 +666,17 @@ class TestArticleScanner(object):
         archive_json_file = os.path.join(self.temp_dir, 'archive.json')
         with open(archive_json_file, 'w') as f:
             json.dump(archive_data, f)
-        self.dearch.data[url]['f'] = fname
+        self.artscan.data[url]['f'] = fname
 
-        self.dearch.find_links_in_page(url, silent = True)
+        self.artscan.find_links_in_page(url, silent = True)
         assert_equals(
             archive_data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test_find_links_in_page_raises_KeyError(self):
         assert_raises(
-            KeyError, self.dearch.find_links_in_page, url = 'www.example.com')
+            KeyError, self.artscan.find_links_in_page, url = 'www.example.com')
 
     def test_find_links_in_page_url_raises_TypeError(self):
-        assert_raises(TypeError, self.dearch.find_links_in_page, 1)
+        assert_raises(TypeError, self.artscan.find_links_in_page, 1)
 
