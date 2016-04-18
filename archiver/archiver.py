@@ -16,7 +16,7 @@ class ScraperBase(object):
     """
     _directory = None
     _archive_folder = None
-    archive_data = None
+    data = None
 
     def __init__(self, directory = None, silent = False):
         self.directory = directory
@@ -67,15 +67,15 @@ class ScraperBase(object):
     def _get_filename(self, url):
         if not isinstance (url, str):
             raise TypeError
-        if not url in self.archive_data:
+        if not url in self.data:
             raise KeyError('File does not registered for url: {}'.format(url))
-        fname = self.archive_data[url]['f']
+        fname = self.data[url]['f']
         return fname
 
     def _get_filepath(self, url):
         if not isinstance (url, str):
             raise TypeError
-        if not url in self.archive_data:
+        if not url in self.data:
             raise KeyError
         fname = self._get_filename(url)
         if not os.path.isfile(os.path.join(self._get_archive_folder(), fname)):
@@ -98,6 +98,16 @@ class ScraperBase(object):
         self._archive_folder = archive_folder
         os.makedirs(self._archive_folder, exist_ok=True)
         return self._archive_folder
+
+    def _load_json(self, json_file, silent = False):
+        if not isinstance(silent, bool):
+            raise TypeError('Parameter \'silent\' must be of type bool')
+        try:
+            self.data = dd(lambda: dict(), json.load(open(json_file)))
+        except FileNotFoundError as e:
+            if not silent: print ('Creating new file:', json_file)
+            self.data = dd(lambda: dict())
+            json.dump(self.data, open(json_file, 'w'))
 
     # Data
     def load_archive(self, urls, silent = False):
@@ -122,7 +132,7 @@ class ScraperBase(object):
         if not url.startswith('http'):
             url = 'http://' + url
         with urllib.request.urlopen(url) as url_obj:
-            fname = str(len(self.archive_data)).zfill(6)
+            fname = str(len(self.data)).zfill(6)
             with open(fname, 'wb') as f:
                 if not silent: print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
@@ -130,7 +140,7 @@ class ScraperBase(object):
 
     def load_article_pages(self, *urls, silent = False):
         for url in urls:
-            if url in self.article_data:
+            if url in self.data:
                 self._get_filename(url)
                 if not silent: print ('Alredy here')
             else:
@@ -140,7 +150,7 @@ class ScraperBase(object):
     def _fetch_article_page(self, url, silent = False):
         with urllib.request.urlopen(url) as url_obj:
             os.makedirs(os.path.join(self.directory, 'articles'), exist_ok=True)
-            fname = str(len(self.archive_data)).zfill(6)
+            fname = str(len(self.data)).zfill(6)
             with open(fname, 'wb') as f:
                 if not silent: print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
@@ -162,24 +172,15 @@ class Dearchiver(ScraperBase):
 
     # Archive
     def _load_archive_json(self, silent = False):
-        if not isinstance(silent, bool):
-            raise TypeError('Parameter \'silent\' must be of type bool')
-        try:
-            self.archive_data = dd(
-                lambda: dict(),
-                json.load(open(self.archive_json_file)))
-        except FileNotFoundError as e:
-            if not silent: print ('Creating new file:', self.archive_json_file)
-            self.archive_data = dd(lambda: dict())
-            json.dump(self.archive_data, open(self.archive_json_file, 'w'))
+        super()._load_json(json_file = self.archive_json_file, silent = silent)
 
     def _save_archive_url(self, url, fname):
         if not isinstance (url, str):
             raise TypeError
         if not isinstance (fname, str):
             raise TypeError
-        self.archive_data[url]['f'] = fname
-        json.dump(self.archive_data, open(self.archive_json_file, 'w'))
+        self.data[url]['f'] = fname
+        json.dump(self.data, open(self.archive_json_file, 'w'))
 
     # Cleaning
     def clean(self, silent = False):
@@ -188,7 +189,7 @@ class Dearchiver(ScraperBase):
         self.clean_archive(silent=silent)
         super().clean(silent = silent)
         self.archive_folder = None
-        self.archive_data = None
+        self.data = None
         self.archive_json_file = None
         if not silent: print()
 
@@ -198,7 +199,6 @@ class Dearchiver(ScraperBase):
             os.remove(f)
 
 class ArticleGetter(ScraperBase):
-    article_data = None
     article_json_file = None
 
     def __init__(self, directory = None, silent = False):
@@ -214,39 +214,30 @@ class ArticleGetter(ScraperBase):
 
     # Articles
     def _load_article_json(self, silent = False):
-        if not isinstance(silent, bool):
-            raise TypeError('Parameter \'silent\' must be of type bool')
-        try:
-            self.article_data = dd(
-                lambda: dict(),
-                json.load(open(self.article_json_file)))
-        except FileNotFoundError as e:
-            if not silent: print ('Creating new file:', self.article_json_file)
-            self.article_data = dd(lambda: dict())
-            json.dump(self.article_data, open(self.article_json_file, 'w'))
+        super()._load_json(json_file = self.article_json_file, silent = silent)
 
     def _save_article_url(self, url, fname):
         if not isinstance (url, str):
             raise TypeError
         if not isinstance (fname, str):
             raise TypeError
-        self.article_data[url]['f'] = fname
-        json.dump(self.article_data, open(self.article_json_file, 'w'))
+        self.data[url]['f'] = fname
+        json.dump(self.data, open(self.article_json_file, 'w'))
 
     def _save_article_links(self, url, links):
         if not isinstance (url, str):
             raise TypeError
         if not isinstance (links, list):
             raise TypeError
-        self.article_data[url]['l'] = links
-        json.dump(self.article_data, open(self.article_json_file, 'w'))
+        self.data[url]['l'] = links
+        json.dump(self.data, open(self.article_json_file, 'w'))
 
     # Cleaning
     def clean(self, silent = False):
         if not silent: print ('Cleaning...')
         self.clean_json(target = self.article_json_file, silent=silent)
         super().clean(silent = silent)
-        self.article_data = None
+        self.data = None
         self.article_json_file = None
         if not silent: print()
 
@@ -254,7 +245,7 @@ class ArticleScanner(ScraperBase):
     scanned_data = {}
     scanned_json_file = None
 
-    def __init__(self, directory = None, silent = False):
+    def __init__(self, source = None, directory = None, silent = False):
         super().__init__(directory, silent)
 
     def load_json(self, silent = False):
@@ -267,16 +258,7 @@ class ArticleScanner(ScraperBase):
 
     # Scanned
     def _load_scanned_json(self, silent = False):
-        if not isinstance(silent, bool):
-            raise TypeError('Parameter \'silent\' must be of type bool')
-        try:
-            self.scanned_data = dd(
-                lambda: list(),
-                json.load(open(self.scanned_json_file)))
-        except FileNotFoundError as e:
-            if not silent: print ('Creating new file:', self.scanned_json_file)
-            self.scanned_data = dd(lambda: list())
-            json.dump(self.scanned_data, open(self.scanned_json_file, 'w'))
+        super()._load_json(json_file = self.scanned_json_file, silent = silent)
 
     def _save_scanned_links(self, url, links):
         if not isinstance (url, str):
@@ -319,11 +301,7 @@ class ArticleScanner(ScraperBase):
             self, url, silent = False,
             target_element = None, target_class = None, target_id = None):
         if not isinstance(url, str): raise TypeError
-        try:
-            fname = self._get_filename(url)
-        except KeyError:
-            raise FileNotFoundError(
-                'File does not exist for url: {}'.format(url))
+        fname = self._get_filename(url)
         if target_element is None: target_element = ''
         if not isinstance(target_element, str):
             raise TypeError('Parameter \'target_element\' must be a string.')
@@ -346,7 +324,7 @@ class ArticleScanner(ScraperBase):
     def find_links_in_archive(
             self, silent = False,
             target_element = None, target_class = None, target_id = None):
-        for url in set(self.archive_data.keys()):
+        for url in set(self.data.keys()):
             if not url in self.scanned_data:
                 self.find_links_in_page(
                     url,
@@ -359,7 +337,7 @@ class ArticleScanner(ScraperBase):
     def count_links(self, counter = None, links = None, domain = None):
         if counter is None: counter = dd(int)
         if links is None:
-            links = [_ for key, item in self.archive_data.items()
+            links = [_ for key, item in self.data.items()
                      for _ in item['l']]
         if domain is None: domain = 'politics.people.com.cn'
         if not isinstance(domain, str):
@@ -374,7 +352,7 @@ class ArticleScanner(ScraperBase):
 
     def get_queue(self, filtr):
         queue = []
-        for url, data in self.archive_data.items():
+        for url, data in self.data.items():
             if url in self.scanned_data:
                 queue.extend(data['l'])
         filtr = [_ for _ in queue if filtr in _]

@@ -164,9 +164,9 @@ class TestDearchiver(object):
             ValueError, archiver.Dearchiver, directory = '', silent = True)
 
     def test_load_data_files_sets_json(self):
-        self.dearch.archive_data = None
+        self.dearch.data = None
         self.dearch.load_data_files(silent = True)
-        assert_equals(self.dearch.archive_data, {})
+        assert_equals(self.dearch.data, {})
 
     def test_isdir_temp(self):
         assert_true(os.path.isdir(self.temp_dir))
@@ -182,32 +182,32 @@ class TestDearchiver(object):
         json.dump(
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
             open(self.dearch.archive_json_file, 'w'))
-        assert_equals(self.dearch.archive_data, {})
+        assert_equals(self.dearch.data, {})
 
         self.dearch._load_archive_json()
         assert_equals(
-            self.dearch.archive_data,
+            self.dearch.data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__load_archive_json_creation(self):
-        self.dearch.archive_data = None
-        assert_is_none(self.dearch.archive_data)
+        self.dearch.data = None
+        assert_is_none(self.dearch.data)
         self.dearch._load_archive_json()
-        assert_is_instance(self.dearch.archive_data, dict)
-        assert_equals(self.dearch.archive_data, {})
+        assert_is_instance(self.dearch.data, dict)
+        assert_equals(self.dearch.data, {})
 
     def test__load_archive_json_load_file(self):
         with open(os.path.join(self.temp_dir, 'archive.json'), 'w') as f:
             f.write(json.dumps(
                 {'www.example.com': {'f': '000001', 'l': ['www.link.com']}}))
 
-        self.dearch.archive_data = None
-        assert_is_none(self.dearch.archive_data)
+        self.dearch.data = None
+        assert_is_none(self.dearch.data)
 
         self.dearch._load_archive_json()
-        assert_is_instance(self.dearch.archive_data, dict)
+        assert_is_instance(self.dearch.data, dict)
         assert_equals(
-            self.dearch.archive_data,
+            self.dearch.data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__save_archive_url(self):
@@ -361,11 +361,11 @@ class TestDearchiver(object):
 
     def test__fetch_archive_page_writes_file(self):
         if self.skip_online_tests: raise SkipTest
-        assert_equals(self.dearch.archive_data, {})
+        assert_equals(self.dearch.data, {})
         self.dearch._fetch_archive_page(url = 'www.example.com', silent = True)
         expected_path = os.path.join(self.dearch._archive_folder, '000000.html')
         expected_archive_data = {'http://www.example.com': {'f': expected_path}}
-        assert_equals(self.dearch.archive_data, expected_archive_data)
+        assert_equals(self.dearch.data, expected_archive_data)
 
     def test__fetch_article_page(self):
         pass
@@ -391,9 +391,9 @@ class TestArticleGetter(object):
         self.dearch.clean(silent = True)
 
     def test_load_data_files_sets_json(self):
-        self.dearch.article_data = None
+        self.dearch.data = None
         self.dearch.load_data_files(silent = True)
-        assert_equals(self.dearch.article_data, {})
+        assert_equals(self.dearch.data, {})
 
     def test_isfile_article_json_file(self):
         assert_true(os.path.isfile(self.dearch.article_json_file))
@@ -406,32 +406,32 @@ class TestArticleGetter(object):
         json.dump(
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
             open(self.dearch.article_json_file, 'w'))
-        assert_equals(self.dearch.article_data, {})
+        assert_equals(self.dearch.data, {})
 
         self.dearch._load_article_json()
         assert_equals(
-            self.dearch.article_data,
+            self.dearch.data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__load_article_json_creation(self):
-        self.dearch.article_data = None
-        assert_is_none(self.dearch.article_data)
+        self.dearch.data = None
+        assert_is_none(self.dearch.data)
         self.dearch._load_article_json()
-        assert_is_instance(self.dearch.article_data, dict)
-        assert_equals(self.dearch.article_data, {})
+        assert_is_instance(self.dearch.data, dict)
+        assert_equals(self.dearch.data, {})
 
     def test__load_article_json_load_file(self):
         with open(os.path.join(self.temp_dir, 'article.json'), 'w') as f:
             f.write(json.dumps(
                 {'www.example.com': {'f': '000001', 'l': ['www.link.com']}}))
 
-        self.dearch.article_data = None
-        assert_is_none(self.dearch.article_data)
+        self.dearch.data = None
+        assert_is_none(self.dearch.data)
 
         self.dearch._load_article_json()
-        assert_is_instance(self.dearch.article_data, dict)
+        assert_is_instance(self.dearch.data, dict)
         assert_equals(
-            self.dearch.article_data,
+            self.dearch.data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__save_article_url(self):
@@ -519,9 +519,9 @@ class TestArticleScanner(object):
         self.dearch.clean(silent = True)
 
     def test_load_data_files_sets_json(self):
-        self.dearch.scanned_data = None
+        self.dearch.data = None
         self.dearch.load_data_files(silent = True)
-        assert_equals(self.dearch.scanned_data, {})
+        assert_equals(self.dearch.data, {})
 
     def test_isfile_scanned_json_file(self):
         assert_true(os.path.isfile(self.dearch.scanned_json_file))
@@ -535,19 +535,19 @@ class TestArticleScanner(object):
             json.dump(
                 {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'},
                 f)
-        assert_equals(self.dearch.scanned_data, {})
+        assert_equals(self.dearch.data, {})
 
         self.dearch._load_scanned_json()
         assert_equals(
-            self.dearch.scanned_data,
+            self.dearch.data,
             {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
 
     def test__load_scanned_json_creation(self):
-        self.dearch.scanned_data = None
-        assert_is_none(self.dearch.scanned_data)
+        self.dearch.data = None
+        assert_is_none(self.dearch.data)
         self.dearch._load_scanned_json()
-        assert_is_instance(self.dearch.scanned_data, dict)
-        assert_equals(self.dearch.scanned_data, {})
+        assert_is_instance(self.dearch.data, dict)
+        assert_equals(self.dearch.data, {})
 
     def test__load_scanned_json_load_file(self):
         with open(os.path.join(self.temp_dir, 'scanned.json'), 'w') as f:
@@ -555,13 +555,13 @@ class TestArticleScanner(object):
                 {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'},
                 f)
 
-        self.dearch.scanned_data = None
-        assert_is_none(self.dearch.scanned_data)
+        self.dearch.data = None
+        assert_is_none(self.dearch.data)
 
         self.dearch._load_scanned_json()
-        assert_is_instance(self.dearch.scanned_data, dict)
+        assert_is_instance(self.dearch.data, dict)
         assert_equals(
-            self.dearch.scanned_data,
+            self.dearch.data,
             {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
 
     def test__save_scanned_links(self):
@@ -578,7 +578,7 @@ class TestArticleScanner(object):
         assert_raises(TypeError, self.dearch._save_scanned_links, url = 1)
 
     def test__save_scanned_self_scanned_raises_TypeError(self):
-        self.dearch.scanned_data = ''
+        self.dearch.data = ''
         assert_raises(TypeError, self.dearch._save_scanned_links, url = 'a')
 
     def test__save_archive_links(self):
@@ -662,10 +662,11 @@ class TestArticleScanner(object):
                          b'</body></html>')
         with open(fpath, 'wb') as f: f.write(html_contents)
         url = 'www.example.com'
-        archive_data = {url: {'f': fname}}
+        archive_data = {url: {'f': fname, 'l': ['www.link.com']}}
         archive_json_file = os.path.join(self.temp_dir, 'archive.json')
         with open(archive_json_file, 'w') as f:
             json.dump(archive_data, f)
+        self.dearch.data[url]['f'] = fname
 
         self.dearch.find_links_in_page(url, silent = True)
         assert_equals(
