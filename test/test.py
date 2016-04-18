@@ -141,10 +141,6 @@ class TestDearchiver(object):
     def setup_class(cls):
         cls.temp_dir = tempfile.mkdtemp()
         os.mkdir(os.path.join(cls.temp_dir, 'archive'))
-        cls.archive = archiver.get_archive_urls(
-            from_date = '2016-04-01',
-            earliest_date='2012-02-06',
-            schema = 'http://politics.people.com.cn/GB/70731/review/{}.html')
 
     @classmethod
     def teardown_class(cls):
@@ -169,27 +165,14 @@ class TestDearchiver(object):
 
     def test_load_data_files_sets_json(self):
         self.dearch.archive_data = None
-        self.dearch.article_data = None
-        self.dearch.scanned = None
         self.dearch.load_data_files(silent = True)
         assert_equals(self.dearch.archive_data, {})
-        assert_equals(self.dearch.article_data, {})
-        assert_equals(self.dearch.scanned, [])
 
     def test_isdir_temp(self):
         assert_true(os.path.isdir(self.temp_dir))
 
     def test_isfile_archive_json_file(self):
         assert_true(os.path.isfile(self.dearch.archive_json_file))
-
-    def test_isfile_scanned_json_file(self):
-        assert_true(os.path.isfile(self.dearch.scanned_json_file))
-
-    def test_isfile_article_json_file(self):
-        assert_true(os.path.isfile(self.dearch.article_json_file))
-
-    def test_len_of_archive(self):
-        assert_equals(len(self.archive), 1517)
 
     # Archive
     def test__load_archive_json_silent_raises_TypeError(self):
@@ -243,32 +226,177 @@ class TestDearchiver(object):
             TypeError, self.dearch._save_archive_url,
             url = 'www.example.com', fname = 1)
 
-    def test__save_archive_url_and_links(self):
-        # We make sure that one doesn't overwrite the other:
+    # Cleaning
+    def test_clean(self):
+        archive = self.dearch._get_archive_folder(archive_folder = 'archive')
+        fpath = os.path.join(archive, '000001.html')
+        with open(fpath, 'wb') as f: f.write(b'Some contents')
+        archive_json_file = os.path.join(self.temp_dir, 'archive.json')
+        archive_folder = os.path.join(self.temp_dir, 'archive')
+
+        # One file, one dir, one data, archive_json_file, archive_folder, fpath:
+        assert_true(os.path.isfile(archive_json_file))
+        assert_true(os.path.isdir(archive_folder))
+        assert_true(os.path.isfile(fpath))
+        assert_equals(2, len(glob(os.path.join(self.dearch.directory,'*'))))
+        assert_equals(1, len(glob(os.path.join(self.dearch._archive_folder,'*'))))
+
+        # Delete it:
+        self.dearch.clean(silent = True)
+        # Files and dir are gone:
+        assert_false(os.path.isfile(archive_json_file))
+        assert_false(os.path.isdir(archive_folder))
+        assert_false(os.path.isfile(fpath))
+        # Root directory is empty:
+        assert_equals(0, len(glob(os.path.join(self.dearch.directory,'*'))))
+        # Recreate, so teardown doesn't fail:
+        self.dearch = archiver.Dearchiver(
+            directory = self.temp_dir, silent = True)
+
+    # File names and paths
+    def test__get_filename_url_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch._get_filename, url=['not a string'])
+
+    def test__get_filename_url_raises_KeyError(self):
+        assert_raises(
+            KeyError, self.dearch._get_filename, url='www.example.com')
+
+    def test__get_filename(self):
+        fname = '000001'
+        archive = self.dearch._get_archive_folder(
+            archive_folder = 'archive')
+        fpath = os.path.join(archive, fname)
+        with open(fpath, 'wb') as f: f.write(b'Some contents')
+        self.dearch._save_archive_url('www.example.com', fname)
+        assert_equals(self.dearch._get_filename('www.example.com'), '000001')
+
+    def test__get_filepath_url_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch._get_filepath, url = ['not a string'])
+
+    def test__get_filepath_url_raises_KeyError(self):
+        assert_raises(
+            KeyError, self.dearch._get_filepath, url='www.example.com')
+
+    def test__get_filepath_file_raises_OSError(self):
         self.dearch._save_archive_url('www.example.com', '000001')
-        self.dearch._save_archive_links('www.example.com', ['www.link.com'])
-        # Manually load the dict from file and compare:
-        assert_equals(
-            json.load(open(self.dearch.archive_json_file)),
-            {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
-
-    def test__save_archive_links(self):
-        # Init file:
-        self.dearch._save_archive_links('www.example.com', ['www.link.com'])
-        # Manually load the dict from file and compare:
-        assert_equals(
-            json.load(open(self.dearch.archive_json_file)),
-            {'www.example.com': {'l': ['www.link.com']}})
-
-    def test__save_archive_links_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.dearch._save_archive_links,
-            url = 1, links = None)
+            OSError, self.dearch._get_filepath, url='www.example.com')
 
-    def test__save_archive_links_fname_raises_TypeError(self):
+    def test__get_filepath(self):
+        fname = '000001'
+        archive = self.dearch._get_archive_folder(
+            archive_folder = 'archive')
+        fpath = os.path.join(archive, fname)
+        with open(fpath, 'wb') as f: f.write(b'Some contents')
+        self.dearch._save_archive_url('www.example.com', fname)
+        assert_equals(self.dearch._get_filepath('www.example.com'), fpath)
+
+    def test__get_archive_folder_sets_folder_name(self):
+        assert_is_none(self.dearch._archive_folder)
+        self.dearch._get_archive_folder('test')
+        assert_equals(
+            self.dearch._archive_folder,
+            os.path.join(self.temp_dir, 'test'))
+
+    def test__get_archive_folder_returns_self_archive_folder(self):
+        assert_equals(
+            self.dearch._get_archive_folder(archive_folder = 'afn'),
+            self.dearch._archive_folder)
+
+    def test__get_archive_folder_default_archive_folder(self):
+        self.dearch._archive_folder = None
+        assert_equals(
+            self.dearch._get_archive_folder(),
+            os.path.join(self.temp_dir, 'archive'))
+
+    def test__get_archive_folder_archive_folder_raises_TypeError(self):
         assert_raises(
-            TypeError, self.dearch._save_archive_links,
-            url = 'www.example.com', links = None)
+            TypeError,
+            self.dearch._get_archive_folder,
+            archive_folder=1)
+
+    def test__get_archive_folder_creates_dirs(self):
+        test_dir = os.path.join(self.temp_dir, 'test_dir')
+        assert_false(os.path.exists(test_dir))
+        self.dearch._get_archive_folder(archive_folder=test_dir)
+        assert_true(os.path.exists(test_dir))
+
+    def test__get_archive_folder_stays_the_same(self):
+        test_dir = os.path.join(self.temp_dir, 'test_dir')
+        self.dearch._get_archive_folder(archive_folder=test_dir)
+        a = self.dearch._archive_folder
+        self.dearch._get_archive_folder(archive_folder=test_dir)
+        b = self.dearch._archive_folder
+        assert_equals(a,b)
+
+    # Data
+    def test__load_archive_pages_url_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch.load_archive_page, url = 1, silent = True)
+
+    def test__load_archive_pages_raises_KeyError_when_page_not_saved(self):
+        if self.skip_online_tests: raise SkipTest
+        assert_raises(
+            KeyError, self.dearch.load_archive_page, url = 'www.example.com',
+            silent = True)
+        self.dearch._save_archive_url('www.example.com', '000001')
+        self.dearch.load_archive_page(url = 'www.example.com', silent = True)
+
+    def test__load_archive_pages(self):
+        fname = '000001'
+        archive = self.dearch._get_archive_folder(
+            archive_folder = 'archive')
+        fpath = os.path.join(archive, fname)
+        self.dearch._save_archive_url('www.example.com', '000001')
+        fname = self.dearch.load_archive_page(
+            url = 'www.example.com', silent = True)
+        assert_equals('000001', fname)
+
+    def test__fetch_archive_page_url_raises_TypeError(self):
+        if self.skip_online_tests: raise SkipTest
+        assert_raises(
+            TypeError, self.dearch._fetch_archive_page, url = 1, silent = True)
+
+    def test__fetch_archive_page_writes_file(self):
+        if self.skip_online_tests: raise SkipTest
+        assert_equals(self.dearch.archive_data, {})
+        self.dearch._fetch_archive_page(url = 'www.example.com', silent = True)
+        expected_path = os.path.join(self.dearch._archive_folder, '000000.html')
+        expected_archive_data = {'http://www.example.com': {'f': expected_path}}
+        assert_equals(self.dearch.archive_data, expected_archive_data)
+
+    def test__fetch_article_page(self):
+        pass
+
+class TestArticleGetter(object):
+
+    skip_online_tests = True
+
+    @classmethod
+    def setup_class(cls):
+        cls.temp_dir = tempfile.mkdtemp()
+        os.mkdir(os.path.join(cls.temp_dir, 'archive'))
+
+    @classmethod
+    def teardown_class(cls):
+        shutil.rmtree(cls.temp_dir)
+
+    def setup(self):
+        self.dearch = archiver.ArticleGetter(
+            directory = self.temp_dir, silent = True)
+
+    def teardown(self):
+        self.dearch.clean(silent = True)
+
+    def test_load_data_files_sets_json(self):
+        self.dearch.article_data = None
+        self.dearch.load_data_files(silent = True)
+        assert_equals(self.dearch.article_data, {})
+
+    def test_isfile_article_json_file(self):
+        assert_true(os.path.isfile(self.dearch.article_json_file))
 
     # Articles
     def test__load_article_json_silent_raises_TypeError(self):
@@ -349,204 +477,148 @@ class TestDearchiver(object):
             TypeError, self.dearch._save_article_links,
             url = 'www.example.com', links = None)
 
+    # Cleaning
+    def test_clean(self):
+        article_json_file = os.path.join(self.temp_dir, 'article.json')
+        assert_true(os.path.isfile(article_json_file))
+
+        # Only one file article_json_file:
+        assert_true(os.path.isfile(article_json_file))
+        assert_equals(1, len(glob(os.path.join(self.dearch.directory,'*'))))
+
+        # Delete it:
+        self.dearch.clean(silent = True)
+
+        # Files and dir are gone:
+        assert_false(os.path.isfile(article_json_file))
+        # Root directory is empty:
+        assert_equals(0, len(glob(os.path.join(self.dearch.directory,'*'))))
+
+        # Recreate, so teardown doesn't fail:
+        self.dearch = archiver.Dearchiver(
+            directory = self.temp_dir, silent = True)
+
+class TestArticleScanner(object):
+
+    skip_online_tests = True
+
+    @classmethod
+    def setup_class(cls):
+        cls.temp_dir = tempfile.mkdtemp()
+        os.mkdir(os.path.join(cls.temp_dir, 'archive'))
+
+    @classmethod
+    def teardown_class(cls):
+        shutil.rmtree(cls.temp_dir)
+
+    def setup(self):
+        self.dearch = archiver.ArticleScanner(
+            directory = self.temp_dir, silent = True)
+
+    def teardown(self):
+        self.dearch.clean(silent = True)
+
+    def test_load_data_files_sets_json(self):
+        self.dearch.scanned_data = None
+        self.dearch.load_data_files(silent = True)
+        assert_equals(self.dearch.scanned_data, {})
+
+    def test_isfile_scanned_json_file(self):
+        assert_true(os.path.isfile(self.dearch.scanned_json_file))
+
     # Scanned
     def test__load_scanned_json_silent_raises_TypeError(self):
         assert_raises(TypeError, self.dearch._load_scanned_json, silent = 2)
 
     def test__load_scanned_json_reads_contents_from_file(self):
-        json.dump(
-            ['url_1', 'url_2', 'url_3'],
-            open(self.dearch.scanned_json_file, 'w'))
-        assert_equals(self.dearch.scanned, [])
+        with open(os.path.join(self.temp_dir, 'scanned.json'), 'w') as f:
+            json.dump(
+                {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'},
+                f)
+        assert_equals(self.dearch.scanned_data, {})
 
         self.dearch._load_scanned_json()
-        assert_equals(self.dearch.scanned, ['url_1', 'url_2', 'url_3'])
+        assert_equals(
+            self.dearch.scanned_data,
+            {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
 
     def test__load_scanned_json_creation(self):
-        self.dearch.scanned = None
-        assert_is_none(self.dearch.scanned)
+        self.dearch.scanned_data = None
+        assert_is_none(self.dearch.scanned_data)
         self.dearch._load_scanned_json()
-        assert_is_instance(self.dearch.scanned, list)
-        assert_equals(self.dearch.scanned, [])
+        assert_is_instance(self.dearch.scanned_data, dict)
+        assert_equals(self.dearch.scanned_data, {})
 
     def test__load_scanned_json_load_file(self):
         with open(os.path.join(self.temp_dir, 'scanned.json'), 'w') as f:
-            f.write(json.dumps(['url_1', 'url_2', 'url_3']))
+            json.dump(
+                {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'},
+                f)
 
-        self.dearch.scanned = None
-        assert_is_none(self.dearch.scanned)
+        self.dearch.scanned_data = None
+        assert_is_none(self.dearch.scanned_data)
 
         self.dearch._load_scanned_json()
-        assert_is_instance(self.dearch.scanned, list)
-        assert_equals(self.dearch.scanned, ['url_1', 'url_2', 'url_3'])
+        assert_is_instance(self.dearch.scanned_data, dict)
+        assert_equals(
+            self.dearch.scanned_data,
+            {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
 
-    def test__save_scanned_url(self):
-        self.dearch._save_scanned('www.example.com')
+    def test__save_scanned_links(self):
+        self.dearch._save_scanned_links('www.example.com', ['link_1'])
         assert_equals(
             json.load(open(self.dearch.scanned_json_file)),
-            ['www.example.com'])
-        self.dearch._save_scanned('www.example2.com')
+            {'www.example.com': ['link_1']})
+        self.dearch._save_scanned_links('www.example2.com', ['link_2'])
         assert_equals(
             json.load(open(self.dearch.scanned_json_file)),
-            ['www.example.com', 'www.example2.com'])
+            {'www.example.com': ['link_1'], 'www.example2.com': ['link_2']})
 
     def test__save_scanned_url_raises_TypeError(self):
-        assert_raises(TypeError, self.dearch._save_scanned, url = 1)
+        assert_raises(TypeError, self.dearch._save_scanned_links, url = 1)
 
     def test__save_scanned_self_scanned_raises_TypeError(self):
-        self.dearch.scanned = ''
-        assert_raises(TypeError, self.dearch._save_scanned, url = 'a')
+        self.dearch.scanned_data = ''
+        assert_raises(TypeError, self.dearch._save_scanned_links, url = 'a')
+
+    def test__save_archive_links(self):
+        # Init file:
+        self.dearch._save_scanned_links('www.example.com', ['www.link.com'])
+        # Manually load the dict from file and compare:
+        assert_equals(
+            json.load(open(self.dearch.scanned_json_file)),
+            {'www.example.com': ['www.link.com']})
+
+    def test__save_archive_links_url_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch._save_scanned_links,
+            url = 1, links = None)
+
+    def test__save_archive_links_fname_raises_TypeError(self):
+        assert_raises(
+            TypeError, self.dearch._save_scanned_links,
+            url = 'www.example.com', links = None)
 
     # Cleaning
     def test_clean(self):
-        # We've only got the project root directory:
-        assert_true(os.path.isdir(self.dearch.directory))
-        # Which contains three json files:
-        assert_equals(3, len(glob(os.path.join(self.dearch.directory,'*'))))
-        # Let's create some contents to delete:
-        fname = '000001.html'
-        archive = self.dearch._get_archive_folder(
-            archive_folder = 'archive')
-        fpath = os.path.join(archive, fname)
-        with open(fpath, 'wb') as f: f.write(b'Some contents')
-        # Content has been created:
-        assert_true(os.path.isfile(self.dearch.archive_json_file))
-        assert_true(os.path.isfile(self.dearch.scanned_json_file))
-        assert_true(os.path.isfile(self.dearch.article_json_file))
-        assert_true(os.path.isdir(self.dearch.archive_folder))
-        assert_true(os.path.isfile(fpath))
+        scanned_json_file = os.path.join(self.temp_dir, 'scanned.json')
+        assert_true(os.path.isfile(scanned_json_file))
+
+        # Only one file scanned_json_file:
+        assert_true(os.path.isfile(scanned_json_file))
+        assert_equals(1, len(glob(os.path.join(self.dearch.directory,'*'))))
+
         # Delete it:
         self.dearch.clean(silent = True)
-        # Aaaaaand, it's gone:
-        assert_false(os.path.isfile(self.dearch.archive_json_file))
-        assert_false(os.path.isfile(self.dearch.scanned_json_file))
-        assert_false(os.path.isfile(self.dearch.article_json_file))
-        assert_false(os.path.isdir(self.dearch.archive_folder))
-        assert_false(os.path.isfile(fpath))
-        # Everything has been deleted, except for the project root directory:
-        assert_true(os.path.isdir(self.dearch.directory))
-        # Which is empty:
+
+        # Files and dir are gone:
+        assert_false(os.path.isfile(scanned_json_file))
+        # Root directory is empty:
         assert_equals(0, len(glob(os.path.join(self.dearch.directory,'*'))))
-        # But we can simply start over:
+
+        # Recreate, so teardown doesn't fail:
         self.dearch = archiver.Dearchiver(
             directory = self.temp_dir, silent = True)
-
-    # File names and paths
-    def test__get_filename_url_raises_TypeError(self):
-        assert_raises(
-            TypeError, self.dearch._get_filename, url=['not a string'])
-
-    def test__get_filename_url_raises_KeyError(self):
-        assert_raises(
-            KeyError, self.dearch._get_filename, url='www.example.com')
-
-    def test__get_filename(self):
-        fname = '000001'
-        archive = self.dearch._get_archive_folder(
-            archive_folder = 'archive')
-        fpath = os.path.join(archive, fname)
-        with open(fpath, 'wb') as f: f.write(b'Some contents')
-        self.dearch._save_archive_url('www.example.com', fname)
-        assert_equals(self.dearch._get_filename('www.example.com'), '000001')
-
-    def test__get_filepath_url_raises_TypeError(self):
-        assert_raises(
-            TypeError, self.dearch._get_filepath, url = ['not a string'])
-
-    def test__get_filepath_url_raises_KeyError(self):
-        assert_raises(
-            KeyError, self.dearch._get_filepath, url='www.example.com')
-
-    def test__get_filepath_file_raises_OSError(self):
-        self.dearch._save_archive_url('www.example.com', '000001')
-        assert_raises(
-            OSError, self.dearch._get_filepath, url='www.example.com')
-
-    def test__get_filepath(self):
-        fname = '000001'
-        archive = self.dearch._get_archive_folder(
-            archive_folder = 'archive')
-        fpath = os.path.join(archive, fname)
-        with open(fpath, 'wb') as f: f.write(b'Some contents')
-        self.dearch._save_archive_url('www.example.com', fname)
-        assert_equals(self.dearch._get_filepath('www.example.com'), fpath)
-
-    def test__get_archive_folder_sets_folder_name(self):
-        assert_is_none(self.dearch.archive_folder)
-        self.dearch._get_archive_folder('test')
-        assert_equals(
-            self.dearch.archive_folder,
-            os.path.join(self.temp_dir, 'test'))
-
-    def test__get_archive_folder_returns_self_archive_folder(self):
-        assert_equals(
-            self.dearch._get_archive_folder(archive_folder = 'afn'),
-            self.dearch.archive_folder)
-
-    def test__get_archive_folder_default_archive_folder(self):
-        self.dearch.archive_folder = None
-        assert_equals(
-            self.dearch._get_archive_folder(),
-            os.path.join(self.temp_dir, 'archive'))
-
-    def test__get_archive_folder_archive_folder_raises_TypeError(self):
-        assert_raises(
-            TypeError,
-            self.dearch._get_archive_folder,
-            archive_folder=1)
-
-    def test__get_archive_folder_creates_dirs(self):
-        test_dir = os.path.join(self.temp_dir, 'test_dir')
-        assert_false(os.path.exists(test_dir))
-        self.dearch._get_archive_folder(archive_folder=test_dir)
-        assert_true(os.path.exists(test_dir))
-
-    def test__get_archive_folder_stays_the_same(self):
-        test_dir = os.path.join(self.temp_dir, 'test_dir')
-        self.dearch._get_archive_folder(archive_folder=test_dir)
-        a = self.dearch.archive_folder
-        self.dearch._get_archive_folder(archive_folder=test_dir)
-        b = self.dearch.archive_folder
-        assert_equals(a,b)
-
-    # Data
-    def test__load_archive_pages_url_raises_TypeError(self):
-        assert_raises(
-            TypeError, self.dearch.load_archive_pages, url = 1, silent = True)
-
-    def test__load_archive_pages_raises_KeyError_when_page_not_saved(self):
-        if self.skip_online_tests: raise SkipTest
-        assert_raises(
-            KeyError, self.dearch.load_archive_pages, url = 'www.example.com',
-            silent = True)
-        self.dearch._save_archive_url('www.example.com', '000001')
-        self.dearch.load_archive_pages(url = 'www.example.com', silent = True)
-
-    def test__load_archive_pages(self):
-        fname = '000001'
-        archive = self.dearch._get_archive_folder(
-            archive_folder = 'archive')
-        fpath = os.path.join(archive, fname)
-        self.dearch._save_archive_url('www.example.com', '000001')
-        fname = self.dearch.load_archive_pages(
-            url = 'www.example.com', silent = True)
-        assert_equals('000001', fname)
-
-    def test__fetch_archive_page_url_raises_TypeError(self):
-        if self.skip_online_tests: raise SkipTest
-        assert_raises(
-            TypeError, self.dearch._fetch_archive_page, url = 1, silent = True)
-
-    def test__fetch_archive_page_writes_file(self):
-        if self.skip_online_tests: raise SkipTest
-        assert_equals(self.dearch.archive_data, {})
-        self.dearch._fetch_archive_page(url = 'www.example.com', silent = True)
-        expected_path = os.path.join(self.dearch.archive_folder, '000000.html')
-        expected_archive_data = {'http://www.example.com': {'f': expected_path}}
-        assert_equals(self.dearch.archive_data, expected_archive_data)
-
-    def test__fetch_article_page(self):
-        pass
 
     def test_get_soup_file_raises_OSError(self):
         assert_raises(
@@ -558,7 +630,7 @@ class TestDearchiver(object):
             archive_folder = 'archive')
         fpath = os.path.join(archive, fname+'.html')
         with open(fpath, 'wb') as f: f.write(b'Some contents')
-        self.dearch._save_archive_url('www.example.com', fname)
+
         soup = self.dearch.get_soup(fname, silent = True)
         assert_equals(soup.text, 'Some contents')
 
@@ -583,20 +655,21 @@ class TestDearchiver(object):
     def test_find_links_in_page_loads_from_disk(self):
         fname = '000001'
         archive = os.path.join(self.temp_dir, 'archive')
-        fpath = os.path.join(archive, fname+'.html')
+        os.makedirs(archive, exist_ok=True)
+        fpath = os.path.join(archive, fname + '.html')
         html_contents = (b'<html><head></head><body>'
                          b'<a href="www.link.com">string</a>'
                          b'</body></html>')
-        os.makedirs(archive, exist_ok=True)
         with open(fpath, 'wb') as f: f.write(html_contents)
         url = 'www.example.com'
-        self.dearch.archive_data[url]['f'] = fname
-        json.dump(
-            self.dearch.archive_data, open(self.dearch.archive_json_file, 'w'))
+        archive_data = {url: {'f': fname}}
+        archive_json_file = os.path.join(self.temp_dir, 'archive.json')
+        with open(archive_json_file, 'w') as f:
+            json.dump(archive_data, f)
 
         self.dearch.find_links_in_page(url, silent = True)
         assert_equals(
-            self.dearch.archive_data,
+            archive_data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test_find_links_in_page_raises_FileNotFoundError(self):
@@ -607,3 +680,4 @@ class TestDearchiver(object):
 
     def test_find_links_in_page_url_raises_TypeError(self):
         assert_raises(TypeError, self.dearch.find_links_in_page, 1)
+
