@@ -77,7 +77,7 @@ class ScraperBase(object):
             json.dump(self.data, open(self.json_file, 'w'))
         if not silent: print ()
 
-    def _save_url(self, url, fname):
+    def _save_url_to_fname(self, url, fname):
         if not isinstance (url, str):
             raise TypeError
         if not isinstance (fname, str):
