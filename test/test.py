@@ -171,8 +171,8 @@ class TestDearchiver(object):
     def test_isdir_temp(self):
         assert_true(os.path.isdir(self.temp_dir))
 
-    def test_isfile_archive_json_file(self):
-        assert_true(os.path.isfile(self.dearch.archive_json_file))
+    def test_isfile_json_file(self):
+        assert_true(os.path.isfile(self.dearch.json_file))
 
     # Archive
     def test__load_archive_json_silent_raises_TypeError(self):
@@ -181,7 +181,7 @@ class TestDearchiver(object):
     def test__load_archive_json_reads_contents_from_file(self):
         json.dump(
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
-            open(self.dearch.archive_json_file, 'w'))
+            open(self.dearch.json_file, 'w'))
         assert_equals(self.dearch.data, {})
 
         self.dearch._load_archive_json()
@@ -213,7 +213,7 @@ class TestDearchiver(object):
     def test__save_archive_url(self):
         self.dearch._save_archive_url('www.example.com', '000001')
         assert_equals(
-            json.load(open(self.dearch.archive_json_file)),
+            json.load(open(self.dearch.json_file)),
             {'www.example.com': {'f': '000001'}})
 
     def test__save_archive_url_url_raises_TypeError(self):
@@ -395,8 +395,8 @@ class TestArticleGetter(object):
         self.artget.load_data_files(silent = True)
         assert_equals(self.artget.data, {})
 
-    def test_isfile_article_json_file(self):
-        assert_true(os.path.isfile(self.artget.article_json_file))
+    def test_isfile_json_file(self):
+        assert_true(os.path.isfile(self.artget.json_file))
 
     # Articles
     def test__load_article_json_silent_raises_TypeError(self):
@@ -405,7 +405,7 @@ class TestArticleGetter(object):
     def test__load_article_json_reads_contents_from_file(self):
         json.dump(
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
-            open(self.artget.article_json_file, 'w'))
+            open(self.artget.json_file, 'w'))
         assert_equals(self.artget.data, {})
 
         self.artget._load_article_json()
@@ -437,7 +437,7 @@ class TestArticleGetter(object):
     def test__save_article_url(self):
         self.artget._save_article_url('www.example.com', '000001')
         assert_equals(
-            json.load(open(self.artget.article_json_file)),
+            json.load(open(self.artget.json_file)),
             {'www.example.com': {'f': '000001'}})
 
     def test__save_article_url_url_raises_TypeError(self):
@@ -456,7 +456,7 @@ class TestArticleGetter(object):
         self.artget._save_article_links('www.example.com', ['www.link.com'])
         # Manually load the dict from file and compare:
         assert_equals(
-            json.load(open(self.artget.article_json_file)),
+            json.load(open(self.artget.json_file)),
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__save_article_links(self):
@@ -464,7 +464,7 @@ class TestArticleGetter(object):
         self.artget._save_article_links('www.example.com', ['www.link.com'])
         # Manually load the dict from file and compare:
         assert_equals(
-            json.load(open(self.artget.article_json_file)),
+            json.load(open(self.artget.json_file)),
             {'www.example.com': {'l': ['www.link.com']}})
 
     def test__save_article_links_url_raises_TypeError(self):
@@ -523,8 +523,8 @@ class TestArticleScanner(object):
         self.artscan.load_data_files(silent = True)
         assert_equals(self.artscan.data, {})
 
-    def test_isfile_scanned_json_file(self):
-        assert_true(os.path.isfile(self.artscan.scanned_json_file))
+    def test_isfile_json_file(self):
+        assert_true(os.path.isfile(self.artscan.json_file))
 
     # Scanned
     def test__load_scanned_json_silent_raises_TypeError(self):
@@ -567,11 +567,11 @@ class TestArticleScanner(object):
     def test__save_scanned_links(self):
         self.artscan._save_scanned_links('www.example.com', ['link_1'])
         assert_equals(
-            json.load(open(self.artscan.scanned_json_file)),
+            json.load(open(self.artscan.json_file)),
             {'www.example.com': ['link_1']})
         self.artscan._save_scanned_links('www.example2.com', ['link_2'])
         assert_equals(
-            json.load(open(self.artscan.scanned_json_file)),
+            json.load(open(self.artscan.json_file)),
             {'www.example.com': ['link_1'], 'www.example2.com': ['link_2']})
 
     def test__save_scanned_url_raises_TypeError(self):
@@ -586,7 +586,7 @@ class TestArticleScanner(object):
         self.artscan._save_scanned_links('www.example.com', ['www.link.com'])
         # Manually load the dict from file and compare:
         assert_equals(
-            json.load(open(self.artscan.scanned_json_file)),
+            json.load(open(self.artscan.json_file)),
             {'www.example.com': ['www.link.com']})
 
     def test__save_archive_links_url_raises_TypeError(self):
