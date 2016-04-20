@@ -451,33 +451,6 @@ class TestArticleGetter(object):
             TypeError, self.artget._save_filename,
             url = 'www.example.com', fname = 1)
 
-    def test__save_filename_and_links(self):
-        # We make sure that one doesn't overwrite the other:
-        self.artget._save_filename('www.example.com', '000001')
-        self.artget._save_article_links('www.example.com', ['www.link.com'])
-        # Manually load the dict from file and compare:
-        assert_equals(
-            json.load(open(self.artget.json_file)),
-            {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
-
-    def test__save_article_links(self):
-        # Init file:
-        self.artget._save_article_links('www.example.com', ['www.link.com'])
-        # Manually load the dict from file and compare:
-        assert_equals(
-            json.load(open(self.artget.json_file)),
-            {'www.example.com': {'l': ['www.link.com']}})
-
-    def test__save_article_links_url_raises_TypeError(self):
-        assert_raises(
-            TypeError, self.artget._save_article_links,
-            url = 1, links = None)
-
-    def test__save_article_links_fname_raises_TypeError(self):
-        assert_raises(
-            TypeError, self.artget._save_article_links,
-            url = 'www.example.com', links = None)
-
     # Cleaning
     def test_clean(self):
         article_json_file = os.path.join(self.temp_dir, 'article.json')
@@ -565,39 +538,37 @@ class TestArticleScanner(object):
             self.artscan.data,
             {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
 
-    def test__save_scanned_links(self):
-        self.artscan._save_scanned_links('www.example.com', ['link_1'])
+    def test__save_links_from_page(self):
+        self.artscan._save_links_from_page('www.example.com', ['link_1'])
         assert_equals(
             json.load(open(self.artscan.json_file)),
             {'www.example.com': ['link_1']})
-        self.artscan._save_scanned_links('www.example2.com', ['link_2'])
+        self.artscan._save_links_from_page('www.example2.com', ['link_2'])
         assert_equals(
             json.load(open(self.artscan.json_file)),
             {'www.example.com': ['link_1'], 'www.example2.com': ['link_2']})
 
     def test__save_scanned_url_raises_TypeError(self):
-        assert_raises(TypeError, self.artscan._save_scanned_links, url = 1)
+        assert_raises(TypeError, self.artscan._save_links_from_page, url = 1)
 
     def test__save_scanned_self_scanned_raises_TypeError(self):
         self.artscan.data = ''
-        assert_raises(TypeError, self.artscan._save_scanned_links, url = 'a')
+        assert_raises(TypeError, self.artscan._save_links_from_page, url = 'a')
 
     def test__save_archive_links(self):
-        # Init file:
-        self.artscan._save_scanned_links('www.example.com', ['www.link.com'])
-        # Manually load the dict from file and compare:
+        self.artscan._save_links_from_page('www.example.com', ['www.link.com'])
         assert_equals(
             json.load(open(self.artscan.json_file)),
             {'www.example.com': ['www.link.com']})
 
     def test__save_archive_links_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.artscan._save_scanned_links,
+            TypeError, self.artscan._save_links_from_page,
             url = 1, links = None)
 
     def test__save_archive_links_fname_raises_TypeError(self):
         assert_raises(
-            TypeError, self.artscan._save_scanned_links,
+            TypeError, self.artscan._save_links_from_page,
             url = 'www.example.com', links = None)
 
     # Cleaning

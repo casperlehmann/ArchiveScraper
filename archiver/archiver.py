@@ -177,6 +177,16 @@ class ScraperBase(object):
                 f.write(url_obj.read())
                 self._save_filename(url, fname)
 
+class ScannerBase(object):
+
+    def _save_links_from_page(self, url, links):
+        if not isinstance (url, str):
+            raise TypeError('url needs to be of type string.')
+        if not isinstance (links, list):
+            raise TypeError
+        self.data[url] = links
+        json.dump(self.data, open(self.json_file, 'w'))
+
 class Dearchiver(ScraperBase):
 
     def set_json_file_name(self, silent = False):
@@ -202,14 +212,6 @@ class ArticleGetter(ScraperBase):
     def set_json_file_name(self, silent = False):
         super().set_json_file_name('article.json', silent = silent)
 
-    def _save_article_links(self, url, links):
-        if not isinstance (url, str):
-            raise TypeError
-        if not isinstance (links, list):
-            raise TypeError
-        self.data[url]['l'] = links
-        json.dump(self.data, open(self.json_file, 'w'))
-
     def clean(self, silent = False):
         if not silent: print ('Cleaning...')
         self.delete_file(target = self.json_file, silent=silent)
@@ -218,19 +220,11 @@ class ArticleGetter(ScraperBase):
         self.json_file = None
         if not silent: print()
 
-class ArticleScanner(ScraperBase):
+class ArticleScanner(ScraperBase, ScannerBase):
     scanned_data = {}
 
     def set_json_file_name(self, silent = False):
         super().set_json_file_name('scanned.json', silent = silent)
-
-    def _save_scanned_links(self, url, links):
-        if not isinstance (url, str):
-            raise TypeError('url needs to be of type string.')
-        if not isinstance (links, list):
-            raise TypeError
-        self.scanned_data[url] = links
-        json.dump(self.scanned_data, open(self.json_file, 'w'))
 
     def clean(self, silent = False):
         if not silent: print ('Cleaning...')
@@ -280,7 +274,7 @@ class ArticleScanner(ScraperBase):
             if a.has_attr('href'):
                 link = a.attrs['href'].strip()
                 links.append(link)
-        self._save_scanned_links(url, links)
+        self._save_links_from_page(url, links)
 
     def find_links_in_archive(
             self, silent = False,
