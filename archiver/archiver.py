@@ -178,6 +178,7 @@ class ScraperBase(object):
                 self._save_filename(url, fname)
 
 class ScannerBase(object):
+    scanned_file_data = {}
 
     def _save_links_from_page(self, url, links):
         if not isinstance (url, str):
@@ -221,7 +222,6 @@ class ArticleGetter(ScraperBase):
         if not silent: print()
 
 class ArticleScanner(ScraperBase, ScannerBase):
-    scanned_data = {}
 
     def set_json_file_name(self, silent = False):
         super().set_json_file_name('scanned.json', silent = silent)
@@ -233,7 +233,7 @@ class ArticleScanner(ScraperBase, ScannerBase):
                 silent=silent)
         self.delete_file(target = self.json_file, silent=silent)
         super().clean(silent = silent)
-        self.scanned_data = None
+        self.scanned_file_data = None
         self.json_file = None
         if not silent: print()
 
@@ -280,7 +280,7 @@ class ArticleScanner(ScraperBase, ScannerBase):
             self, silent = False,
             target_element = None, target_class = None, target_id = None):
         for url in set(self.file_name_data.keys()):
-            if not url in self.scanned_data:
+            if not url in self.scanned_file_data:
                 self.find_links_in_page(
                     url,
                     silent = silent,
@@ -308,7 +308,7 @@ class ArticleScanner(ScraperBase, ScannerBase):
     def get_queue(self, filtr):
         queue = []
         for url, data in self.file_name_data.items():
-            if url in self.scanned_data:
+            if url in self.scanned_file_data:
                 queue.extend(data['l'])
         filtr = [_ for _ in queue if filtr in _]
         return filtr
