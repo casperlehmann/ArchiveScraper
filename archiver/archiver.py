@@ -14,34 +14,6 @@ from archiver.date_tools import get_date, get_date_string_generator
 class ScraperBase(object):
     """Starts from a list of archive urls and crawls links.
     """
-    _directory = None
-    _archive_folder = None
-    _json_file = None
-    data = None
-
-    def __init__(self, directory = None, silent = False):
-        self.directory = directory
-        self.set_json_file_name(silent = silent)
-        self.load_data_files(silent = silent)
-
-    def set_json_file_name(self, json_name, silent = False):
-        if not isinstance(json_name, str):
-            raise TypeError
-        if len(json_name) == 0:
-            raise ValueError
-        self.json_file = os.path.join(self.directory, json_name)
-
-    def load_data_files(self, silent = False):
-        if not silent: print ('Loading data files...')
-        if not isinstance(silent, bool):
-            raise TypeError('Parameter \'silent\' must be of type bool')
-        try:
-            self.data = dd(lambda: dict(), json.load(open(self.json_file)))
-        except FileNotFoundError as e:
-            if not silent: print ('Creating new file:', self.json_file)
-            self.data = dd(lambda: dict())
-            json.dump(self.data, open(self.json_file, 'w'))
-        if not silent: print ()
 
     @property
     def directory(self):
@@ -75,6 +47,35 @@ class ScraperBase(object):
             self._json_file = json_file
         elif self._json_file is None:
             raise IOError('self._json_file cannot be None.')
+
+    _directory = None
+    _archive_folder = None
+    _json_file = None
+    data = None
+
+    def __init__(self, directory = None, silent = False):
+        self.directory = directory
+        self.set_json_file_name(silent = silent)
+        self.load_data_files(silent = silent)
+
+    def set_json_file_name(self, json_name, silent = False):
+        if not isinstance(json_name, str):
+            raise TypeError
+        if len(json_name) == 0:
+            raise ValueError
+        self.json_file = os.path.join(self.directory, json_name)
+
+    def load_data_files(self, silent = False):
+        if not silent: print ('Loading data files...')
+        if not isinstance(silent, bool):
+            raise TypeError('Parameter \'silent\' must be of type bool')
+        try:
+            self.data = dd(lambda: dict(), json.load(open(self.json_file)))
+        except FileNotFoundError as e:
+            if not silent: print ('Creating new file:', self.json_file)
+            self.data = dd(lambda: dict())
+            json.dump(self.data, open(self.json_file, 'w'))
+        if not silent: print ()
 
     # Cleaning
     def clean(self, silent = False):
