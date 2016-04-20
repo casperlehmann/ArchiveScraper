@@ -21,10 +21,10 @@ class ScraperBase(object):
 
     def __init__(self, directory = None, silent = False):
         self.directory = directory
-        self.load_json(silent = silent)
+        self.set_json_file_name(silent = silent)
         self.load_data_files(silent = silent)
 
-    def load_json(self, json_name, silent = False):
+    def set_json_file_name(self, json_name, silent = False):
         if not isinstance(json_name, str):
             raise TypeError
         if len(json_name) == 0:
@@ -185,8 +185,8 @@ class Dearchiver(ScraperBase):
     def __init__(self, directory = None, silent = False):
         super().__init__(directory, silent)
 
-    def load_json(self, silent = False):
-        super().load_json('archive.json', silent = silent)
+    def set_json_file_name(self, silent = False):
+        super().set_json_file_name('archive.json', silent = silent)
 
     def load_data_files(self, silent = False):
         if not silent: print ('Loading data files...')
@@ -226,8 +226,8 @@ class ArticleGetter(ScraperBase):
     def __init__(self, directory = None, silent = False):
         super().__init__(directory, silent)
 
-    def load_json(self, silent = False):
-        super().load_json('article.json', silent = silent)
+    def set_json_file_name(self, silent = False):
+        super().set_json_file_name('article.json', silent = silent)
 
     def load_data_files(self, silent = False):
         if not silent: print ('Loading data files...')
@@ -269,8 +269,8 @@ class ArticleScanner(ScraperBase):
     def __init__(self, source = None, directory = None, silent = False):
         super().__init__(directory, silent)
 
-    def load_json(self, silent = False):
-        super().load_json('scanned.json', silent = silent)
+    def set_json_file_name(self, silent = False):
+        super().set_json_file_name('scanned.json', silent = silent)
 
     def load_data_files(self, silent = False):
         if not silent: print ('Loading data files...')
