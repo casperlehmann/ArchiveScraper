@@ -497,8 +497,8 @@ class TestArticleScanner(object):
         self.artscan.load_data_files(silent = True)
         assert_equals(self.artscan.file_name_data, {})
 
-    def test_isfile_json_file(self):
-        assert_true(os.path.isfile(self.artscan.json_file))
+    def test_isfile_scanned_json_file(self):
+        assert_true(os.path.isfile(self.artscan.scanned_json_file))
 
     # Scanned
     def test_load_data_files_silent_raises_TypeError(self):
@@ -511,9 +511,9 @@ class TestArticleScanner(object):
                 f)
         assert_equals(self.artscan.file_name_data, {})
 
-        self.artscan.load_data_files()
+        self.artscan.load_scanned_file_data_files()
         assert_equals(
-            self.artscan.file_name_data,
+            self.artscan.scanned_file_data,
             {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
 
     def test_load_data_files_creation(self):
@@ -532,20 +532,20 @@ class TestArticleScanner(object):
         self.artscan.file_name_data = None
         assert_is_none(self.artscan.file_name_data)
 
-        self.artscan.load_data_files()
-        assert_is_instance(self.artscan.file_name_data, dict)
+        self.artscan.load_scanned_file_data_files()
+        assert_is_instance(self.artscan.scanned_file_data, dict)
         assert_equals(
-            self.artscan.file_name_data,
+            self.artscan.scanned_file_data,
             {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
 
     def test__save_links_from_page(self):
         self.artscan._save_links_from_page('www.example.com', ['link_1'])
         assert_equals(
-            json.load(open(self.artscan.json_file)),
+            json.load(open(self.artscan.scanned_json_file)),
             {'www.example.com': ['link_1']})
         self.artscan._save_links_from_page('www.example2.com', ['link_2'])
         assert_equals(
-            json.load(open(self.artscan.json_file)),
+            json.load(open(self.artscan.scanned_json_file)),
             {'www.example.com': ['link_1'], 'www.example2.com': ['link_2']})
 
     def test__save_scanned_url_raises_TypeError(self):
@@ -558,7 +558,7 @@ class TestArticleScanner(object):
     def test__save_archive_links(self):
         self.artscan._save_links_from_page('www.example.com', ['www.link.com'])
         assert_equals(
-            json.load(open(self.artscan.json_file)),
+            json.load(open(self.artscan.scanned_json_file)),
             {'www.example.com': ['www.link.com']})
 
     def test__save_archive_links_url_raises_TypeError(self):
@@ -573,18 +573,18 @@ class TestArticleScanner(object):
 
     # Cleaning
     def test_clean(self):
-        scanned_json_file = os.path.join(self.temp_dir, 'scanned.json')
-        assert_true(os.path.isfile(scanned_json_file))
+        scanned_scanned_json_file = os.path.join(self.temp_dir, 'scanned.json')
+        assert_true(os.path.isfile(scanned_scanned_json_file))
 
-        # Only one file scanned_json_file:
-        assert_true(os.path.isfile(scanned_json_file))
-        assert_equals(1, len(glob(os.path.join(self.artscan.directory,'*'))))
+        # Only one file scanned_scanned_json_file:
+        assert_true(os.path.isfile(scanned_scanned_json_file))
+        assert_equals(2, len(glob(os.path.join(self.artscan.directory,'*'))))
 
         # Delete it:
         self.artscan.clean(silent = True)
 
         # Files and dir are gone:
-        assert_false(os.path.isfile(scanned_json_file))
+        assert_false(os.path.isfile(scanned_scanned_json_file))
         # Root directory is empty:
         assert_equals(0, len(glob(os.path.join(self.artscan.directory,'*'))))
 
@@ -635,8 +635,8 @@ class TestArticleScanner(object):
         with open(fpath, 'wb') as f: f.write(html_contents)
         url = 'www.example.com'
         archive_data = {url: {'f': fname, 'l': ['www.link.com']}}
-        archive_json_file = os.path.join(self.temp_dir, 'archive.json')
-        with open(archive_json_file, 'w') as f:
+        archive_scanned_json_file = os.path.join(self.temp_dir, 'archive.json')
+        with open(archive_scanned_json_file, 'w') as f:
             json.dump(archive_data, f)
         self.artscan.file_name_data[url]['f'] = fname
 

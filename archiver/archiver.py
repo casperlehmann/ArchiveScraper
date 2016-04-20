@@ -178,15 +178,55 @@ class ScraperBase(object):
                 self._save_filename(url, fname)
 
 class ScannerBase(object):
-    scanned_file_data = {}
+
+    @property
+    def scanned_json_file(self):
+        return self._scanned_json_file
+
+    @scanned_json_file.setter
+    def scanned_json_file(self, json_file):
+        if json_file is not None:
+            if not isinstance (json_file, str):
+                raise TypeError('json_file must be a string.')
+            self._scanned_json_file = json_file
+        elif self._scanned_json_file is None:
+            raise IOError('self._scanned_json_file cannot be None.')
+
+    _scanned_json_file = None
+
+    scanned_file_data = None
+
+    def __init__(self, directory = None, silent = False):
+        self.directory = directory
+        self.set_scanned_json_file_name(silent = silent)
+        self.load_scanned_file_data_files(silent = silent)
+
+    def set_scanned_json_file_name(self, json_name, silent = False):
+        if not isinstance(json_name, str):
+            raise TypeError
+        if len(json_name) == 0:
+            raise ValueError
+        self.scanned_json_file = os.path.join(self.directory, json_name)
+
+    def load_scanned_file_data_files(self, silent = False):
+        if not silent: print ('Loading data files...')
+        if not isinstance(silent, bool):
+            raise TypeError('Parameter \'silent\' must be of type bool')
+        try:
+            self.scanned_file_data = dd(lambda: dict(), json.load(open(self.scanned_json_file)))
+        except FileNotFoundError as e:
+            if not silent: print ('Creating new file:', self.scanned_json_file)
+            self.scanned_file_data = dd(lambda: dict())
+            json.dump(self.scanned_file_data, open(self.scanned_json_file, 'w'))
+        if not silent: print ()
 
     def _save_links_from_page(self, url, links):
         if not isinstance (url, str):
             raise TypeError('url needs to be of type string.')
         if not isinstance (links, list):
             raise TypeError
-        self.file_name_data[url] = links
-        json.dump(self.file_name_data, open(self.json_file, 'w'))
+        self.scanned_file_data[url] = links
+        json.dump(self.scanned_file_data, open(self.scanned_json_file, 'w'))
 
 class Dearchiver(ScraperBase):
 
@@ -221,15 +261,30 @@ class ArticleGetter(ScraperBase):
         self.json_file = None
         if not silent: print()
 
-class ArticleScanner(ScraperBase, ScannerBase):
+class ArticleScanner(ScannerBase, ScraperBase):
+
+    def __init__(self, directory = None, silent = False):
+        super().__init__(directory = directory, silent = silent)
+        self.directory = directory
+        self.set_scanned_json_file_name(silent = silent)
+        self.set_json_file_name(silent = silent)
+        self.load_scanned_file_data_files(silent = silent)
+        self.load_data_files(silent = silent)
 
     def set_json_file_name(self, silent = False):
-        super().set_json_file_name('scanned.json', silent = silent)
+        super().set_json_file_name('article.json', silent = silent)
+
+    def set_scanned_json_file_name(self, silent = False):
+        super().set_scanned_json_file_name('scanned.json', silent = silent)
+
 
     def clean(self, silent = False):
         if not silent: print ('Cleaning...')
         self.delete_file(
                 target = os.path.join(self._directory, 'archive.json'),
+                silent=silent)
+        self.delete_file(
+                target = os.path.join(self._directory, 'scanned.json'),
                 silent=silent)
         self.delete_file(target = self.json_file, silent=silent)
         super().clean(silent = silent)
