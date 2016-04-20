@@ -77,6 +77,14 @@ class ScraperBase(object):
             json.dump(self.data, open(self.json_file, 'w'))
         if not silent: print ()
 
+    def _save_url(self, url, fname):
+        if not isinstance (url, str):
+            raise TypeError
+        if not isinstance (fname, str):
+            raise TypeError
+        self.data[url]['f'] = fname
+        json.dump(self.data, open(self.json_file, 'w'))
+
     # Cleaning
     def clean(self, silent = False):
         for f in glob(os.path.join(self.directory, '*')):
@@ -181,15 +189,6 @@ class Dearchiver(ScraperBase):
     def set_json_file_name(self, silent = False):
         super().set_json_file_name('archive.json', silent = silent)
 
-    # Archive
-    def _save_archive_url(self, url, fname):
-        if not isinstance (url, str):
-            raise TypeError
-        if not isinstance (fname, str):
-            raise TypeError
-        self.data[url]['f'] = fname
-        json.dump(self.data, open(self.json_file, 'w'))
-
     # Cleaning
     def clean(self, silent = False):
         if not silent: print ('Cleaning...')
@@ -213,15 +212,6 @@ class ArticleGetter(ScraperBase):
 
     def set_json_file_name(self, silent = False):
         super().set_json_file_name('article.json', silent = silent)
-
-    # Articles
-    def _save_article_url(self, url, fname):
-        if not isinstance (url, str):
-            raise TypeError
-        if not isinstance (fname, str):
-            raise TypeError
-        self.data[url]['f'] = fname
-        json.dump(self.data, open(self.json_file, 'w'))
 
     def _save_article_links(self, url, links):
         if not isinstance (url, str):

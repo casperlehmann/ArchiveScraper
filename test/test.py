@@ -210,20 +210,20 @@ class TestDearchiver(object):
             self.dearch.data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
-    def test__save_archive_url(self):
-        self.dearch._save_archive_url('www.example.com', '000001')
+    def test__save_url(self):
+        self.dearch._save_url('www.example.com', '000001')
         assert_equals(
             json.load(open(self.dearch.json_file)),
             {'www.example.com': {'f': '000001'}})
 
-    def test__save_archive_url_url_raises_TypeError(self):
+    def test__save_url_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.dearch._save_archive_url,
+            TypeError, self.dearch._save_url,
             url = 1, fname = '000001')
 
-    def test__save_archive_url_fname_raises_TypeError(self):
+    def test__save_url_fname_raises_TypeError(self):
         assert_raises(
-            TypeError, self.dearch._save_archive_url,
+            TypeError, self.dearch._save_url,
             url = 'www.example.com', fname = 1)
 
     # Cleaning
@@ -268,7 +268,7 @@ class TestDearchiver(object):
             archive_folder = 'archive')
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
-        self.dearch._save_archive_url('www.example.com', fname)
+        self.dearch._save_url('www.example.com', fname)
         assert_equals(self.dearch._get_filename('www.example.com'), '000001')
 
     def test__get_filepath_url_raises_TypeError(self):
@@ -280,7 +280,7 @@ class TestDearchiver(object):
             KeyError, self.dearch._get_filepath, url='www.example.com')
 
     def test__get_filepath_file_raises_OSError(self):
-        self.dearch._save_archive_url('www.example.com', '000001')
+        self.dearch._save_url('www.example.com', '000001')
         assert_raises(
             OSError, self.dearch._get_filepath, url='www.example.com')
 
@@ -290,7 +290,7 @@ class TestDearchiver(object):
             archive_folder = 'archive')
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
-        self.dearch._save_archive_url('www.example.com', fname)
+        self.dearch._save_url('www.example.com', fname)
         assert_equals(self.dearch._get_filepath('www.example.com'), fpath)
 
     def test__get_archive_folder_sets_folder_name(self):
@@ -341,7 +341,7 @@ class TestDearchiver(object):
         assert_raises(
             KeyError, self.dearch.load_archive_page, url = 'www.example.com',
             silent = True)
-        self.dearch._save_archive_url('www.example.com', '000001')
+        self.dearch._save_url('www.example.com', '000001')
         self.dearch.load_archive_page(url = 'www.example.com', silent = True)
 
     def test__load_archive_pages(self):
@@ -349,7 +349,7 @@ class TestDearchiver(object):
         archive = self.dearch._get_archive_folder(
             archive_folder = 'archive')
         fpath = os.path.join(archive, fname)
-        self.dearch._save_archive_url('www.example.com', '000001')
+        self.dearch._save_url('www.example.com', '000001')
         fname = self.dearch.load_archive_page(
             url = 'www.example.com', silent = True)
         assert_equals('000001', fname)
@@ -434,25 +434,25 @@ class TestArticleGetter(object):
             self.artget.data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
-    def test__save_article_url(self):
-        self.artget._save_article_url('www.example.com', '000001')
+    def test__save_url(self):
+        self.artget._save_url('www.example.com', '000001')
         assert_equals(
             json.load(open(self.artget.json_file)),
             {'www.example.com': {'f': '000001'}})
 
-    def test__save_article_url_url_raises_TypeError(self):
+    def test__save_url_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.artget._save_article_url,
+            TypeError, self.artget._save_url,
             url = 1, fname = '000001')
 
-    def test__save_article_url_fname_raises_TypeError(self):
+    def test__save_url_fname_raises_TypeError(self):
         assert_raises(
-            TypeError, self.artget._save_article_url,
+            TypeError, self.artget._save_url,
             url = 'www.example.com', fname = 1)
 
-    def test__save_article_url_and_links(self):
+    def test__save_url_and_links(self):
         # We make sure that one doesn't overwrite the other:
-        self.artget._save_article_url('www.example.com', '000001')
+        self.artget._save_url('www.example.com', '000001')
         self.artget._save_article_links('www.example.com', ['www.link.com'])
         # Manually load the dict from file and compare:
         assert_equals(
