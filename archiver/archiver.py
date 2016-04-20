@@ -113,9 +113,10 @@ class ScraperBase(object):
         if not url in self.data:
             raise KeyError
         fname = self._get_filename(url)
-        if not os.path.isfile(os.path.join(self._get_archive_folder(), fname)):
+        fpath = os.path.join(self._get_archive_folder(), fname)
+        if not os.path.isfile(fpath):
             raise OSError(('File {} does not exist.'.format(fname)))
-        return os.path.join(self._get_archive_folder(), fname)
+        return fpath
 
     def _get_archive_folder(self, archive_folder = None):
         if archive_folder is None:
