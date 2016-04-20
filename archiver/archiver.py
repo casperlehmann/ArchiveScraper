@@ -51,7 +51,7 @@ class ScraperBase(object):
     def clean(self, silent = False):
         self.clean_project_root(silent=silent)
 
-    def clean_json(self, target, silent = False):
+    def delete_file(self, target, silent = False):
         try:
             if not silent: print ('Deleting: ' + target + '...')
             os.remove(target)
@@ -185,7 +185,7 @@ class Dearchiver(ScraperBase):
     # Cleaning
     def clean(self, silent = False):
         if not silent: print ('Cleaning...')
-        self.clean_json(target = self.archive_json_file, silent=silent)
+        self.delete_file(target = self.archive_json_file, silent=silent)
         self.clean_archive(silent=silent)
         super().clean(silent = silent)
         self.archive_folder = None
@@ -235,7 +235,7 @@ class ArticleGetter(ScraperBase):
     # Cleaning
     def clean(self, silent = False):
         if not silent: print ('Cleaning...')
-        self.clean_json(target = self.article_json_file, silent=silent)
+        self.delete_file(target = self.article_json_file, silent=silent)
         super().clean(silent = silent)
         self.data = None
         self.article_json_file = None
@@ -271,12 +271,10 @@ class ArticleScanner(ScraperBase):
     # Cleaning
     def clean(self, silent = False):
         if not silent: print ('Cleaning...')
-        try:
-            os.remove(
-                os.path.join(self._directory, 'archive.json'))
-        except:
-            pass
-        self.clean_json(target = self.scanned_json_file, silent=silent)
+        self.delete_file(
+                target = os.path.join(self._directory, 'archive.json'),
+                silent=silent)
+        self.delete_file(target = self.scanned_json_file, silent=silent)
         super().clean(silent = silent)
         self.scanned_data = None
         self.scanned_json_file = None
