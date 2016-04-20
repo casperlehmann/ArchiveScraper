@@ -29,9 +29,6 @@ class ScraperBase(object):
             self._directory = directory
         elif self._directory is None:
             self._directory = 'data_dearchiver'
-        else:
-            # self._directory already has a value
-            pass
 
     @property
     def json_file(self):
@@ -42,8 +39,6 @@ class ScraperBase(object):
         if json_file is not None:
             if not isinstance (json_file, str):
                 raise TypeError('json_file must be a string.')
-            #if not os.path.isfile(json_file):
-            #    raise ValueError('json_file is not a file.')
             self._json_file = json_file
         elif self._json_file is None:
             raise IOError('self._json_file cannot be None.')
@@ -77,7 +72,6 @@ class ScraperBase(object):
             json.dump(self.data, open(self.json_file, 'w'))
         if not silent: print ()
 
-    # Cleaning
     def clean(self, silent = False):
         for f in glob(os.path.join(self.directory, '*')):
             if not silent: print ('Deleting: ' + f)
@@ -188,7 +182,6 @@ class Dearchiver(ScraperBase):
     def set_json_file_name(self, silent = False):
         super().set_json_file_name('archive.json', silent = silent)
 
-    # Cleaning
     def clean(self, silent = False):
         if not silent: print ('Cleaning...')
         self.delete_file(target = self.json_file, silent=silent)
@@ -217,7 +210,6 @@ class ArticleGetter(ScraperBase):
         self.data[url]['l'] = links
         json.dump(self.data, open(self.json_file, 'w'))
 
-    # Cleaning
     def clean(self, silent = False):
         if not silent: print ('Cleaning...')
         self.delete_file(target = self.json_file, silent=silent)
@@ -232,7 +224,6 @@ class ArticleScanner(ScraperBase):
     def set_json_file_name(self, silent = False):
         super().set_json_file_name('scanned.json', silent = silent)
 
-    # Scanned
     def _save_scanned_links(self, url, links):
         if not isinstance (url, str):
             raise TypeError('url needs to be of type string.')
@@ -241,7 +232,6 @@ class ArticleScanner(ScraperBase):
         self.scanned_data[url] = links
         json.dump(self.scanned_data, open(self.json_file, 'w'))
 
-    # Cleaning
     def clean(self, silent = False):
         if not silent: print ('Cleaning...')
         self.delete_file(
