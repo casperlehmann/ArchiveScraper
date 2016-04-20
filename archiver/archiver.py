@@ -159,10 +159,11 @@ class ScraperBase(object):
             url = 'http://' + url
         with urllib.request.urlopen(url) as url_obj:
             fname = str(len(self.data)).zfill(6)
-            with open(fname, 'wb') as f:
+            fpath = os.path.join(self._get_archive_folder(), fname)
+            with open(fpath, 'wb') as f:
                 if not silent: print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
-                self._save_archive_url(url, fname)
+                self._save_filename(url, fname)
 
     def load_article_pages(self, *urls, silent = False):
         for url in urls:
@@ -180,7 +181,7 @@ class ScraperBase(object):
             with open(fname, 'wb') as f:
                 if not silent: print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
-                self._save_archive_url(url, fname)
+                self._save_filename(url, fname)
 
 class Dearchiver(ScraperBase):
 

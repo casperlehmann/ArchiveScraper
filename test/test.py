@@ -363,8 +363,9 @@ class TestDearchiver(object):
         if self.skip_online_tests: raise SkipTest
         assert_equals(self.dearch.data, {})
         self.dearch._fetch_archive_page(url = 'www.example.com', silent = True)
-        expected_path = os.path.join(self.dearch._archive_folder, '000000.html')
-        expected_archive_data = {'http://www.example.com': {'f': expected_path}}
+        arch = self.dearch._get_archive_folder(archive_folder = 'archive_folder')
+        expected_name = '000000'
+        expected_archive_data = {'http://www.example.com': {'f': expected_name}}
         assert_equals(self.dearch.data, expected_archive_data)
 
     def test__fetch_article_page(self):
