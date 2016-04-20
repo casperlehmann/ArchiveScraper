@@ -77,14 +77,6 @@ class ScraperBase(object):
             json.dump(self.data, open(self.json_file, 'w'))
         if not silent: print ()
 
-    def _save_url_to_fname(self, url, fname):
-        if not isinstance (url, str):
-            raise TypeError
-        if not isinstance (fname, str):
-            raise TypeError
-        self.data[url]['f'] = fname
-        json.dump(self.data, open(self.json_file, 'w'))
-
     # Cleaning
     def clean(self, silent = False):
         for f in glob(os.path.join(self.directory, '*')):
@@ -99,6 +91,14 @@ class ScraperBase(object):
             if not silent: print ('Does not exist: ' + target)
 
     # File names and paths
+    def _save_filename(self, url, fname):
+        if not isinstance (url, str):
+            raise TypeError
+        if not isinstance (fname, str):
+            raise TypeError
+        self.data[url]['f'] = fname
+        json.dump(self.data, open(self.json_file, 'w'))
+
     def _get_filename(self, url):
         if not isinstance (url, str):
             raise TypeError
