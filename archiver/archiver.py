@@ -33,7 +33,14 @@ class ScraperBase(object):
 
     def load_data_files(self, silent = False):
         if not silent: print ('Loading data files...')
-        self._load_json(json_file = self.json_file, silent = silent)
+        if not isinstance(silent, bool):
+            raise TypeError('Parameter \'silent\' must be of type bool')
+        try:
+            self.data = dd(lambda: dict(), json.load(open(self.json_file)))
+        except FileNotFoundError as e:
+            if not silent: print ('Creating new file:', self.json_file)
+            self.data = dd(lambda: dict())
+            json.dump(self.data, open(self.json_file, 'w'))
         if not silent: print ()
 
     @property
@@ -124,16 +131,6 @@ class ScraperBase(object):
         self._archive_folder = archive_folder
         os.makedirs(self._archive_folder, exist_ok=True)
         return self._archive_folder
-
-    def _load_json(self, json_file, silent = False):
-        if not isinstance(silent, bool):
-            raise TypeError('Parameter \'silent\' must be of type bool')
-        try:
-            self.data = dd(lambda: dict(), json.load(open(json_file)))
-        except FileNotFoundError as e:
-            if not silent: print ('Creating new file:', json_file)
-            self.data = dd(lambda: dict())
-            json.dump(self.data, open(json_file, 'w'))
 
     # Data
     def load_archive(self, urls, silent = False):
