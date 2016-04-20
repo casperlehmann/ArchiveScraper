@@ -103,7 +103,7 @@ class ScraperBase(object):
         if not isinstance (url, str):
             raise TypeError
         if not url in self.data:
-            raise KeyError('File does not registered for url: {}'.format(url))
+            raise KeyError('File not registered for url: {}'.format(url))
         fname = self.data[url]['f']
         return fname
 
