@@ -79,7 +79,9 @@ class ScraperBase(object):
 
     # Cleaning
     def clean(self, silent = False):
-        self.clean_project_root(silent=silent)
+        for f in glob(os.path.join(self.directory, '*')):
+            if not silent: print ('Deleting: ' + f)
+            shutil.rmtree(f)
 
     def delete_file(self, target, silent = False):
         try:
@@ -87,11 +89,6 @@ class ScraperBase(object):
             os.remove(target)
         except FileNotFoundError:
             if not silent: print ('Does not exist: ' + target)
-
-    def clean_project_root(self, silent = False):
-        for f in glob(os.path.join(self.directory, '*')):
-            if not silent: print ('Deleting: ' + f)
-            shutil.rmtree(f)
 
     # File names and paths
     def _get_filename(self, url):
