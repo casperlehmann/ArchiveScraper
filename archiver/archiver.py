@@ -190,13 +190,10 @@ class Dearchiver(ScraperBase):
 
     def load_data_files(self, silent = False):
         if not silent: print ('Loading data files...')
-        self._load_archive_json(silent = silent)
+        super()._load_json(json_file = self.json_file, silent = silent)
         if not silent: print ()
 
     # Archive
-    def _load_archive_json(self, silent = False):
-        super()._load_json(json_file = self.json_file, silent = silent)
-
     def _save_archive_url(self, url, fname):
         if not isinstance (url, str):
             raise TypeError
@@ -231,13 +228,10 @@ class ArticleGetter(ScraperBase):
 
     def load_data_files(self, silent = False):
         if not silent: print ('Loading data files...')
-        self._load_article_json(silent = silent)
+        super()._load_json(json_file = self.json_file, silent = silent)
         if not silent: print ()
 
     # Articles
-    def _load_article_json(self, silent = False):
-        super()._load_json(json_file = self.json_file, silent = silent)
-
     def _save_article_url(self, url, fname):
         if not isinstance (url, str):
             raise TypeError
@@ -274,13 +268,10 @@ class ArticleScanner(ScraperBase):
 
     def load_data_files(self, silent = False):
         if not silent: print ('Loading data files...')
-        self._load_scanned_json(silent = silent)
+        super()._load_json(json_file = self.json_file, silent = silent)
         if not silent: print ()
 
     # Scanned
-    def _load_scanned_json(self, silent = False):
-        super()._load_json(json_file = self.json_file, silent = silent)
-
     def _save_scanned_links(self, url, links):
         if not isinstance (url, str):
             raise TypeError('url needs to be of type string.')

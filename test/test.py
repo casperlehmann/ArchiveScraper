@@ -175,28 +175,28 @@ class TestDearchiver(object):
         assert_true(os.path.isfile(self.dearch.json_file))
 
     # Archive
-    def test__load_archive_json_silent_raises_TypeError(self):
-        assert_raises(TypeError, self.dearch._load_archive_json, silent = 2)
+    def test_load_data_files_silent_raises_TypeError(self):
+        assert_raises(TypeError, self.dearch.load_data_files, silent = 2)
 
-    def test__load_archive_json_reads_contents_from_file(self):
+    def test_load_data_files_reads_contents_from_file(self):
         json.dump(
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
             open(self.dearch.json_file, 'w'))
         assert_equals(self.dearch.data, {})
 
-        self.dearch._load_archive_json()
+        self.dearch.load_data_files()
         assert_equals(
             self.dearch.data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
-    def test__load_archive_json_creation(self):
+    def test_load_data_files_creation(self):
         self.dearch.data = None
         assert_is_none(self.dearch.data)
-        self.dearch._load_archive_json()
+        self.dearch.load_data_files()
         assert_is_instance(self.dearch.data, dict)
         assert_equals(self.dearch.data, {})
 
-    def test__load_archive_json_load_file(self):
+    def test_load_data_files_load_file(self):
         with open(os.path.join(self.temp_dir, 'archive.json'), 'w') as f:
             f.write(json.dumps(
                 {'www.example.com': {'f': '000001', 'l': ['www.link.com']}}))
@@ -204,7 +204,7 @@ class TestDearchiver(object):
         self.dearch.data = None
         assert_is_none(self.dearch.data)
 
-        self.dearch._load_archive_json()
+        self.dearch.load_data_files()
         assert_is_instance(self.dearch.data, dict)
         assert_equals(
             self.dearch.data,
@@ -399,28 +399,28 @@ class TestArticleGetter(object):
         assert_true(os.path.isfile(self.artget.json_file))
 
     # Articles
-    def test__load_article_json_silent_raises_TypeError(self):
-        assert_raises(TypeError, self.artget._load_article_json, silent = 2)
+    def test_load_data_files_silent_raises_TypeError(self):
+        assert_raises(TypeError, self.artget.load_data_files, silent = 2)
 
-    def test__load_article_json_reads_contents_from_file(self):
+    def test_load_data_files_reads_contents_from_file(self):
         json.dump(
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
             open(self.artget.json_file, 'w'))
         assert_equals(self.artget.data, {})
 
-        self.artget._load_article_json()
+        self.artget.load_data_files()
         assert_equals(
             self.artget.data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
-    def test__load_article_json_creation(self):
+    def test_load_data_files_creation(self):
         self.artget.data = None
         assert_is_none(self.artget.data)
-        self.artget._load_article_json()
+        self.artget.load_data_files()
         assert_is_instance(self.artget.data, dict)
         assert_equals(self.artget.data, {})
 
-    def test__load_article_json_load_file(self):
+    def test_load_data_files_load_file(self):
         with open(os.path.join(self.temp_dir, 'article.json'), 'w') as f:
             f.write(json.dumps(
                 {'www.example.com': {'f': '000001', 'l': ['www.link.com']}}))
@@ -428,7 +428,7 @@ class TestArticleGetter(object):
         self.artget.data = None
         assert_is_none(self.artget.data)
 
-        self.artget._load_article_json()
+        self.artget.load_data_files()
         assert_is_instance(self.artget.data, dict)
         assert_equals(
             self.artget.data,
@@ -527,29 +527,29 @@ class TestArticleScanner(object):
         assert_true(os.path.isfile(self.artscan.json_file))
 
     # Scanned
-    def test__load_scanned_json_silent_raises_TypeError(self):
-        assert_raises(TypeError, self.artscan._load_scanned_json, silent = 2)
+    def test_load_data_files_silent_raises_TypeError(self):
+        assert_raises(TypeError, self.artscan.load_data_files, silent = 2)
 
-    def test__load_scanned_json_reads_contents_from_file(self):
+    def test_load_data_files_reads_contents_from_file(self):
         with open(os.path.join(self.temp_dir, 'scanned.json'), 'w') as f:
             json.dump(
                 {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'},
                 f)
         assert_equals(self.artscan.data, {})
 
-        self.artscan._load_scanned_json()
+        self.artscan.load_data_files()
         assert_equals(
             self.artscan.data,
             {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
 
-    def test__load_scanned_json_creation(self):
+    def test_load_data_files_creation(self):
         self.artscan.data = None
         assert_is_none(self.artscan.data)
-        self.artscan._load_scanned_json()
+        self.artscan.load_data_files()
         assert_is_instance(self.artscan.data, dict)
         assert_equals(self.artscan.data, {})
 
-    def test__load_scanned_json_load_file(self):
+    def test_load_data_files_load_file(self):
         with open(os.path.join(self.temp_dir, 'scanned.json'), 'w') as f:
             json.dump(
                 {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'},
@@ -558,7 +558,7 @@ class TestArticleScanner(object):
         self.artscan.data = None
         assert_is_none(self.artscan.data)
 
-        self.artscan._load_scanned_json()
+        self.artscan.load_data_files()
         assert_is_instance(self.artscan.data, dict)
         assert_equals(
             self.artscan.data,
