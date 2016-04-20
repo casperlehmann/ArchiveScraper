@@ -46,7 +46,7 @@ class ScraperBase(object):
     _directory = None
     _archive_folder = None
     _json_file = None
-    data = None
+    file_name_data = None
 
     def __init__(self, directory = None, silent = False):
         self.directory = directory
@@ -65,11 +65,11 @@ class ScraperBase(object):
         if not isinstance(silent, bool):
             raise TypeError('Parameter \'silent\' must be of type bool')
         try:
-            self.data = dd(lambda: dict(), json.load(open(self.json_file)))
+            self.file_name_data = dd(lambda: dict(), json.load(open(self.json_file)))
         except FileNotFoundError as e:
             if not silent: print ('Creating new file:', self.json_file)
-            self.data = dd(lambda: dict())
-            json.dump(self.data, open(self.json_file, 'w'))
+            self.file_name_data = dd(lambda: dict())
+            json.dump(self.file_name_data, open(self.json_file, 'w'))
         if not silent: print ()
 
     def clean(self, silent = False):
@@ -90,21 +90,21 @@ class ScraperBase(object):
             raise TypeError
         if not isinstance (fname, str):
             raise TypeError
-        self.data[url]['f'] = fname
-        json.dump(self.data, open(self.json_file, 'w'))
+        self.file_name_data[url]['f'] = fname
+        json.dump(self.file_name_data, open(self.json_file, 'w'))
 
     def _get_filename(self, url):
         if not isinstance (url, str):
             raise TypeError
-        if not url in self.data:
+        if not url in self.file_name_data:
             raise KeyError('File not registered for url: {}'.format(url))
-        fname = self.data[url]['f']
+        fname = self.file_name_data[url]['f']
         return fname
 
     def _get_filepath(self, url):
         if not isinstance (url, str):
             raise TypeError
-        if not url in self.data:
+        if not url in self.file_name_data:
             raise KeyError
         fname = self._get_filename(url)
         fpath = os.path.join(self._get_archive_folder(), fname)
@@ -152,7 +152,7 @@ class ScraperBase(object):
         if not url.startswith('http'):
             url = 'http://' + url
         with urllib.request.urlopen(url) as url_obj:
-            fname = str(len(self.data)).zfill(6)
+            fname = str(len(self.file_name_data)).zfill(6)
             fpath = os.path.join(self._get_archive_folder(), fname)
             with open(fpath, 'wb') as f:
                 if not silent: print ('Writing file: {}'.format(fname))
@@ -161,7 +161,7 @@ class ScraperBase(object):
 
     def load_article_pages(self, *urls, silent = False):
         for url in urls:
-            if url in self.data:
+            if url in self.file_name_data:
                 self._get_filename(url)
                 if not silent: print ('Alredy here')
             else:
@@ -171,7 +171,7 @@ class ScraperBase(object):
     def _fetch_article_page(self, url, silent = False):
         with urllib.request.urlopen(url) as url_obj:
             os.makedirs(os.path.join(self.directory, 'articles'), exist_ok=True)
-            fname = str(len(self.data)).zfill(6)
+            fname = str(len(self.file_name_data)).zfill(6)
             with open(fname, 'wb') as f:
                 if not silent: print ('Writing file: {}'.format(fname))
                 f.write(url_obj.read())
@@ -184,8 +184,8 @@ class ScannerBase(object):
             raise TypeError('url needs to be of type string.')
         if not isinstance (links, list):
             raise TypeError
-        self.data[url] = links
-        json.dump(self.data, open(self.json_file, 'w'))
+        self.file_name_data[url] = links
+        json.dump(self.file_name_data, open(self.json_file, 'w'))
 
 class Dearchiver(ScraperBase):
 
@@ -198,7 +198,7 @@ class Dearchiver(ScraperBase):
         self.clean_archive(silent=silent)
         super().clean(silent = silent)
         self.archive_folder = None
-        self.data = None
+        self.file_name_data = None
         self.json_file = None
         if not silent: print()
 
@@ -216,7 +216,7 @@ class ArticleGetter(ScraperBase):
         if not silent: print ('Cleaning...')
         self.delete_file(target = self.json_file, silent=silent)
         super().clean(silent = silent)
-        self.data = None
+        self.file_name_data = None
         self.json_file = None
         if not silent: print()
 
@@ -279,7 +279,7 @@ class ArticleScanner(ScraperBase, ScannerBase):
     def find_links_in_archive(
             self, silent = False,
             target_element = None, target_class = None, target_id = None):
-        for url in set(self.data.keys()):
+        for url in set(self.file_name_data.keys()):
             if not url in self.scanned_data:
                 self.find_links_in_page(
                     url,
@@ -292,7 +292,7 @@ class ArticleScanner(ScraperBase, ScannerBase):
     def count_links(self, counter = None, links = None, domain = None):
         if counter is None: counter = dd(int)
         if links is None:
-            links = [_ for key, item in self.data.items()
+            links = [_ for key, item in self.file_name_data.items()
                      for _ in item['l']]
         if domain is None: domain = 'politics.people.com.cn'
         if not isinstance(domain, str):
@@ -307,7 +307,7 @@ class ArticleScanner(ScraperBase, ScannerBase):
 
     def get_queue(self, filtr):
         queue = []
-        for url, data in self.data.items():
+        for url, data in self.file_name_data.items():
             if url in self.scanned_data:
                 queue.extend(data['l'])
         filtr = [_ for _ in queue if filtr in _]

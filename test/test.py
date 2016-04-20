@@ -164,9 +164,9 @@ class TestDearchiver(object):
             ValueError, archiver.Dearchiver, directory = '', silent = True)
 
     def test_load_data_files_sets_json(self):
-        self.dearch.data = None
+        self.dearch.file_name_data = None
         self.dearch.load_data_files(silent = True)
-        assert_equals(self.dearch.data, {})
+        assert_equals(self.dearch.file_name_data, {})
 
     def test_isdir_temp(self):
         assert_true(os.path.isdir(self.temp_dir))
@@ -182,32 +182,32 @@ class TestDearchiver(object):
         json.dump(
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
             open(self.dearch.json_file, 'w'))
-        assert_equals(self.dearch.data, {})
+        assert_equals(self.dearch.file_name_data, {})
 
         self.dearch.load_data_files()
         assert_equals(
-            self.dearch.data,
+            self.dearch.file_name_data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test_load_data_files_creation(self):
-        self.dearch.data = None
-        assert_is_none(self.dearch.data)
+        self.dearch.file_name_data = None
+        assert_is_none(self.dearch.file_name_data)
         self.dearch.load_data_files()
-        assert_is_instance(self.dearch.data, dict)
-        assert_equals(self.dearch.data, {})
+        assert_is_instance(self.dearch.file_name_data, dict)
+        assert_equals(self.dearch.file_name_data, {})
 
     def test_load_data_files_load_file(self):
         with open(os.path.join(self.temp_dir, 'archive.json'), 'w') as f:
             f.write(json.dumps(
                 {'www.example.com': {'f': '000001', 'l': ['www.link.com']}}))
 
-        self.dearch.data = None
-        assert_is_none(self.dearch.data)
+        self.dearch.file_name_data = None
+        assert_is_none(self.dearch.file_name_data)
 
         self.dearch.load_data_files()
-        assert_is_instance(self.dearch.data, dict)
+        assert_is_instance(self.dearch.file_name_data, dict)
         assert_equals(
-            self.dearch.data,
+            self.dearch.file_name_data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__save_filename(self):
@@ -361,12 +361,12 @@ class TestDearchiver(object):
 
     def test__fetch_archive_page_writes_file(self):
         if self.skip_online_tests: raise SkipTest
-        assert_equals(self.dearch.data, {})
+        assert_equals(self.dearch.file_name_data, {})
         self.dearch._fetch_archive_page(url = 'www.example.com', silent = True)
         arch = self.dearch._get_archive_folder(archive_folder = 'archive_folder')
         expected_name = '000000'
         expected_archive_data = {'http://www.example.com': {'f': expected_name}}
-        assert_equals(self.dearch.data, expected_archive_data)
+        assert_equals(self.dearch.file_name_data, expected_archive_data)
 
     def test__fetch_article_page(self):
         pass
@@ -392,9 +392,9 @@ class TestArticleGetter(object):
         self.artget.clean(silent = True)
 
     def test_load_data_files_sets_json(self):
-        self.artget.data = None
+        self.artget.file_name_data = None
         self.artget.load_data_files(silent = True)
-        assert_equals(self.artget.data, {})
+        assert_equals(self.artget.file_name_data, {})
 
     def test_isfile_json_file(self):
         assert_true(os.path.isfile(self.artget.json_file))
@@ -407,32 +407,32 @@ class TestArticleGetter(object):
         json.dump(
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
             open(self.artget.json_file, 'w'))
-        assert_equals(self.artget.data, {})
+        assert_equals(self.artget.file_name_data, {})
 
         self.artget.load_data_files()
         assert_equals(
-            self.artget.data,
+            self.artget.file_name_data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test_load_data_files_creation(self):
-        self.artget.data = None
-        assert_is_none(self.artget.data)
+        self.artget.file_name_data = None
+        assert_is_none(self.artget.file_name_data)
         self.artget.load_data_files()
-        assert_is_instance(self.artget.data, dict)
-        assert_equals(self.artget.data, {})
+        assert_is_instance(self.artget.file_name_data, dict)
+        assert_equals(self.artget.file_name_data, {})
 
     def test_load_data_files_load_file(self):
         with open(os.path.join(self.temp_dir, 'article.json'), 'w') as f:
             f.write(json.dumps(
                 {'www.example.com': {'f': '000001', 'l': ['www.link.com']}}))
 
-        self.artget.data = None
-        assert_is_none(self.artget.data)
+        self.artget.file_name_data = None
+        assert_is_none(self.artget.file_name_data)
 
         self.artget.load_data_files()
-        assert_is_instance(self.artget.data, dict)
+        assert_is_instance(self.artget.file_name_data, dict)
         assert_equals(
-            self.artget.data,
+            self.artget.file_name_data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test__save_filename(self):
@@ -493,9 +493,9 @@ class TestArticleScanner(object):
         self.artscan.clean(silent = True)
 
     def test_load_data_files_sets_json(self):
-        self.artscan.data = None
+        self.artscan.file_name_data = None
         self.artscan.load_data_files(silent = True)
-        assert_equals(self.artscan.data, {})
+        assert_equals(self.artscan.file_name_data, {})
 
     def test_isfile_json_file(self):
         assert_true(os.path.isfile(self.artscan.json_file))
@@ -509,19 +509,19 @@ class TestArticleScanner(object):
             json.dump(
                 {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'},
                 f)
-        assert_equals(self.artscan.data, {})
+        assert_equals(self.artscan.file_name_data, {})
 
         self.artscan.load_data_files()
         assert_equals(
-            self.artscan.data,
+            self.artscan.file_name_data,
             {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
 
     def test_load_data_files_creation(self):
-        self.artscan.data = None
-        assert_is_none(self.artscan.data)
+        self.artscan.file_name_data = None
+        assert_is_none(self.artscan.file_name_data)
         self.artscan.load_data_files()
-        assert_is_instance(self.artscan.data, dict)
-        assert_equals(self.artscan.data, {})
+        assert_is_instance(self.artscan.file_name_data, dict)
+        assert_equals(self.artscan.file_name_data, {})
 
     def test_load_data_files_load_file(self):
         with open(os.path.join(self.temp_dir, 'scanned.json'), 'w') as f:
@@ -529,13 +529,13 @@ class TestArticleScanner(object):
                 {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'},
                 f)
 
-        self.artscan.data = None
-        assert_is_none(self.artscan.data)
+        self.artscan.file_name_data = None
+        assert_is_none(self.artscan.file_name_data)
 
         self.artscan.load_data_files()
-        assert_is_instance(self.artscan.data, dict)
+        assert_is_instance(self.artscan.file_name_data, dict)
         assert_equals(
-            self.artscan.data,
+            self.artscan.file_name_data,
             {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
 
     def test__save_links_from_page(self):
@@ -552,7 +552,7 @@ class TestArticleScanner(object):
         assert_raises(TypeError, self.artscan._save_links_from_page, url = 1)
 
     def test__save_scanned_self_scanned_raises_TypeError(self):
-        self.artscan.data = ''
+        self.artscan.file_name_data = ''
         assert_raises(TypeError, self.artscan._save_links_from_page, url = 'a')
 
     def test__save_archive_links(self):
@@ -638,7 +638,7 @@ class TestArticleScanner(object):
         archive_json_file = os.path.join(self.temp_dir, 'archive.json')
         with open(archive_json_file, 'w') as f:
             json.dump(archive_data, f)
-        self.artscan.data[url]['f'] = fname
+        self.artscan.file_name_data[url]['f'] = fname
 
         self.artscan.find_links_in_page(url, silent = True)
         assert_equals(
