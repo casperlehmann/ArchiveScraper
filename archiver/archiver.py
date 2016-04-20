@@ -32,7 +32,9 @@ class ScraperBase(object):
         self.json_file = os.path.join(self.directory, json_name)
 
     def load_data_files(self, silent = False):
-        raise NotImplementedError
+        if not silent: print ('Loading data files...')
+        self._load_json(json_file = self.json_file, silent = silent)
+        if not silent: print ()
 
     @property
     def directory(self):
@@ -188,11 +190,6 @@ class Dearchiver(ScraperBase):
     def set_json_file_name(self, silent = False):
         super().set_json_file_name('archive.json', silent = silent)
 
-    def load_data_files(self, silent = False):
-        if not silent: print ('Loading data files...')
-        super()._load_json(json_file = self.json_file, silent = silent)
-        if not silent: print ()
-
     # Archive
     def _save_archive_url(self, url, fname):
         if not isinstance (url, str):
@@ -225,11 +222,6 @@ class ArticleGetter(ScraperBase):
 
     def set_json_file_name(self, silent = False):
         super().set_json_file_name('article.json', silent = silent)
-
-    def load_data_files(self, silent = False):
-        if not silent: print ('Loading data files...')
-        super()._load_json(json_file = self.json_file, silent = silent)
-        if not silent: print ()
 
     # Articles
     def _save_article_url(self, url, fname):
@@ -265,11 +257,6 @@ class ArticleScanner(ScraperBase):
 
     def set_json_file_name(self, silent = False):
         super().set_json_file_name('scanned.json', silent = silent)
-
-    def load_data_files(self, silent = False):
-        if not silent: print ('Loading data files...')
-        super()._load_json(json_file = self.json_file, silent = silent)
-        if not silent: print ()
 
     # Scanned
     def _save_scanned_links(self, url, links):
