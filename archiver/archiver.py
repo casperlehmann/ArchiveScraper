@@ -183,9 +183,6 @@ class ScraperBase(object):
 
 class Dearchiver(ScraperBase):
 
-    def __init__(self, directory = None, silent = False):
-        super().__init__(directory, silent)
-
     def set_json_file_name(self, silent = False):
         super().set_json_file_name('archive.json', silent = silent)
 
@@ -206,9 +203,6 @@ class Dearchiver(ScraperBase):
             os.remove(f)
 
 class ArticleGetter(ScraperBase):
-
-    def __init__(self, directory = None, silent = False):
-        super().__init__(directory, silent)
 
     def set_json_file_name(self, silent = False):
         super().set_json_file_name('article.json', silent = silent)
@@ -232,9 +226,6 @@ class ArticleGetter(ScraperBase):
 
 class ArticleScanner(ScraperBase):
     scanned_data = {}
-
-    def __init__(self, source = None, directory = None, silent = False):
-        super().__init__(directory, silent)
 
     def set_json_file_name(self, silent = False):
         super().set_json_file_name('scanned.json', silent = silent)
