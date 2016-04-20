@@ -82,20 +82,20 @@ class IOBase(object):
 class ScraperBase(object):
 
     @property
-    def json_file(self):
-        return self._json_file
+    def naming_json_file(self):
+        return self._naming_json_file
 
-    @json_file.setter
-    def json_file(self, json_file):
+    @naming_json_file.setter
+    def naming_json_file(self, json_file):
         if json_file is not None:
             if not isinstance (json_file, str):
                 raise TypeError('json_file must be a string.')
-            self._json_file = json_file
-        elif self._json_file is None:
-            raise IOError('self._json_file cannot be None.')
+            self._naming_json_file = json_file
+        elif self._naming_json_file is None:
+            raise IOError('self._naming_json_file cannot be None.')
 
-    _json_file = None
-    file_name_data = None
+    _naming_json_file = None
+    naming_file_data = None
 
     def __init__(self, directory = None, silent = False):
         self.directory = directory
