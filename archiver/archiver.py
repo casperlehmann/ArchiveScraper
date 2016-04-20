@@ -73,12 +73,8 @@ class ScraperBase(object):
             #if not os.path.isfile(json_file):
             #    raise ValueError('json_file is not a file.')
             self._json_file = json_file
-        elif self._directory is None:
-            self._directory = 'data_dearchiver'
-        else:
-            # self._directory already has a value
-            pass
-
+        elif self._json_file is None:
+            raise IOError('self._json_file cannot be None.')
 
     # Cleaning
     def clean(self, silent = False):
