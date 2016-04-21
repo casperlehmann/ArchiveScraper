@@ -239,8 +239,8 @@ class Agent(object):
             print ('Loading & Souping file: [{}] for url: [{}]'.format(
                 fname, url))
         try:
-            fname = os.path.join(self._get_archive_folder(), fname)
-            with open(fname, 'rb') as fobj:
+            fpath = os.path.join(self._get_archive_folder(), fname)
+            with open(fpath, 'rb') as fobj:
                 return bs(fobj.read(), 'html.parser')
         except FileNotFoundError:
             raise OSError('File not found: {}'.format(fname))
