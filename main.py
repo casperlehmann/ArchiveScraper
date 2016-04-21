@@ -10,8 +10,7 @@ if __name__ == '__main__':
         schema = 'http://politics.people.com.cn/GB/70731/review/{}.html')
 
     agent = archiver.Agent(
-        naming_json_file = 'archive.json',
-        scanned_json_file = 'scanned.json')
+        naming_json_file = 'archive.json', scanned_json_file = 'scanned.json')
 
     #agent.clean()
     #agent.set_json_file_name()
