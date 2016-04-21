@@ -11,7 +11,14 @@ from glob import glob
 
 from archiver.date_tools import get_date, get_date_string_generator
 
-class IOBase(object):
+class Agent(object):
+
+    _directory = None
+    _archive_folder = None
+    _naming_json_file = None
+    naming_file_data = None
+    _scanned_json_file = None
+    scanned_file_data = None
 
     @property
     def directory(self):
@@ -28,13 +35,66 @@ class IOBase(object):
         elif self._directory is None:
             self._directory = 'data_dearchiver'
 
-    _directory = None
-    _archive_folder = None
+    @property
+    def naming_json_file(self):
+        return self._naming_json_file
+
+    @naming_json_file.setter
+    def naming_json_file(self, json_file):
+        if not isinstance (json_file, str):
+            raise TypeError('naming_json_file must be a string.')
+        if len(json_file) == 0:
+            raise ValueError('naming_json_file cannot have length zero.')
+        self._naming_json_file = json_file
+
+    @property
+    def scanned_json_file(self):
+        return self._scanned_json_file
+
+    @scanned_json_file.setter
+    def scanned_json_file(self, json_file):
+        if not isinstance (json_file, str):
+            raise TypeError('scanned_json_file must be a string.')
+        if len(json_file) == 0:
+            raise ValueError('scanned_json_file cannot have length zero.')
+        self._scanned_json_file = json_file
+
+    def __init__(
+            self, directory = None, naming_json_file = None,
+            scanned_json_file = None, silent = False):
+        self.directory = directory
+
+        self.naming_json_file = os.path.join(self.directory, naming_json_file)
+        self.load_file_names_data_files(silent = silent)
+
+        self.scanned_json_file = os.path.join(self.directory, scanned_json_file)
+        self.load_scanned_file_data_files(silent = silent)
 
     def clean(self, silent = False):
+        if not silent: print ('Cleaning...')
+        self.delete_file(target = self.naming_json_file, silent=silent)
+        self.delete_file(
+                target = os.path.join(self._directory, 'archive.json'),
+                silent=silent)
+        self.delete_file(
+                target = os.path.join(self._directory, 'scanned.json'),
+                silent=silent)
+        self.delete_file(target = self.naming_json_file, silent=silent)
+        self.clean_archive(silent=silent)
         for f in glob(os.path.join(self.directory, '*')):
             if not silent: print ('Deleting: ' + f)
             shutil.rmtree(f)
+        self.archive_folder = None
+        self.file_name_data = None
+        self.scanned_file_data = None
+        self._naming_json_file = None
+        self._scanned_json_file = None
+        if not silent: print()
+
+    def clean_archive(self, silent = False):
+        for f in glob(os.path.join(self._get_archive_folder(), '*')):
+            if not silent: print ('Deleting: ' + f)
+            os.remove(f)
 
     def delete_file(self, target, silent = False):
         try:
@@ -79,46 +139,15 @@ class IOBase(object):
         os.makedirs(self._archive_folder, exist_ok=True)
         return self._archive_folder
 
-class ScraperBase(object):
-
-    @property
-    def naming_json_file(self):
-        return self._naming_json_file
-
-    @naming_json_file.setter
-    def naming_json_file(self, json_file):
-        if json_file is not None:
-            if not isinstance (json_file, str):
-                raise TypeError('json_file must be a string.')
-            self._naming_json_file = json_file
-        elif self._naming_json_file is None:
-            raise IOError('self._naming_json_file cannot be None.')
-
-    _naming_json_file = None
-    naming_file_data = None
-
-    def __init__(self, directory = None, silent = False):
-        self.directory = directory
-        self.set_json_file_name(silent = silent)
-        self.load_data_files(silent = silent)
-
-    def set_json_file_name(self, json_name, silent = False):
-        if not isinstance(json_name, str):
-            raise TypeError
-        if len(json_name) == 0:
-            raise ValueError
-        self.json_file = os.path.join(self.directory, json_name)
-
-    def load_data_files(self, silent = False):
+    # ScraperBase(object):
+    def load_file_names_data_files(self, silent = False):
         if not silent: print ('Loading data files...')
-        if not isinstance(silent, bool):
-            raise TypeError('Parameter \'silent\' must be of type bool')
         try:
-            self.file_name_data = dd(lambda: dict(), json.load(open(self.json_file)))
+            self.file_name_data = dd(lambda: dict(), json.load(open(self.naming_json_file)))
         except FileNotFoundError as e:
-            if not silent: print ('Creating new file:', self.json_file)
+            if not silent: print ('Creating new file:', self.naming_json_file)
             self.file_name_data = dd(lambda: dict())
-            json.dump(self.file_name_data, open(self.json_file, 'w'))
+            json.dump(self.file_name_data, open(self.naming_json_file, 'w'))
         if not silent: print ()
 
     # File names and paths
@@ -128,7 +157,7 @@ class ScraperBase(object):
         if not isinstance (fname, str):
             raise TypeError
         self.file_name_data[url]['f'] = fname
-        json.dump(self.file_name_data, open(self.json_file, 'w'))
+        json.dump(self.file_name_data, open(self.naming_json_file, 'w'))
 
     # Data
     def load_archive(self, urls, silent = False):
@@ -178,40 +207,9 @@ class ScraperBase(object):
                 f.write(url_obj.read())
                 self._save_filename(url, fname)
 
-class ScannerBase(object):
-
-    @property
-    def scanned_json_file(self):
-        return self._scanned_json_file
-
-    @scanned_json_file.setter
-    def scanned_json_file(self, json_file):
-        if json_file is not None:
-            if not isinstance (json_file, str):
-                raise TypeError('json_file must be a string.')
-            self._scanned_json_file = json_file
-        elif self._scanned_json_file is None:
-            raise IOError('self._scanned_json_file cannot be None.')
-
-    _scanned_json_file = None
-    scanned_file_data = None
-
-    def __init__(self, directory = None, silent = False):
-        self.directory = directory
-        self.set_scanned_json_file_name(silent = silent)
-        self.load_scanned_file_data_files(silent = silent)
-
-    def set_scanned_json_file_name(self, json_name, silent = False):
-        if not isinstance(json_name, str):
-            raise TypeError
-        if len(json_name) == 0:
-            raise ValueError
-        self.scanned_json_file = os.path.join(self.directory, json_name)
-
+    # ScannerBase(object):
     def load_scanned_file_data_files(self, silent = False):
         if not silent: print ('Loading data files...')
-        if not isinstance(silent, bool):
-            raise TypeError('Parameter \'silent\' must be of type bool')
         try:
             self.scanned_file_data = dd(lambda: dict(), json.load(open(self.scanned_json_file)))
         except FileNotFoundError as e:
@@ -228,70 +226,6 @@ class ScannerBase(object):
         self.scanned_file_data[url] = links
         json.dump(self.scanned_file_data, open(self.scanned_json_file, 'w'))
 
-class Dearchiver(IOBase, ScraperBase):
-
-    def set_json_file_name(self, silent = False):
-        super().set_json_file_name('archive.json', silent = silent)
-
-    def clean(self, silent = False):
-        if not silent: print ('Cleaning...')
-        self.delete_file(target = self.json_file, silent=silent)
-        self.clean_archive(silent=silent)
-        super().clean(silent = silent)
-        self.archive_folder = None
-        self.file_name_data = None
-        self.json_file = None
-        if not silent: print()
-
-    def clean_archive(self, silent = False):
-        for f in glob(os.path.join(self._get_archive_folder(), '*')):
-            if not silent: print ('Deleting: ' + f)
-            os.remove(f)
-
-class ArticleGetter(IOBase, ScraperBase):
-
-    def set_json_file_name(self, silent = False):
-        super().set_json_file_name('article.json', silent = silent)
-
-    def clean(self, silent = False):
-        if not silent: print ('Cleaning...')
-        self.delete_file(target = self.json_file, silent=silent)
-        super().clean(silent = silent)
-        self.file_name_data = None
-        self.json_file = None
-        if not silent: print()
-
-class ArticleScanner(IOBase, ScannerBase, ScraperBase):
-
-    def __init__(self, directory = None, silent = False):
-        super().__init__(directory = directory, silent = silent)
-        self.directory = directory
-        self.set_scanned_json_file_name(silent = silent)
-        self.set_json_file_name(silent = silent)
-        self.load_scanned_file_data_files(silent = silent)
-        self.load_data_files(silent = silent)
-
-    def set_json_file_name(self, silent = False):
-        super().set_json_file_name('article.json', silent = silent)
-
-    def set_scanned_json_file_name(self, silent = False):
-        super().set_scanned_json_file_name('scanned.json', silent = silent)
-
-
-    def clean(self, silent = False):
-        if not silent: print ('Cleaning...')
-        self.delete_file(
-                target = os.path.join(self._directory, 'archive.json'),
-                silent=silent)
-        self.delete_file(
-                target = os.path.join(self._directory, 'scanned.json'),
-                silent=silent)
-        self.delete_file(target = self.json_file, silent=silent)
-        super().clean(silent = silent)
-        self.scanned_file_data = None
-        self.json_file = None
-        if not silent: print()
-
     def get_soup(self, fname, url = 'not supplied', silent = False):
         if fname is None or not isinstance(fname, str):
             raise TypeError("fname must be a string.")
@@ -301,7 +235,7 @@ class ArticleScanner(IOBase, ScannerBase, ScraperBase):
             print ('Loading & Souping file: [{}] for url: [{}]'.format(
                 fname, url))
         try:
-            fname = os.path.join(self._get_archive_folder(), fname + '.html')
+            fname = os.path.join(self._get_archive_folder(), fname)
             with open(fname, 'rb') as fobj:
                 return bs(fobj.read(), 'html.parser')
         except FileNotFoundError:
@@ -324,6 +258,7 @@ class ArticleScanner(IOBase, ScannerBase, ScraperBase):
 
         soup = self.get_soup(fname, silent = silent)
         target = soup.find(target_element, class_=target_class, id=target_id)
+        if target is None: target = soup
         links = []
         for a in target.find_all('a'):
             if a.has_attr('href'):
@@ -348,7 +283,7 @@ class ArticleScanner(IOBase, ScannerBase, ScraperBase):
         if counter is None: counter = dd(int)
         if links is None:
             links = [_ for key, item in self.file_name_data.items()
-                     for _ in item['l']]
+                     for _ in item]
         if domain is None: domain = 'politics.people.com.cn'
         if not isinstance(domain, str):
             raise TypeError('Parameter \'domain\' must be a string')
