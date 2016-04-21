@@ -13,15 +13,11 @@ if __name__ == '__main__':
         naming_json_file = 'archive.json', scanned_json_file = 'scanned.json')
 
     #agent.clean()
-    #agent.set_json_file_name()
-    #agent.load_data_files(silent = False)
-    #try:
-    #    agent.load_archive(all_urls)
-    #except httplib.IncompleteRead as e:
-    #    print (e.partial)
+    #agent = archiver.Agent(
+    #    naming_json_file = 'archive.json', scanned_json_file = 'scanned.json')
 
-    agent.find_links_in_archive(
-        target_element = 'ul', target_class = 'list_16')
+    agent.load_archive(all_urls)
+    agent.find_links_in_archive(target_element = 'ul', target_class = 'list_16')
 
     c = agent.count_links()
 
@@ -31,4 +27,4 @@ if __name__ == '__main__':
     c = {href:count for href, count in c.items()
                 if not (stripper(href).split('.')[-1] in ['cn', 'com', ''])}
 
-    #agent.show_counter(counter = c, root = 'http://politics.people.com.cn')
+    agent.show_counter(counter = c, root = 'http://politics.people.com.cn')
