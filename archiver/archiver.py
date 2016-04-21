@@ -162,7 +162,11 @@ class Agent(object):
     # Data
     def load_archive(self, urls, silent = False):
         for url in urls:
-            self.load_archive_page(url, silent = silent)
+            try:
+                self.load_archive_page(url, silent = silent)
+            except httplib.IncompleteRead as e:
+                print (url)
+                print (e.partial)
 
     def load_archive_page(self, url, silent = False):
         if not isinstance (url, str):
