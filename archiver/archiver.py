@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 import urllib.request
+import http.client
 
 from collections import defaultdict as dd
 from bs4 import BeautifulSoup as bs
@@ -164,9 +165,17 @@ class Agent(object):
         for url in urls:
             try:
                 self.load_archive_page(url, silent = silent)
-            except httplib.IncompleteRead as e:
-                print (url)
-                print (e.partial)
+            except urllib.error.HTTPError:
+                print ('404:', url)
+                continue
+            except http.client.IncompleteRead as e:
+                print ('Partial:')
+                print ('dir(e):\n', dir(e))
+                print('==================')
+                print ('Partial', e.partial)
+            except:
+                print ('retry:', url)
+                self.load_archive_page(url, silent = silent)
 
     def load_archive_page(self, url, silent = False):
         if not isinstance (url, str):
