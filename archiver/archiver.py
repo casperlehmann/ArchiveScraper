@@ -64,6 +64,8 @@ class Agent(object):
             self, directory = None, naming_json_file = None,
             scanned_json_file = None, silent = False, archive_folder = None):
         self.directory = directory
+        if not archive_folder is None:
+            self._archive_folder = os.path.join(self.directory, archive_folder)
 
         self.naming_json_file = os.path.join(self.directory, naming_json_file)
         self.load_file_names_data_files(silent = silent)
