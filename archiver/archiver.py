@@ -61,7 +61,7 @@ class Agent(object):
 
     def __init__(
             self, directory = None, naming_json_file = None,
-            scanned_json_file = None, silent = False):
+            scanned_json_file = None, silent = False, archive_folder = None):
         self.directory = directory
 
         self.naming_json_file = os.path.join(self.directory, naming_json_file)
