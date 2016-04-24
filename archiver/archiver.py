@@ -165,7 +165,7 @@ class Agent(object):
     # Data
     def load_archive(self, urls, silent = False):
         four_o_fours = json.load(
-            open(os.path.join(self._get_archive_folder(), '404.json'))
+            open(os.path.join(self._get_archive_folder(), '404.json')))
         for url in urls:
             if url in four_o_fours:
                 print ('404:    ', url, '(Previously checked)')
