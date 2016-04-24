@@ -168,15 +168,16 @@ class Agent(object):
             try:
                 self.load_archive_page(url, silent = silent)
             except urllib.error.HTTPError:
-                print ('404:', url)
+                print ('404:    ', url)
                 continue
             except http.client.IncompleteRead as e:
-                print ('Partial:')
-                print ('dir(e):\n', dir(e))
-                print('==================')
-                print ('Partial', e.partial)
+                print ('Partial:', url)
+                #print ('Partial', e.partial)
+            except urllib.error.URLError:
+                print ('fail:   ', url)
+                continue
             except:
-                print ('retry:', url)
+                print ('retry:  ', url)
                 self.load_archive_page(url, silent = silent)
 
     def load_archive_page(self, url, silent = False):
