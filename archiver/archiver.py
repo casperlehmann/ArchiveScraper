@@ -164,11 +164,21 @@ class Agent(object):
 
     # Data
     def load_archive(self, urls, silent = False):
+        four_o_fours = json.load(
+            open(os.path.join(self._get_archive_folder(), '404.json'))
         for url in urls:
+            if url in four_o_fours:
+                print ('404:    ', url, '(Previously checked)')
+                continue
             try:
                 self.load_archive_page(url, silent = silent)
             except urllib.error.HTTPError:
                 print ('404:    ', url)
+                four_o_fours.append(url)
+                json.dump(
+                    four_o_fours, open(
+                        os.path.join(self._get_archive_folder(), '404.json'),
+                        'w'))
                 continue
             except http.client.IncompleteRead as e:
                 print ('Partial:', url)
