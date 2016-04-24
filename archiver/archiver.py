@@ -308,7 +308,7 @@ class Agent(object):
     def count_links(self, counter = None, links = None, domain = None):
         if counter is None: counter = dd(int)
         if links is None:
-            links = [_ for key, item in self.file_name_data.items()
+            links = [_ for key, item in self.scanned_file_data.items()
                      for _ in item]
         if domain is None: domain = 'politics.people.com.cn'
         if not isinstance(domain, str):
