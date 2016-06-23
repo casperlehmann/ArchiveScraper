@@ -1,4 +1,7 @@
-import datetime
+"""Class for scraping website.
+
+"""
+
 import json
 import os
 import re
@@ -7,12 +10,15 @@ import urllib.request
 import http.client
 
 from collections import defaultdict as dd
-from bs4 import BeautifulSoup as bs
+from socket import timeout
 from glob import glob
 
-from archiver.date_tools import get_date, get_date_string_generator
+from bs4 import BeautifulSoup as bs
 
 class Agent(object):
+    """Class for scraping website.
+
+    """
 
     _directory = None
     _archive_folder = None
@@ -23,6 +29,7 @@ class Agent(object):
 
     @property
     def directory(self):
+        """dir"""
         return self._directory
 
     @directory.setter
@@ -38,6 +45,7 @@ class Agent(object):
 
     @property
     def naming_json_file(self):
+        """_"""
         return self._naming_json_file
 
     @naming_json_file.setter
@@ -50,6 +58,7 @@ class Agent(object):
 
     @property
     def scanned_json_file(self):
+        """_"""
         return self._scanned_json_file
 
     @scanned_json_file.setter
@@ -68,26 +77,29 @@ class Agent(object):
             self._archive_folder = os.path.join(self.directory, archive_folder)
 
         self.naming_json_file = os.path.join(self.directory, naming_json_file)
+
+        self.file_name_data = None
         self.load_file_names_data_files(silent = silent)
 
         self.scanned_json_file = os.path.join(self.directory, scanned_json_file)
         self.load_scanned_file_data_files(silent = silent)
 
     def clean(self, silent = False):
+        """_"""
         if not silent: print ('Cleaning...')
         self.delete_file(target = self.naming_json_file, silent=silent)
         self.delete_file(
-                target = os.path.join(self._directory, 'archive.json'),
-                silent=silent)
+            target = os.path.join(self._directory, 'archive.json'),
+            silent=silent)
         self.delete_file(
-                target = os.path.join(self._directory, 'scanned.json'),
-                silent=silent)
+            target = os.path.join(self._directory, 'scanned.json'),
+            silent=silent)
         self.delete_file(target = self.naming_json_file, silent=silent)
         self.clean_archive(silent=silent)
         for f in glob(os.path.join(self.directory, '*')):
             if not silent: print ('Deleting: ' + f)
             shutil.rmtree(f)
-        self.archive_folder = None
+        self._archive_folder = None
         self.file_name_data = None
         self.scanned_file_data = None
         self._naming_json_file = None
@@ -95,11 +107,14 @@ class Agent(object):
         if not silent: print()
 
     def clean_archive(self, silent = False):
+        """_"""
         for f in glob(os.path.join(self._get_archive_folder(), '*')):
             if not silent: print ('Deleting: ' + f)
             os.remove(f)
 
-    def delete_file(self, target, silent = False):
+    @staticmethod
+    def delete_file(target, silent = False):
+        """_"""
         try:
             if not silent: print ('Deleting: ' + target + '...')
             os.remove(target)
@@ -144,12 +159,13 @@ class Agent(object):
 
     # ScraperBase(object):
     def load_file_names_data_files(self, silent = False):
+        """_"""
         if not silent: print ('Loading data files...')
         try:
-            self.file_name_data = dd(lambda: dict(), json.load(open(self.naming_json_file)))
-        except FileNotFoundError as e:
+            self.file_name_data = dd(dict, json.load(open(self.naming_json_file)))
+        except FileNotFoundError:
             if not silent: print ('Creating new file:', self.naming_json_file)
-            self.file_name_data = dd(lambda: dict())
+            self.file_name_data = dd(dict)
             json.dump(self.file_name_data, open(self.naming_json_file, 'w'))
         if not silent: print ()
 
@@ -164,6 +180,7 @@ class Agent(object):
 
     # Data
     def load_archive(self, urls, silent = False):
+        """_"""
         four_o_fours = json.load(
             open(os.path.join(self._get_archive_folder(), '404.json')))
         for url in urls:
@@ -180,17 +197,18 @@ class Agent(object):
                         os.path.join(self._get_archive_folder(), '404.json'),
                         'w'))
                 continue
-            except http.client.IncompleteRead as e:
+            except http.client.IncompleteRead:
                 print ('Partial:', url)
                 #print ('Partial', e.partial)
             except urllib.error.URLError:
                 print ('fail:   ', url)
                 continue
-            except:
+            except timeout:
                 print ('retry:  ', url)
                 self.load_archive_page(url, silent = silent)
 
     def load_archive_page(self, url, silent = False):
+        """_"""
         if not isinstance (url, str):
             raise TypeError('url must be a string')
         try:
@@ -216,6 +234,7 @@ class Agent(object):
                 self._save_filename(url, fname)
 
     def load_article_pages(self, *urls, silent = False):
+        """_"""
         for url in urls:
             if url in self.file_name_data:
                 self._get_filename(url)
@@ -235,12 +254,13 @@ class Agent(object):
 
     # ScannerBase(object):
     def load_scanned_file_data_files(self, silent = False):
+        """_"""
         if not silent: print ('Loading data files...')
         try:
-            self.scanned_file_data = dd(lambda: dict(), json.load(open(self.scanned_json_file)))
-        except FileNotFoundError as e:
+            self.scanned_file_data = dd(dict, json.load(open(self.scanned_json_file)))
+        except FileNotFoundError:
             if not silent: print ('Creating new file:', self.scanned_json_file)
-            self.scanned_file_data = dd(lambda: dict())
+            self.scanned_file_data = dd(dict)
             json.dump(self.scanned_file_data, open(self.scanned_json_file, 'w'))
         if not silent: print ()
 
@@ -253,6 +273,7 @@ class Agent(object):
         json.dump(self.scanned_file_data, open(self.scanned_json_file, 'w'))
 
     def get_soup(self, fname, url = 'not supplied', silent = False):
+        """_"""
         if fname is None or not isinstance(fname, str):
             raise TypeError("fname must be a string.")
         if url is None or not isinstance(url, str):
@@ -270,6 +291,7 @@ class Agent(object):
     def find_links_in_page(
             self, url, silent = False,
             target_element = None, target_class = None, target_id = None):
+        """_"""
         if not isinstance(url, str): raise TypeError
         fname = self._get_filename(url)
         if target_element is None: target_element = ''
@@ -295,6 +317,7 @@ class Agent(object):
     def find_links_in_archive(
             self, silent = False,
             target_element = None, target_class = None, target_id = None):
+        """_"""
         for url in set(self.file_name_data.keys()):
             if not url in self.scanned_file_data:
                 self.find_links_in_page(
@@ -306,6 +329,7 @@ class Agent(object):
 
     # Analysis
     def count_links(self, counter = None, links = None, domain = None):
+        """_"""
         if counter is None: counter = dd(int)
         if links is None:
             links = [_ for key, item in self.scanned_file_data.items()
@@ -322,6 +346,7 @@ class Agent(object):
         return counter
 
     def get_queue(self, filtr):
+        """_"""
         queue = []
         for url, data in self.file_name_data.items():
             if url in self.scanned_file_data:
@@ -330,7 +355,9 @@ class Agent(object):
         return filtr
 
     # Feedback
-    def show_counter(self, counter, filtr = None, silent = False, root = None):
+    @staticmethod
+    def show_counter(counter, filtr = None, silent = False, root = None):
+        """_"""
         if not isinstance(root, str):
             raise TypeError('Parameter \'root\' must be a string.')
         if filtr is None:
@@ -344,7 +371,7 @@ class Agent(object):
                 refiltered_count.items(),
                 key=lambda x: x[1]):
             stripped = href.strip('/').strip('GB/index.html').strip('/')
-            if (stripped.endswith('.com') or stripped.endswith('.cn')):
+            if stripped.endswith('.com') or stripped.endswith('.cn'):
                 continue
             if href.startswith('/'):
                 if not silent: print ('{:>8} {}'.format(count, root+href))

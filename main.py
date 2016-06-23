@@ -1,7 +1,8 @@
-from archiver import archiver, date_tools, url_tools
+"""Generate archive urls, download archives, scan for links, download articles.
 
-# agent = archiver.Dearchiver()
-# url_tools.get_archive_urls() | 
+"""
+
+from archiver import archiver, url_tools
 
 clean_archive = False
 scan_archive = False
