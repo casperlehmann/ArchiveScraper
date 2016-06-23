@@ -88,6 +88,28 @@ class Agent(object):
             raise ValueError('scanned_json_file cannot have length zero.')
         self._scanned_json_file = json_file
 
+    @property
+    def archive_folder(self):
+        """_"""
+        return self._archive_folder
+
+    @archive_folder.setter
+    def archive_folder(self, archive_folder):
+        if archive_folder is None:
+            current = self._archive_folder
+            if isinstance(current, str):
+                archive_folder = current
+            else:
+                archive_folder = os.path.join(self.directory, 'archive')
+        else:
+            archive_folder = os.path.join(self.directory, archive_folder)
+        if not isinstance(archive_folder, str):
+            raise TypeError(
+                'Name of archive folder must be a string, not {}'.format(
+                    archive_folder))
+        os.makedirs(archive_folder, exist_ok=True)
+        self._archive_folder = archive_folder
+
     @staticmethod
     def delete_file(target):
         """_"""
@@ -140,7 +162,7 @@ class Agent(object):
 
     def clean_archive(self):
         """_"""
-        for f in glob(os.path.join(self._get_archive_folder(), '*')):
+        for f in glob(os.path.join(self.archive_folder, '*')):
             logging.info('Deleting: ' + f)
             os.remove(f)
 
@@ -158,27 +180,10 @@ class Agent(object):
         if not url in self.file_name_data:
             raise KeyError
         fname = self._get_filename(url)
-        fpath = os.path.join(self._get_archive_folder(), fname)
+        fpath = os.path.join(self.archive_folder, fname)
         if not os.path.isfile(fpath):
             raise OSError(('File {} does not exist.'.format(fname)))
         return fpath
-
-    def _get_archive_folder(self, archive_folder = None):
-        if archive_folder is None:
-            current = self._archive_folder
-            if isinstance(current, str):
-                archive_folder = current
-            else:
-                archive_folder = os.path.join(self.directory, 'archive')
-        else:
-            archive_folder = os.path.join(self.directory, archive_folder)
-        if not isinstance(archive_folder, str):
-            raise TypeError(
-                'Name of archive folder must be a string, not {}'.format(
-                    archive_folder))
-        self._archive_folder = archive_folder
-        os.makedirs(self._archive_folder, exist_ok=True)
-        return self._archive_folder
 
     # ScraperBase(object):
     def load_file_names_data_files(self):
@@ -205,7 +210,7 @@ class Agent(object):
     def load_archive(self, urls):
         """_"""
         four_o_fours = json.load(
-            open(os.path.join(self._get_archive_folder(), '404.json')))
+            open(os.path.join(self.archive_folder, '404.json')))
         for url in urls:
             if url in four_o_fours:
                 print ('404:    ', url, '(Previously checked)')
@@ -217,7 +222,7 @@ class Agent(object):
                 four_o_fours.append(url)
                 json.dump(
                     four_o_fours, open(
-                        os.path.join(self._get_archive_folder(), '404.json'),
+                        os.path.join(self.archive_folder, '404.json'),
                         'w'))
                 continue
             except http.client.IncompleteRead:
@@ -250,7 +255,7 @@ class Agent(object):
             url = 'http://' + url
         with urllib.request.urlopen(url) as url_obj:
             fname = str(len(self.file_name_data)).zfill(6)
-            fpath = os.path.join(self._get_archive_folder(), fname)
+            fpath = os.path.join(self.archive_folder, fname)
             with open(fpath, 'wb') as f:
                 logging.info('Writing file: %s', fname)
                 f.write(url_obj.read())
@@ -304,7 +309,7 @@ class Agent(object):
         logging.info(
             'Loading & Souping file: [%s] for url: [%s]', fname, url)
         try:
-            fpath = os.path.join(self._get_archive_folder(), fname)
+            fpath = os.path.join(self.archive_folder, fname)
             with open(fpath, 'rb') as fobj:
                 return bs(fobj.read(), 'html.parser')
         except FileNotFoundError:
