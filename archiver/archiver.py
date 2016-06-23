@@ -28,7 +28,6 @@ class Agent(object):
     _directory = None
     _archive_folder = None
     _naming_json_file = None
-    naming_file_data = None
     _scanned_json_file = None
     scanned_file_data = None
 
@@ -89,6 +88,39 @@ class Agent(object):
             raise ValueError('scanned_json_file cannot have length zero.')
         self._scanned_json_file = json_file
 
+    @staticmethod
+    def delete_file(target):
+        """_"""
+        try:
+            logging.info('Deleting: ' + target + '...')
+            os.remove(target)
+        except FileNotFoundError:
+            logging.info('Does not exist: ' + target)
+
+    # Feedback
+    @staticmethod
+    def show_counter(counter, root, filtr = None):
+        """_"""
+        if not isinstance(root, str):
+            raise TypeError('Parameter \'root\' must be a string.')
+        if filtr is None:
+            filtr = r'/'
+            #filtr = r'/[1-2][09][901][0-9]/'
+        refiltered_count = {}
+        for item in counter:
+            if re.search(filtr, item) is not None:
+                refiltered_count[item] = counter[item]
+        for href, count in sorted(
+                refiltered_count.items(),
+                key=lambda x: x[1]):
+            stripped = href.strip('/').strip('GB/index.html').strip('/')
+            if stripped.endswith('.com') or stripped.endswith('.cn'):
+                continue
+            if href.startswith('/'):
+                logging.info('%8s %s', count, root+href)
+            else:
+                logging.info('%8s %s', count, href)
+
     def clean(self):
         """_"""
         logging.info('Cleaning...')
@@ -111,15 +143,6 @@ class Agent(object):
         for f in glob(os.path.join(self._get_archive_folder(), '*')):
             logging.info('Deleting: ' + f)
             os.remove(f)
-
-    @staticmethod
-    def delete_file(target):
-        """_"""
-        try:
-            logging.info('Deleting: ' + target + '...')
-            os.remove(target)
-        except FileNotFoundError:
-            logging.info('Does not exist: ' + target)
 
     def _get_filename(self, url):
         if not isinstance (url, str):
@@ -350,27 +373,3 @@ class Agent(object):
                 queue.extend(data['l'])
         filtr = [_ for _ in queue if filtr in _]
         return filtr
-
-    # Feedback
-    @staticmethod
-    def show_counter(counter, root, filtr = None):
-        """_"""
-        if not isinstance(root, str):
-            raise TypeError('Parameter \'root\' must be a string.')
-        if filtr is None:
-            filtr = r'/'
-            #filtr = r'/[1-2][09][901][0-9]/'
-        refiltered_count = {}
-        for item in counter:
-            if re.search(filtr, item) is not None:
-                refiltered_count[item] = counter[item]
-        for href, count in sorted(
-                refiltered_count.items(),
-                key=lambda x: x[1]):
-            stripped = href.strip('/').strip('GB/index.html').strip('/')
-            if stripped.endswith('.com') or stripped.endswith('.cn'):
-                continue
-            if href.startswith('/'):
-                logging.info('%8s %s', count, root+href)
-            else:
-                logging.info('%8s %s', count, href)
