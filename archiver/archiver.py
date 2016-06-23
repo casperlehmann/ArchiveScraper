@@ -162,7 +162,8 @@ class Agent(object):
         """_"""
         logging.info('Loading data files...')
         try:
-            self.file_name_data = dd(dict, json.load(open(self.naming_json_file)))
+            self.file_name_data = dd(
+                dict, json.load(open(self.naming_json_file)))
         except FileNotFoundError:
             logging.info('Creating new file: %s\n', self.naming_json_file)
             self.file_name_data = dd(dict)
@@ -256,7 +257,8 @@ class Agent(object):
         """_"""
         logging.info('Loading data files...')
         try:
-            self.scanned_file_data = dd(dict, json.load(open(self.scanned_json_file)))
+            self.scanned_file_data = dd(
+                dict, json.load(open(self.scanned_json_file)))
         except FileNotFoundError:
             logging.info('Creating new file: %s\n', self.scanned_json_file)
             self.scanned_file_data = dd(dict)
