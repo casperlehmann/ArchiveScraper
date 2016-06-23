@@ -213,12 +213,12 @@ class Agent(object):
             open(os.path.join(self.archive_folder, '404.json')))
         for url in urls:
             if url in four_o_fours:
-                print ('404:    ', url, '(Previously checked)')
+                logging.info('400:     %s (Previously checked)', url)
                 continue
             try:
                 self.load_archive_page(url)
             except urllib.error.HTTPError:
-                print ('404:    ', url)
+                logging.info('404:     %s', url)
                 four_o_fours.append(url)
                 json.dump(
                     four_o_fours, open(
@@ -226,13 +226,13 @@ class Agent(object):
                         'w'))
                 continue
             except http.client.IncompleteRead:
-                print ('Partial:', url)
+                logging.info('Partial: %s', url)
                 #print ('Partial', e.partial)
             except urllib.error.URLError:
-                print ('fail:   ', url)
+                logging.info('fail:   %s', url)
                 continue
             except timeout:
-                print ('retry:  ', url)
+                logging.info('retry:  %s', url)
                 self.load_archive_page(url)
 
     def load_archive_page(self, url):
