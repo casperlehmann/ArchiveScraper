@@ -32,6 +32,21 @@ class Agent(object):
     _scanned_json_file = None
     scanned_file_data = None
 
+    def __init__(
+            self, directory = None, naming_json_file = None,
+            scanned_json_file = None, archive_folder = None):
+        self.directory = directory
+        if not archive_folder is None:
+            self._archive_folder = os.path.join(self.directory, archive_folder)
+
+        self.naming_json_file = os.path.join(self.directory, naming_json_file)
+
+        self.file_name_data = None
+        self.load_file_names_data_files()
+
+        self.scanned_json_file = os.path.join(self.directory, scanned_json_file)
+        self.load_scanned_file_data_files()
+
     @property
     def directory(self):
         """dir"""
@@ -73,21 +88,6 @@ class Agent(object):
         if len(json_file) == 0:
             raise ValueError('scanned_json_file cannot have length zero.')
         self._scanned_json_file = json_file
-
-    def __init__(
-            self, directory = None, naming_json_file = None,
-            scanned_json_file = None, archive_folder = None):
-        self.directory = directory
-        if not archive_folder is None:
-            self._archive_folder = os.path.join(self.directory, archive_folder)
-
-        self.naming_json_file = os.path.join(self.directory, naming_json_file)
-
-        self.file_name_data = None
-        self.load_file_names_data_files()
-
-        self.scanned_json_file = os.path.join(self.directory, scanned_json_file)
-        self.load_scanned_file_data_files()
 
     def clean(self):
         """_"""
