@@ -152,24 +152,20 @@ class Agent(object):
         """_"""
         logging.info('Cleaning...')
         self.delete_file(target = self.naming_json_file)
-        self.delete_file(target = os.path.join(self._directory, 'archive.json'))
-        self.delete_file(target = os.path.join(self._directory, 'scanned.json'))
-        self.delete_file(target = self.naming_json_file)
-        self.clean_archive()
+        self.delete_file(target = self.scanned_json_file)
+        # clean archive
+        for f in glob(os.path.join(self.archive_folder, '*')):
+            logging.info('Deleting (archive): %s', f)
+            os.remove(f)
+        # remove subfolders
         for f in glob(os.path.join(self.directory, '*')):
-            logging.info('Deleting: %s\n', f)
+            logging.info('Deleting: (dir): %s', f)
             shutil.rmtree(f)
         self._archive_folder = None
         self.file_name_data = None
         self.scanned_file_data = None
         self._naming_json_file = None
         self._scanned_json_file = None
-
-    def clean_archive(self):
-        """_"""
-        for f in glob(os.path.join(self.archive_folder, '*')):
-            logging.info('Deleting: ' + f)
-            os.remove(f)
 
     def _get_filename(self, url):
         if not isinstance (url, str):
