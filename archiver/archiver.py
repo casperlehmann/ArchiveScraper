@@ -32,11 +32,9 @@ class Agent(object):
     scanned_file_data = None
 
     def __init__(
-            self, directory = None, naming_json_file = None,
-            scanned_json_file = None, archive_folder = None):
+            self, directory, naming_json_file,
+            scanned_json_file, archive_folder):
         self.directory = directory
-        if not archive_folder is None:
-            self._archive_folder = os.path.join(self.directory, archive_folder)
 
         self.naming_json_file = os.path.join(self.directory, naming_json_file)
 
@@ -53,14 +51,11 @@ class Agent(object):
 
     @directory.setter
     def directory(self, directory):
-        if directory is not None:
-            if not isinstance (directory, str):
-                raise TypeError('directory must be a string.')
-            if not os.path.isdir(directory):
-                raise ValueError('directory is not a directory.')
-            self._directory = directory
-        elif self._directory is None:
-            self._directory = 'data_dearchiver'
+        if not isinstance (directory, str):
+            raise TypeError('directory must be a string.')
+        if not os.path.isdir(directory):
+            raise ValueError('directory is not a directory.')
+        self._directory = directory
 
     @property
     def naming_json_file(self):
@@ -95,14 +90,7 @@ class Agent(object):
 
     @archive_folder.setter
     def archive_folder(self, archive_folder):
-        if archive_folder is None:
-            current = self._archive_folder
-            if isinstance(current, str):
-                archive_folder = current
-            else:
-                archive_folder = os.path.join(self.directory, 'archive')
-        else:
-            archive_folder = os.path.join(self.directory, archive_folder)
+        archive_folder = os.path.join(self.directory, archive_folder)
         if not isinstance(archive_folder, str):
             raise TypeError(
                 'Name of archive folder must be a string, not {}'.format(
