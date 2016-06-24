@@ -111,6 +111,9 @@ class Agent(object):
                     archive_folder))
         os.makedirs(archive_folder, exist_ok=True)
         self._archive_folder = archive_folder
+        four_o_four_file = os.path.join(archive_folder, '404.json')
+        if not os.path.isfile(four_o_four_file):
+            json.dump([], fp=open(four_o_four_file, 'w'))
 
     @staticmethod
     def delete_file(target):
@@ -199,8 +202,8 @@ class Agent(object):
     # Data
     def load_archive(self, urls):
         """_"""
-        four_o_fours = json.load(
-            open(os.path.join(self.archive_folder, '404.json')))
+        four_o_four_file = os.path.join(self.archive_folder, '404.json')
+        four_o_fours = json.load(open(four_o_four_file))
         for url in urls:
             if url in four_o_fours:
                 logging.info('400:     %s (Previously checked)', url)
