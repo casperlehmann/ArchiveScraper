@@ -15,14 +15,16 @@ if __name__ == '__main__':
         schema = 'http://politics.people.com.cn/GB/70731/review/{}.html')
 
     agent = archiver.Agent(
-        naming_json_file = '1_archive.json', scanned_json_file = '1_scanned.json',
-        archive_folder = '1_archive')
+        directory = 'data_dearchiver',
+        naming_json_file = '1_archives.json', scanned_json_file = '1_scanned.json',
+        archive_folder = '1_archives')
 
     if CLEAN_ARCHIVE:
         agent.clean()
         agent = archiver.Agent(
-            naming_json_file = '1_archive.json', scanned_json_file = '1_scanned.json',
-            archive_folder = '1_archive')
+            directory = 'data_dearchiver',
+            naming_json_file = '1_archives.json', scanned_json_file = '1_scanned.json',
+            archive_folder = '1_archives')
 
     if SCAN_ARCHIVE:
         agent.load_archive(all_urls)
@@ -36,7 +38,8 @@ if __name__ == '__main__':
              for item in li])
 
         reader = archiver.Agent(
-            naming_json_file = '2_article.json', scanned_json_file = '2_artscan.json',
+            directory = 'data_dearchiver',
+            naming_json_file = '2_articles.json', scanned_json_file = '2_artscan.json',
             archive_folder = '2_articles')
         print ('Fetching {} articles.'.format(len(article_urls)))
         reader.load_archive(article_urls)
