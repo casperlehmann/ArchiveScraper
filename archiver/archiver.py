@@ -36,13 +36,9 @@ class Agent(object):
             self, directory, naming_json_file,
             scanned_json_file, archive_folder):
         self.directory = directory
-
-        self.naming_json_file = os.path.join(self.directory, naming_json_file)
-
-        self.load_file_names_data_files()
-
-        self.scanned_json_file = os.path.join(self.directory, scanned_json_file)
-        self.load_scanned_file_data_files()
+        self.archive_folder = archive_folder
+        self.naming_json_file = naming_json_file
+        self.scanned_json_file = scanned_json_file
 
     @property
     def directory(self):
@@ -68,7 +64,16 @@ class Agent(object):
             raise TypeError('naming_json_file must be a string.')
         if len(json_file) == 0:
             raise ValueError('naming_json_file cannot have length zero.')
-        self._naming_json_file = json_file
+        self._naming_json_file = os.path.join(self.directory, json_file)
+        # load_file_names_data_files
+        logging.info('Loading data files...')
+        try:
+            self.file_name_data = dd(
+                dict, json.load(open(self._naming_json_file)))
+        except FileNotFoundError:
+            logging.info('Creating new file: %s\n', self._naming_json_file)
+            self.file_name_data = dd(dict)
+            json.dump(self.file_name_data, open(self._naming_json_file, 'w'))
 
     @property
     def scanned_json_file(self):
@@ -81,7 +86,16 @@ class Agent(object):
             raise TypeError('scanned_json_file must be a string.')
         if len(json_file) == 0:
             raise ValueError('scanned_json_file cannot have length zero.')
-        self._scanned_json_file = json_file
+        self._scanned_json_file = os.path.join(self.directory, json_file)
+        # load_scanned_file_data_files
+        logging.info('Loading data files...')
+        try:
+            self.scanned_file_data = dd(
+                dict, json.load(open(self._scanned_json_file)))
+        except FileNotFoundError:
+            logging.info('Creating new file: %s\n', self._scanned_json_file)
+            self.scanned_file_data = dd(dict)
+            json.dump(self.scanned_file_data, open(self._scanned_json_file, 'w'))
 
     @property
     def archive_folder(self):
@@ -173,18 +187,6 @@ class Agent(object):
             raise OSError(('File {} does not exist.'.format(fname)))
         return fpath
 
-    # ScraperBase(object):
-    def load_file_names_data_files(self):
-        """_"""
-        logging.info('Loading data files...')
-        try:
-            self.file_name_data = dd(
-                dict, json.load(open(self.naming_json_file)))
-        except FileNotFoundError:
-            logging.info('Creating new file: %s\n', self.naming_json_file)
-            self.file_name_data = dd(dict)
-            json.dump(self.file_name_data, open(self.naming_json_file, 'w'))
-
     # File names and paths
     def _save_filename(self, url, fname):
         if not isinstance (url, str):
@@ -267,18 +269,6 @@ class Agent(object):
                 logging.info('Writing file: %s', fname)
                 f.write(url_obj.read())
                 self._save_filename(url, fname)
-
-    # ScannerBase(object):
-    def load_scanned_file_data_files(self):
-        """_"""
-        logging.info('Loading data files...')
-        try:
-            self.scanned_file_data = dd(
-                dict, json.load(open(self.scanned_json_file)))
-        except FileNotFoundError:
-            logging.info('Creating new file: %s\n', self.scanned_json_file)
-            self.scanned_file_data = dd(dict)
-            json.dump(self.scanned_file_data, open(self.scanned_json_file, 'w'))
 
     def _save_links_from_page(self, url, links):
         if not isinstance (url, str):
