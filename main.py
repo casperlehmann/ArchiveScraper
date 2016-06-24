@@ -4,9 +4,9 @@
 
 from archiver import archiver, url_tools
 
-clean_archive = False
-scan_archive = False
-scan_articles = True
+CLEAN_ARCHIVE = True
+SCAN_ARCHIVE = True
+SCAN_ARTICLES = True
 
 if __name__ == '__main__':
     all_urls = url_tools.get_archive_urls(
@@ -18,18 +18,17 @@ if __name__ == '__main__':
         naming_json_file = '1_archive.json', scanned_json_file = '1_scanned.json',
         archive_folder = '1_archive')
 
-    if clean_archive:
+    if CLEAN_ARCHIVE:
         agent.clean()
         agent = archiver.Agent(
             naming_json_file = '1_archive.json', scanned_json_file = '1_scanned.json',
             archive_folder = '1_archive')
 
-    if scan_archive:
+    if SCAN_ARCHIVE:
         agent.load_archive(all_urls)
         agent.find_links_in_archive(target_element = 'ul', target_class = 'list_16')
 
-
-    if scan_articles:
+    if SCAN_ARTICLES:
         home = 'http://politics.people.com.cn'
         article_urls = set(
             [item if not item.startswith('/') else home + item
