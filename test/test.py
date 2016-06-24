@@ -1,9 +1,6 @@
-from nose.tools import assert_equals, assert_not_equals
-from nose.tools import assert_is_instance, assert_is_none
-from nose.tools import assert_raises, raises
-from nose.tools import assert_true, assert_false
-from nose.plugins.skip import SkipTest
-import nose
+"""Test suite
+
+"""
 
 import datetime
 import tempfile
@@ -12,7 +9,15 @@ import json
 import shutil
 from glob import glob
 
+from nose.tools import assert_equals#, assert_not_equals
+from nose.tools import assert_is_instance, assert_is_none
+from nose.tools import assert_raises
+from nose.tools import assert_true, assert_false
+from nose.plugins.skip import SkipTest
+
 import archiver
+
+# pylint: disable=missing-docstring,no-self-use,attribute-defined-outside-init,too-many-public-methods,protected-access
 
 class TestGetDateAsString(object):
 
@@ -140,7 +145,7 @@ class TestAgent(object):
     @classmethod
     def setup_class(cls):
         cls.temp_dir = tempfile.mkdtemp()
-        os.mkdir(os.path.join(cls.temp_dir, 'archive'))
+        os.mkdir(os.path.join(cls.temp_dir, 'archives'))
 
     @classmethod
     def teardown_class(cls):
@@ -149,25 +154,29 @@ class TestAgent(object):
     def setup(self):
         self.agent = archiver.Agent(
             naming_json_file = 'archive.json', scanned_json_file = 'scanned.json',
-            directory = self.temp_dir, silent = True)
+            directory = self.temp_dir, archive_folder = 'archives')
 
     def teardown(self):
-        self.agent.clean(silent = True)
+        self.agent.clean()
 
     # __init__
     def test_directory_raises_TypeError(self):
         assert_raises(
             TypeError, archiver.Agent, directory = 1,
-            naming_json_file = 'archive.json', scanned_json_file = 'scanned.json',
-            silent = True)
+            naming_json_file = 'archive.json',
+            scanned_json_file = 'scanned.json')
 
     def test_directory_raises_ValueError(self):
         assert_raises(
-            ValueError, archiver.Agent, directory = '', silent = True)
+            ValueError, archiver.Agent, directory = '',
+            naming_json_file = '1_archives.json', scanned_json_file = '1_scanned.json',
+            archive_folder = '1_archives')
 
-    def test_load_file_names_data_files_sets_json(self):
+    def test_naming_json_file_sets_json(self):
         self.agent.file_name_data = None
-        self.agent.load_file_names_data_files(silent = True)
+        self.agent = archiver.Agent(
+            naming_json_file = 'archive.json', scanned_json_file = 'scanned.json',
+            directory = self.temp_dir, archive_folder = 'archives')
         assert_equals(self.agent.file_name_data, {})
 
     def test_isdir_temp(self):
@@ -177,12 +186,6 @@ class TestAgent(object):
         assert_true(os.path.isfile(self.agent.naming_json_file))
 
     # Archive
-    def test_load_file_names_data_files_silent_raises_TypeError(self):
-        assert_raises(
-            TypeError, self.agent.load_file_names_data_files,
-            naming_json_file = 'archive.json', scanned_json_file = 'scanned.json',
-            silent = 2)
-
     def test_load_file_names_data_files_reads_contents_from_file(self):
         with open(os.path.join(self.temp_dir, 'archive.json'), 'w') as f:
             json.dump(
@@ -190,7 +193,7 @@ class TestAgent(object):
                 f)
         assert_equals(self.agent.file_name_data, {})
 
-        self.agent.load_file_names_data_files()
+        self.agent.naming_json_file = 'archive.json'
         assert_equals(
             self.agent.file_name_data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
@@ -202,7 +205,7 @@ class TestAgent(object):
         self.agent.file_name_data = {}
         assert_equals(self.agent.file_name_data, {})
 
-        self.agent.load_scanned_file_data_files()
+        self.agent.scanned_json_file = 'scanned.json'
         assert_equals(
             self.agent.scanned_file_data,
             {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
@@ -210,7 +213,7 @@ class TestAgent(object):
     def test_load_file_names_data_files_creation(self):
         self.agent.file_name_data = None
         assert_is_none(self.agent.file_name_data)
-        self.agent.load_file_names_data_files()
+        self.agent.naming_json_file = 'archive.json'
         assert_is_instance(self.agent.file_name_data, dict)
         assert_equals(self.agent.file_name_data, {})
 
@@ -222,7 +225,7 @@ class TestAgent(object):
         self.agent.file_name_data = None
         assert_is_none(self.agent.file_name_data)
 
-        self.agent.load_file_names_data_files()
+        self.agent.naming_json_file = 'archive.json'
         assert_is_instance(self.agent.file_name_data, dict)
         assert_equals(
             self.agent.file_name_data,
@@ -236,7 +239,7 @@ class TestAgent(object):
         self.agent.file_name_data = None
         assert_is_none(self.agent.file_name_data)
 
-        self.agent.load_scanned_file_data_files()
+        self.agent.scanned_json_file = 'scanned.json'
         assert_is_instance(self.agent.scanned_file_data, dict)
         assert_equals(
             self.agent.scanned_file_data,
@@ -261,11 +264,12 @@ class TestAgent(object):
 
     # Cleaning
     def test_clean(self):
-        archive = self.agent._get_archive_folder(archive_folder = 'archive')
+        self.agent.archive_folder = 'archives'
+        archive = self.agent.archive_folder
         fpath = os.path.join(archive, '000001')
         with open(fpath, 'wb') as f: f.write(b'Some contents')
         archive_json_file = os.path.join(self.temp_dir, 'archive.json')
-        archive_folder = os.path.join(self.temp_dir, 'archive')
+        archive_folder = os.path.join(self.temp_dir, 'archives')
 
         # One file, one dir, one data, archive_json_file, archive_folder, fpath:
         assert_true(os.path.isfile(archive_json_file))
@@ -273,10 +277,10 @@ class TestAgent(object):
         assert_true(os.path.isfile(fpath))
         # ./archive/ ./archive.json ./scanned.json
         assert_equals(3, len(glob(os.path.join(self.agent.directory,'*'))))
-        assert_equals(1, len(glob(os.path.join(self.agent._archive_folder,'*'))))
+        assert_equals(2, len(glob(os.path.join(self.agent.archive_folder,'*'))))
 
         # Delete it:
-        self.agent.clean(silent = True)
+        self.agent.clean()
         # Files and dir are gone:
         assert_false(os.path.isfile(archive_json_file))
         assert_false(os.path.isdir(archive_folder))
@@ -286,7 +290,7 @@ class TestAgent(object):
         # Recreate, so teardown doesn't fail:
         self.agent = archiver.Agent(
             naming_json_file = 'archive.json', scanned_json_file = 'scanned.json',
-            directory = self.temp_dir, silent = True)
+            directory = self.temp_dir, archive_folder = 'archives')
 
         # Scanned
         scanned_scanned_json_file = os.path.join(self.temp_dir, 'scanned.json')
@@ -294,10 +298,10 @@ class TestAgent(object):
 
         # Only one file scanned_scanned_json_file:
         assert_true(os.path.isfile(scanned_scanned_json_file))
-        assert_equals(2, len(glob(os.path.join(self.agent.directory,'*'))))
+        assert_equals(3, len(glob(os.path.join(self.agent.directory,'*'))))
 
         # Delete it:
-        self.agent.clean(silent = True)
+        self.agent.clean()
 
         # Files and dir are gone:
         assert_false(os.path.isfile(scanned_scanned_json_file))
@@ -307,7 +311,7 @@ class TestAgent(object):
         # Recreate, so teardown doesn't fail:
         self.agent = archiver.Agent(
             naming_json_file = 'archive.json', scanned_json_file = 'scanned.json',
-            directory = self.temp_dir, silent = True)
+            directory = self.temp_dir, archive_folder = 'archives')
 
     # File names and paths
     def test__get_filename_url_raises_TypeError(self):
@@ -320,8 +324,8 @@ class TestAgent(object):
 
     def test__get_filename(self):
         fname = '000001'
-        archive = self.agent._get_archive_folder(
-            archive_folder = 'archive')
+        self.agent.archive_folder = 'archives'
+        archive = self.agent.archive_folder
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
         self.agent._save_filename('www.example.com', fname)
@@ -342,84 +346,72 @@ class TestAgent(object):
 
     def test__get_filepath(self):
         fname = '000001'
-        archive = self.agent._get_archive_folder(
-            archive_folder = 'archive')
+        self.agent.archive_folder = 'archives'
+        archive = self.agent.archive_folder
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
         self.agent._save_filename('www.example.com', fname)
         assert_equals(self.agent._get_filepath('www.example.com'), fpath)
 
     def test__get_archive_folder_sets_folder_name(self):
-        assert_is_none(self.agent._archive_folder)
-        self.agent._get_archive_folder('test')
+        assert_equals(self.agent._archive_folder[-9:], '/archives')
+        self.agent.archive_folder = 'test'
         assert_equals(
             self.agent._archive_folder,
             os.path.join(self.temp_dir, 'test'))
 
-    def test__get_archive_folder_returns_self_archive_folder(self):
-        assert_equals(
-            self.agent._get_archive_folder(archive_folder = 'afn'),
-            self.agent._archive_folder)
-
-    def test__get_archive_folder_default_archive_folder(self):
-        self.agent._archive_folder = None
-        assert_equals(
-            self.agent._get_archive_folder(),
-            os.path.join(self.temp_dir, 'archive'))
-
     def test__get_archive_folder_archive_folder_raises_TypeError(self):
+        def name_setter(name):
+            self.agent.archive_folder = name
         assert_raises(
             TypeError,
-            self.agent._get_archive_folder,
-            archive_folder=1)
+            name_setter,
+            1)
 
     def test__get_archive_folder_creates_dirs(self):
         test_dir = os.path.join(self.temp_dir, 'test_dir')
         assert_false(os.path.exists(test_dir))
-        self.agent._get_archive_folder(archive_folder=test_dir)
+        self.agent.archive_folder = test_dir
         assert_true(os.path.exists(test_dir))
 
     def test__get_archive_folder_stays_the_same(self):
         test_dir = os.path.join(self.temp_dir, 'test_dir')
-        self.agent._get_archive_folder(archive_folder=test_dir)
+        self.agent.archive_folder = test_dir
         a = self.agent._archive_folder
-        self.agent._get_archive_folder(archive_folder=test_dir)
+        self.agent.archive_folder = test_dir
         b = self.agent._archive_folder
         assert_equals(a,b)
 
     # Data
     def test__load_archive_pages_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.agent.load_archive_page, url = 1, silent = True)
+            TypeError, self.agent.load_archive_page, url = 1)
 
     def test__load_archive_pages_raises_KeyError_when_page_not_saved(self):
         if self.skip_online_tests: raise SkipTest
         assert_raises(
-            KeyError, self.agent.load_archive_page, url = 'www.example.com',
-            silent = True)
+            KeyError, self.agent.load_archive_page, url = 'www.example.com')
         self.agent._save_filename('www.example.com', '000001')
-        self.agent.load_archive_page(url = 'www.example.com', silent = True)
+        self.agent.load_archive_page(url = 'www.example.com')
 
     def test__load_archive_pages(self):
         fname = '000001'
-        archive = self.agent._get_archive_folder(
-            archive_folder = 'archive')
-        fpath = os.path.join(archive, fname)
+        self.agent.archive_folder = 'archives'
         self.agent._save_filename('www.example.com', '000001')
         fname = self.agent.load_archive_page(
-            url = 'www.example.com', silent = True)
+            url = 'www.example.com')
         assert_equals('000001', fname)
 
     def test__fetch_archive_page_url_raises_TypeError(self):
         if self.skip_online_tests: raise SkipTest
         assert_raises(
-            TypeError, self.agent._fetch_archive_page, url = 1, silent = True)
+            TypeError, self.agent._fetch_archive_page, url = 1)
 
     def test__fetch_archive_page_writes_file(self):
         if self.skip_online_tests: raise SkipTest
         assert_equals(self.agent.file_name_data, {})
-        self.agent._fetch_archive_page(url = 'www.example.com', silent = True)
-        arch = self.agent._get_archive_folder(archive_folder = 'archive_folder')
+        self.agent._fetch_archive_page(url = 'www.example.com')
+        self.agent.archive_folder = 'archive_folder'
         expected_name = '000000'
         expected_archive_data = {'http://www.example.com': {'f': expected_name}}
         assert_equals(self.agent.file_name_data, expected_archive_data)
@@ -467,39 +459,34 @@ class TestAgent(object):
 
     def test_get_soup_file_raises_OSError(self):
         assert_raises(
-            OSError, self.agent.get_soup, fname = '000001', silent = True)
+            OSError, self.agent.get_soup, fname = '000001')
 
     def test_get_soup(self):
         fname = '000001'
-        archive = self.agent._get_archive_folder(
-            archive_folder = 'archive')
+        self.agent.archive_folder = 'archives'
+        archive = self.agent.archive_folder
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
 
-        soup = self.agent.get_soup(fname, silent = True)
+        soup = self.agent.get_soup(fname)
         assert_equals(soup.text, 'Some contents')
 
     def test_get_soup_filename_raises_TypeError(self):
-        assert_raises(
-            TypeError, self.agent.get_soup, fname=1, url='string',
-            silent = True)
+        assert_raises(TypeError, self.agent.get_soup, fname=1, url='string')
 
     def test_get_soup_url_raises_TypeError(self):
         string = '000001'
         not_string = 1
         assert_raises(
-            TypeError, self.agent.get_soup, fname=string, url=not_string,
-            silent = True)
+            TypeError, self.agent.get_soup, fname=string, url=not_string)
 
     def test_get_soup_raises_OSError(self):
         string = '000001'
-        assert_raises(
-            OSError, self.agent.get_soup, fname=string, url=string,
-            silent = True)
+        assert_raises(OSError, self.agent.get_soup, fname=string, url=string)
 
     def test_find_links_in_page_loads_from_disk(self):
         fname = '000001'
-        archive = os.path.join(self.temp_dir, 'archive')
+        archive = os.path.join(self.temp_dir, 'archives')
         os.makedirs(archive, exist_ok=True)
         fpath = os.path.join(archive, fname)
         html_contents = (b'<html><head></head><body>'
@@ -513,7 +500,7 @@ class TestAgent(object):
             json.dump(archive_data, f)
         self.agent.file_name_data[url]['f'] = fname
 
-        self.agent.find_links_in_page(url, silent = True)
+        self.agent.find_links_in_page(url)
         assert_equals(
             archive_data,
             {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
