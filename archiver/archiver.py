@@ -29,6 +29,7 @@ class Agent(object):
     _archive_folder = None
     _naming_json_file = None
     _scanned_json_file = None
+    file_name_data = None
     scanned_file_data = None
 
     def __init__(
@@ -38,7 +39,6 @@ class Agent(object):
 
         self.naming_json_file = os.path.join(self.directory, naming_json_file)
 
-        self.file_name_data = None
         self.load_file_names_data_files()
 
         self.scanned_json_file = os.path.join(self.directory, scanned_json_file)
