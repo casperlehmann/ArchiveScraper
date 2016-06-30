@@ -5,7 +5,8 @@ import tempfile
 import os
 import shutil
 
-from nose.tools import assert_equals#, assert_not_equals
+from nose.tools import assert_equals
+from nose.tools import assert_raises
 
 import archiver
 
@@ -34,7 +35,7 @@ class TestDB():
         with self.db.connect() as con:
             self.db.insert_url(con, url)
             cur = con.cursor()
-            cur.execute('SELECT * FROM name_mapper')
+            cur.execute('SELECT * FROM file_names')
             assert_equals(cur.fetchone(), (url, 1))
 
     def test_insert_autoincrement(self):
@@ -43,6 +44,19 @@ class TestDB():
             self.db.insert_url(con, url)
             self.db.insert_url(con, url+'2')
             cur = con.cursor()
-            cur.execute('SELECT * FROM name_mapper')
+            cur.execute('SELECT * FROM file_names')
             result = cur.fetchall()
         assert_equals(result, [(url, 1), (url+'2', 2)])
+
+    def test_get_filename(self):
+        with self.db.connect() as con:
+            cur = con.cursor()
+            cur.execute('INSERT INTO file_names (url) VALUES ("wikipedia.org")')
+            filename = self.db.get_filename(con, 'wikipedia.org')
+            assert_equals(filename, '000001')
+
+    def test_get_filename_raises_KeyError(self):
+        with self.db.connect() as con:
+            cur = con.cursor()
+            cur.execute('INSERT INTO file_names (url) VALUES ("wikipedia.org")')
+            assert_raises(KeyError, self.db.get_filename, con, 'uncyclopedia.org')

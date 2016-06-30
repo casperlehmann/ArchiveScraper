@@ -19,7 +19,7 @@ class DB():
     def create_name_mapper(con):
         cur = con.cursor()
         cur.execute(
-            'CREATE TABLE name_mapper('
+            'CREATE TABLE file_names('
             'url VARCHAR(255) NOT NULL,'
             'ID INTEGER PRIMARY KEY AUTOINCREMENT'
             ')'
@@ -31,7 +31,7 @@ class DB():
     @staticmethod
     def drop_name_mapper(con):
         cur = con.cursor()
-        cur.execute('DROP TABLE name_mapper')
+        cur.execute('DROP TABLE file_names')
 
     def clean(self, con):
         self.drop_name_mapper(con)
@@ -39,4 +39,16 @@ class DB():
     @staticmethod
     def insert_url(con, url):
         cur = con.cursor()
-        cur.execute('INSERT INTO name_mapper (url) VALUES ("{}")'.format(url))
+        cur.execute('INSERT INTO file_names (url) VALUES ("{}")'.format(url))
+
+    @staticmethod
+    def get_filename(con, url):
+        if not isinstance (url, str):
+            raise TypeError
+        cur = con.cursor()
+        cur.execute('SELECT id FROM file_names WHERE url="{}"'.format(url))
+        result = cur.fetchone()
+        if result is None:
+            raise KeyError('File not registered for url: {}'.format(url))
+        filename = str(result[0]).zfill(6)
+        return filename
