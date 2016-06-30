@@ -1,12 +1,12 @@
-"""Test suite
+""" Test suite
 
 """
 
-import datetime
 import tempfile
 import os
 import json
 import shutil
+
 from glob import glob
 
 from nose.tools import assert_equals#, assert_not_equals
@@ -18,125 +18,6 @@ from nose.plugins.skip import SkipTest
 import archiver
 
 # pylint: disable=missing-docstring,no-self-use,attribute-defined-outside-init,too-many-public-methods,protected-access
-
-class TestGetDateAsString(object):
-
-    def test_date_YYYY_mm_dd_raises_TypeError(self):
-        assert_raises(
-            TypeError,
-            archiver.get_date_as_string_YYYY_mm_dd,
-            '2015-09-01')
-
-    def test_date_YYYY_mm_dd(self):
-        date_string = '2015-09-01'
-        assert_equals(
-            archiver.get_date_as_string_YYYY_mm_dd(
-                datetime.datetime.strptime(date_string, '%Y-%m-%d')),
-            date_string)
-
-    def test_date_YYYYmmdd_raises_TypeError(self):
-        assert_raises(
-            TypeError,
-            archiver.get_date_as_string_YYYYmmdd,
-            '2015-09-01')
-
-    def test_date_YYYYmmdd(self):
-        date_string = '20150901'
-        assert_equals(
-            archiver.get_date_as_string_YYYYmmdd(
-                datetime.datetime.strptime(date_string, '%Y%m%d')),
-            date_string)
-
-class TestGetDateStringeGenerator(object):
-
-    def setup(self):
-        self.dates = archiver.get_date_string_generator(
-            from_date = '2015-04-01',
-            earliest_date='2015-01-01',
-            date_formatter=archiver.get_date_as_string_YYYYmmdd)
-
-    def test_first_date(self):
-        for generator_item, number in zip(self.dates, ['20150401']):
-            assert_equals(generator_item, number)
-
-    def test_len(self):
-        assert_equals(len(list(self.dates)), 91)
-
-    def test_first_date_YYYY_mm_dd(self):
-        dates = archiver.get_date_string_generator(
-            from_date = '2015-04-01',
-            earliest_date='2015-01-01',
-            date_formatter=archiver.get_date_as_string_YYYY_mm_dd)
-        for generator_item, number in zip(dates, ['2015-04-01']):
-            assert_equals(generator_item, number)
-
-class TestGetDate(object):
-
-    def test_date(self):
-        assert_equals(
-            archiver.get_date('2016-06-06'),
-            datetime.datetime.strptime('20160606', '%Y%m%d'))
-
-    def test_date_string_raises_TypeError(self):
-        assert_raises(TypeError, archiver.get_date, 20160606)
-
-    def test_date_string_raises_ValueError(self):
-        assert_raises(ValueError, archiver.get_date, date_string='06=06-2016')
-
-class TestGetArchiveUrls(object):
-
-    @classmethod
-    def setup_class(cls):
-        """Generate urls for the politics.people.com.cn archive (2012-2016).
-        """
-        cls.data = archiver.get_archive_urls(
-            from_date = '2016-04-01',
-            earliest_date='2012-02-06',
-            schema = 'http://politics.people.com.cn/GB/70731/review/{}.html')
-
-    def test_type_urls(self):
-        assert_is_instance(self.data, (list,))
-
-    def test_len_urls(self):
-        assert_equals(len(self.data), 1517)
-
-    def test_type_url(self):
-        assert_is_instance(self.data[0], (str,))
-
-    def test_first_url(self):
-        assert_equals(
-            self.data[0],
-            'http://politics.people.com.cn/GB/70731/review/20160401.html')
-
-    def test_final_url(self):
-        assert_equals(
-            self.data[-1],
-            'http://politics.people.com.cn/GB/70731/review/20120206.html')
-
-    def test_from_date_raises_TypeError(self):
-        assert_raises(TypeError, archiver.get_archive_urls, 20160401)
-
-    def test_from_date_raises_ValueError(self):
-        assert_raises(ValueError, archiver.get_archive_urls, '2016-4-1')
-
-    def test_earliest_date_raises_TypeError(self):
-        assert_raises(
-            TypeError, archiver.get_archive_urls, earliest_date=20160401)
-
-    def test_earliest_date_raises_ValueError(self):
-        assert_raises(
-            ValueError, archiver.get_archive_urls, earliest_date='20160401')
-
-    def test_earliest_date_string_raises_ValueError(self):
-        assert_raises(ValueError, archiver.get_archive_urls, '2016-4-1')
-
-    def test_schema_raises_TypeError(self):
-        assert_raises(TypeError, archiver.get_archive_urls, schema = 1)
-
-    def test_schema_raises_ValueError(self):
-        assert_raises(
-            ValueError, archiver.get_archive_urls, from_date='today',
-            earliest_date='2012-02-06', schema = '[]')
 
 class TestAgent(object):
 
@@ -511,4 +392,3 @@ class TestAgent(object):
 
     def test_find_links_in_page_url_raises_TypeError(self):
         assert_raises(TypeError, self.agent.find_links_in_page, 1)
-
