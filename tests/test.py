@@ -236,10 +236,10 @@ class TestAgent(object):
         assert_equals(self.agent._get_filepath('www.example.com'), fpath)
 
     def test__get_archive_folder_sets_folder_name(self):
-        assert_equals(self.agent._archive_folder[-9:], '/archives')
+        assert_equals(str(self.agent._directories['archive_folder'])[-9:], '/archives')
         self.agent.archive_folder = 'test'
         assert_equals(
-            self.agent._archive_folder,
+            self.agent._directories['archive_folder'],
             os.path.join(self.temp_dir, 'test'))
 
     def test__get_archive_folder_archive_folder_raises_TypeError(self):
@@ -259,9 +259,9 @@ class TestAgent(object):
     def test__get_archive_folder_stays_the_same(self):
         test_dir = os.path.join(self.temp_dir, 'test_dir')
         self.agent.archive_folder = test_dir
-        a = self.agent._archive_folder
+        a = self.agent._directories['archive_folder']
         self.agent.archive_folder = test_dir
-        b = self.agent._archive_folder
+        b = self.agent._directories['archive_folder']
         assert_equals(a,b)
 
     # Data

@@ -26,10 +26,12 @@ class Agent(object):
 
     """
 
-    _directory = None
-    _archive_folder = None
-    _naming_json_file = None
-    _scanned_json_file = None
+    _directories = {
+        'directory': None,
+        'archive_folder': None,
+        'naming_json_file': None,
+        'scanned_json_file': None
+    }
     file_name_data = None
     scanned_file_data = None
 
@@ -46,7 +48,7 @@ class Agent(object):
     @property
     def directory(self):
         """dir"""
-        return self._directory
+        return self._directories['directory']
 
     @directory.setter
     def directory(self, directory):
@@ -54,12 +56,12 @@ class Agent(object):
             raise TypeError('directory must be a string.')
         if not os.path.isdir(directory):
             raise ValueError('directory is not a directory.')
-        self._directory = directory
+        self._directories['directory'] = directory
 
     @property
     def naming_json_file(self):
         """_"""
-        return self._naming_json_file
+        return self._directories['naming_json_file']
 
     @naming_json_file.setter
     def naming_json_file(self, json_file):
@@ -67,21 +69,22 @@ class Agent(object):
             raise TypeError('naming_json_file must be a string.')
         if len(json_file) == 0:
             raise ValueError('naming_json_file cannot have length zero.')
-        self._naming_json_file = os.path.join(self.directory, json_file)
+        self._directories['naming_json_file'] = os.path.join(
+            self.directory, json_file)
         # load_file_names_data_files
         logging.info('Loading data files...')
         try:
             self.file_name_data = dd(
-                dict, json.load(open(self._naming_json_file)))
+                dict, json.load(open(self._directories['naming_json_file'])))
         except FileNotFoundError:
-            logging.info('Creating new file: %s\n', self._naming_json_file)
+            logging.info('Creating new file: %s\n', self._directories['naming_json_file'])
             self.file_name_data = dd(dict)
-            json.dump(self.file_name_data, open(self._naming_json_file, 'w'))
+            json.dump(self.file_name_data, open(self._directories['naming_json_file'], 'w'))
 
     @property
     def scanned_json_file(self):
         """_"""
-        return self._scanned_json_file
+        return self._directories['scanned_json_file']
 
     @scanned_json_file.setter
     def scanned_json_file(self, json_file):
@@ -89,21 +92,21 @@ class Agent(object):
             raise TypeError('scanned_json_file must be a string.')
         if len(json_file) == 0:
             raise ValueError('scanned_json_file cannot have length zero.')
-        self._scanned_json_file = os.path.join(self.directory, json_file)
+        self._directories['scanned_json_file'] = os.path.join(self.directory, json_file)
         # load_scanned_file_data_files
         logging.info('Loading data files...')
         try:
             self.scanned_file_data = dd(
-                dict, json.load(open(self._scanned_json_file)))
+                dict, json.load(open(self._directories['scanned_json_file'])))
         except FileNotFoundError:
-            logging.info('Creating new file: %s\n', self._scanned_json_file)
+            logging.info('Creating new file: %s\n', self._directories['scanned_json_file'])
             self.scanned_file_data = dd(dict)
-            json.dump(self.scanned_file_data, open(self._scanned_json_file, 'w'))
+            json.dump(self.scanned_file_data, open(self._directories['scanned_json_file'], 'w'))
 
     @property
     def archive_folder(self):
         """_"""
-        return self._archive_folder
+        return self._directories['archive_folder']
 
     @archive_folder.setter
     def archive_folder(self, archive_folder):
@@ -113,7 +116,7 @@ class Agent(object):
                 'Name of archive folder must be a string, not {}'.format(
                     archive_folder))
         os.makedirs(archive_folder, exist_ok=True)
-        self._archive_folder = archive_folder
+        self._directories['archive_folder'] = archive_folder
         four_o_four_file = os.path.join(archive_folder, '404.json')
         if not os.path.isfile(four_o_four_file):
             json.dump([], fp=open(four_o_four_file, 'w'))
@@ -165,11 +168,14 @@ class Agent(object):
         for f in glob(os.path.join(self.directory, '*')):
             logging.info('Deleting: (dir): %s', f)
             shutil.rmtree(f)
-        self._archive_folder = None
+        self._directories = {
+            'directory': self.directory,
+            'archive_folder': None,
+            'naming_json_file': None,
+            'scanned_json_file': None
+        }
         self.file_name_data = None
         self.scanned_file_data = None
-        self._naming_json_file = None
-        self._scanned_json_file = None
 
     def _get_filename(self, url):
         if not isinstance (url, str):
