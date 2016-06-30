@@ -12,44 +12,43 @@ class DB():
 
     def __init__(self, fname = None):
         if not fname is None: self.fname = fname
-        with lite.connect(self.fname) as con:
-            self.create_name_mapper(con)
+        self.create_name_mapper()
 
-    @staticmethod
-    def create_name_mapper(con):
-        cur = con.cursor()
-        cur.execute(
-            'CREATE TABLE file_names('
-            'url VARCHAR(255) NOT NULL,'
-            'ID INTEGER PRIMARY KEY AUTOINCREMENT'
-            ')'
-        )
+    def create_name_mapper(self):
+        with self.connect() as con:
+            cur = con.cursor()
+            cur.execute(
+                'CREATE TABLE file_names('
+                'url VARCHAR(255) NOT NULL,'
+                'ID INTEGER PRIMARY KEY AUTOINCREMENT'
+                ')'
+            )
 
     def connect(self):
         return lite.connect(self.fname)
 
-    @staticmethod
-    def drop_name_mapper(con):
-        cur = con.cursor()
-        cur.execute('DROP TABLE file_names')
+    def drop_name_mapper(self):
+        with self.connect() as con:
+            cur = con.cursor()
+            cur.execute('DROP TABLE file_names')
 
-    def clean(self, con):
-        self.drop_name_mapper(con)
+    def clean(self):
+        self.drop_name_mapper()
 
-    @staticmethod
-    def set_filename(con, url):
-        cur = con.cursor()
-        cur.execute('INSERT INTO file_names (url) VALUES ("{}")'.format(url))
-        return cur.lastrowid
+    def set_filename(self, url):
+        with self.connect() as con:
+            cur = con.cursor()
+            cur.execute('INSERT INTO file_names (url) VALUES ("{}")'.format(url))
+            return cur.lastrowid
 
-    @staticmethod
-    def get_filename(con, url):
-        if not isinstance (url, str):
-            raise TypeError
-        cur = con.cursor()
-        cur.execute('SELECT id FROM file_names WHERE url="{}"'.format(url))
-        result = cur.fetchone()
-        if result is None:
-            raise KeyError('File not registered for url: {}'.format(url))
-        filename = str(result[0]).zfill(6)
-        return filename
+    def get_filename(self, url):
+        with self.connect() as con:
+            if not isinstance (url, str):
+                raise TypeError
+            cur = con.cursor()
+            cur.execute('SELECT id FROM file_names WHERE url="{}"'.format(url))
+            result = cur.fetchone()
+            if result is None:
+                raise KeyError('File not registered for url: {}'.format(url))
+            filename = str(result[0]).zfill(6)
+            return filename

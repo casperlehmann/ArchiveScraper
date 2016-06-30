@@ -27,27 +27,25 @@ class TestDB():
         self.db = archiver.DB(fname = self.fname)
 
     def teardown(self):
-        with self.db.connect() as con:
-            self.db.clean(con)
+        self.db.clean()
 
     def test_set_filename(self):
         url = 'wikipedia.org'
         with self.db.connect() as con:
-            self.db.set_filename(con, url)
+            self.db.set_filename(url)
             cur = con.cursor()
             cur.execute('SELECT * FROM file_names')
             assert_equals(cur.fetchone(), (url, 1))
 
     def test_set_filename_get_row_id(self):
         url = 'wikipedia.org'
-        with self.db.connect() as con:
-            row_id = self.db.set_filename(con, url)
-            assert_equals(row_id, 1)
+        row_id = self.db.set_filename(url)
+        assert_equals(row_id, 1)
 
     def test_set_filename_autoincrement(self):
         with self.db.connect() as con:
-            self.db.set_filename(con, 'a')
-            self.db.set_filename(con, 'b')
+            self.db.set_filename('a')
+            self.db.set_filename('b')
             cur = con.cursor()
             cur.execute('SELECT * FROM file_names')
             result = cur.fetchall()
@@ -57,11 +55,11 @@ class TestDB():
         with self.db.connect() as con:
             cur = con.cursor()
             cur.execute('INSERT INTO file_names (url) VALUES ("wikipedia.org")')
-            filename = self.db.get_filename(con, 'wikipedia.org')
-            assert_equals(filename, '000001')
+        filename = self.db.get_filename('wikipedia.org')
+        assert_equals(filename, '000001')
 
     def test_get_filename_raises_KeyError(self):
         with self.db.connect() as con:
             cur = con.cursor()
             cur.execute('INSERT INTO file_names (url) VALUES ("wikipedia.org")')
-            assert_raises(KeyError, self.db.get_filename, con, 'uncyclopedia.org')
+            assert_raises(KeyError, self.db.get_filename, 'uncyclopedia.org')
