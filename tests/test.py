@@ -129,19 +129,19 @@ class TestAgent(object):
 
 
     def test__save_filename(self):
-        self.agent._save_filename('www.example.com', '000001')
-        assert_equals(
-            json.load(open(self.agent.naming_json_file)),
-            {'www.example.com': {'f': '000001'}})
+        row_id = self.agent.db.set_filename('www.example.com')
+        retrieved = self.agent.db.get_filename('www.example.com')
+        assert_equals(row_id, '000001')
+        assert_equals(retrieved, '000001')
 
     def test__save_filename_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.agent._save_filename,
+            TypeError, self.agent.db.set_filename,
             url = 1, fname = '000001')
 
     def test__save_filename_fname_raises_TypeError(self):
         assert_raises(
-            TypeError, self.agent._save_filename,
+            TypeError, self.agent.db.set_filename,
             url = 'www.example.com', fname = 1)
 
     # Cleaning
@@ -205,13 +205,12 @@ class TestAgent(object):
             KeyError, self.agent._get_filename, url='www.example.com')
 
     def test__get_filename(self):
-        fname = '000001'
         self.agent.archive_folder = 'archives'
         archive = self.agent.archive_folder
+        fname = self.agent.db.set_filename('www.example.com')
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
-        self.agent._save_filename('www.example.com', fname)
-        assert_equals(self.agent._get_filename('www.example.com'), '000001')
+        assert_equals(self.agent.db.get_filename('www.example.com'), '000001')
 
     def test__get_filepath_url_raises_TypeError(self):
         assert_raises(
@@ -222,17 +221,16 @@ class TestAgent(object):
             KeyError, self.agent._get_filepath, url='www.example.com')
 
     def test__get_filepath_file_raises_OSError(self):
-        self.agent._save_filename('www.example.com', '000001')
+        self.agent.db.set_filename('www.example.com')
         assert_raises(
             OSError, self.agent._get_filepath, url='www.example.com')
 
     def test__get_filepath(self):
-        fname = '000001'
         self.agent.archive_folder = 'archives'
         archive = self.agent.archive_folder
+        fname = self.agent.db.set_filename('www.example.com')
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
-        self.agent._save_filename('www.example.com', fname)
         assert_equals(self.agent._get_filepath('www.example.com'), fpath)
 
     def test__get_archive_folder_sets_folder_name(self):
@@ -275,12 +273,12 @@ class TestAgent(object):
             KeyError, self.agent.load_archive_page, url = 'www.example.com')
 
     def test__load_archive_pages(self):
-        fname = '000001'
         self.agent.archive_folder = 'archives'
-        self.agent._save_filename('www.example.com', '000001')
-        fname = self.agent.load_archive_page(
+        fname = self.agent.db.set_filename('www.example.com')
+        retrieved = self.agent.load_archive_page(
             url = 'www.example.com')
-        assert_equals('000001', fname)
+        assert_equals(fname, '000001')
+        assert_equals(retrieved, '000001')
 
     def test__fetch_archive_page_url_raises_TypeError(self):
         if self.skip_online_tests: raise SkipTest

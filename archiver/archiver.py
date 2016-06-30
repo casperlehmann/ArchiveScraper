@@ -188,22 +188,11 @@ class Agent(object):
     def _get_filepath(self, url):
         if not isinstance (url, str):
             raise TypeError
-        if not url in self.file_name_data:
-            raise KeyError
-        fname = self._get_filename(url)
+        fname = self.db.get_filename(url)
         fpath = os.path.join(self.archive_folder, fname)
         if not os.path.isfile(fpath):
             raise OSError(('File {} does not exist.'.format(fname)))
         return fpath
-
-    # File names and paths
-    def _save_filename(self, url, fname):
-        if not isinstance (url, str):
-            raise TypeError
-        if not isinstance (fname, str):
-            raise TypeError
-        self.file_name_data[url]['f'] = fname
-        json.dump(self.file_name_data, open(self.naming_json_file, 'w'))
 
     # Data
     def load_archive(self, urls):
@@ -239,7 +228,7 @@ class Agent(object):
         if not isinstance (url, str):
             raise TypeError('url must be a string')
         try:
-            fname = self._get_filename(url)
+            fname = self.db.get_filename(url)
             logging.info('Alredy here: %s', url)
         except KeyError:
             logging.info('Fetching...: %s', url)
@@ -253,12 +242,11 @@ class Agent(object):
         if not url.startswith('http'):
             url = 'http://' + url
         with urllib.request.urlopen(url) as url_obj:
-            fname = str(len(self.file_name_data)).zfill(6)
+            fname = self.db.set_filename(url)
             fpath = os.path.join(self.archive_folder, fname)
             with open(fpath, 'wb') as f:
                 logging.info('Writing file: %s', fname)
                 f.write(url_obj.read())
-                self._save_filename(url, fname)
 
     def load_article_pages(self, *urls):
         """_"""
@@ -273,11 +261,10 @@ class Agent(object):
     def _fetch_article_page(self, url):
         with urllib.request.urlopen(url) as url_obj:
             os.makedirs(os.path.join(self.directory, 'articles'), exist_ok=True)
-            fname = str(len(self.file_name_data)).zfill(6)
+            fname = self.db.set_filename(url)
             with open(fname, 'wb') as f:
                 logging.info('Writing file: %s', fname)
                 f.write(url_obj.read())
-                self._save_filename(url, fname)
 
     def _save_links_from_page(self, url, links):
         if not isinstance (url, str):

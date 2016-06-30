@@ -36,10 +36,13 @@ class DB():
         self.drop_name_mapper()
 
     def set_filename(self, url):
+        if not isinstance (url, str):
+            raise TypeError
         with self.connect() as con:
             cur = con.cursor()
             cur.execute('INSERT INTO file_names (url) VALUES ("{}")'.format(url))
-            return cur.lastrowid
+            filename = str(cur.lastrowid).zfill(6)
+            return filename
 
     def get_filename(self, url):
         with self.connect() as con:

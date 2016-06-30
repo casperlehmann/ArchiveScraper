@@ -40,7 +40,7 @@ class TestDB():
     def test_set_filename_get_row_id(self):
         url = 'wikipedia.org'
         row_id = self.db.set_filename(url)
-        assert_equals(row_id, 1)
+        assert_equals(row_id, '000001')
 
     def test_set_filename_autoincrement(self):
         with self.db.connect() as con:
