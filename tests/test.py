@@ -273,8 +273,6 @@ class TestAgent(object):
         if self.skip_online_tests: raise SkipTest
         assert_raises(
             KeyError, self.agent.load_archive_page, url = 'www.example.com')
-        self.agent._save_filename('www.example.com', '000001')
-        self.agent.load_archive_page(url = 'www.example.com')
 
     def test__load_archive_pages(self):
         fname = '000001'
