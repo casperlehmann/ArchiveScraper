@@ -20,7 +20,8 @@ class DB():
             cur.execute(
                 'CREATE TABLE file_names('
                 'url VARCHAR(255) NOT NULL,'
-                'ID INTEGER PRIMARY KEY AUTOINCREMENT'
+                'ID INTEGER PRIMARY KEY AUTOINCREMENT,'
+                'scanned INT DEFAULT 0'
                 ')'
             )
 
@@ -55,3 +56,9 @@ class DB():
                 raise KeyError('File not registered for url: {}'.format(url))
             filename = str(result[0]).zfill(6)
             return filename
+
+    def get_unscanned(self):
+        with self.connect() as con:
+            cur = con.cursor()
+            cur.execute('SELECT * FROM table WHERE scanned = 0')
+            return cur.fetchall()

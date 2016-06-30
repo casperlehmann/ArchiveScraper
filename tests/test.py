@@ -10,7 +10,6 @@ import shutil
 from glob import glob
 
 from nose.tools import assert_equals#, assert_not_equals
-from nose.tools import assert_is_instance, assert_is_none
 from nose.tools import assert_raises
 from nose.tools import assert_true, assert_false
 from nose.plugins.skip import SkipTest
@@ -34,7 +33,7 @@ class TestAgent(object):
 
     def setup(self):
         self.agent = archiver.Agent(
-            naming_json_file = 'archive.json', scanned_json_file = 'scanned.json',
+            scanned_json_file = 'scanned.json',
             directory = self.temp_dir, archive_folder = 'archives', db = 'db')
 
     def teardown(self):
@@ -44,90 +43,18 @@ class TestAgent(object):
     def test_directory_raises_TypeError(self):
         assert_raises(
             TypeError, archiver.Agent, directory = 1,
-            naming_json_file = 'archive.json',
             scanned_json_file = 'scanned.json')
 
     def test_directory_raises_ValueError(self):
         assert_raises(
             ValueError, archiver.Agent, directory = '',
-            naming_json_file = '1_archives.json', scanned_json_file = '1_scanned.json',
+            scanned_json_file = '1_scanned.json',
             archive_folder = '1_archives', db = 'db')
-
-    def test_naming_json_file_sets_json(self):
-        self.agent.clean()
-        self.agent.file_name_data = None
-        self.agent = archiver.Agent(
-            naming_json_file = 'archive.json', scanned_json_file = 'scanned.json',
-            directory = self.temp_dir, archive_folder = 'archives', db = 'db')
-        assert_equals(self.agent.file_name_data, {})
 
     def test_isdir_temp(self):
         assert_true(os.path.isdir(self.temp_dir))
 
-    def test_isfile_json_file(self):
-        assert_true(os.path.isfile(self.agent.naming_json_file))
-
     # Archive
-    def test_load_file_names_data_files_reads_contents_from_file(self):
-        with open(os.path.join(self.temp_dir, 'archive.json'), 'w') as f:
-            json.dump(
-                {'www.example.com': {'f': '000001', 'l': ['www.link.com']}},
-                f)
-        assert_equals(self.agent.file_name_data, {})
-
-        self.agent.naming_json_file = 'archive.json'
-        assert_equals(
-            self.agent.file_name_data,
-            {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
-
-        with open(os.path.join(self.temp_dir, 'scanned.json'), 'w') as f:
-            json.dump(
-                {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'},
-                f)
-        self.agent.file_name_data = {}
-        assert_equals(self.agent.file_name_data, {})
-
-        self.agent.scanned_json_file = 'scanned.json'
-        assert_equals(
-            self.agent.scanned_file_data,
-            {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
-
-    def test_load_file_names_data_files_creation(self):
-        self.agent.file_name_data = None
-        assert_is_none(self.agent.file_name_data)
-        self.agent.naming_json_file = 'archive.json'
-        assert_is_instance(self.agent.file_name_data, dict)
-        assert_equals(self.agent.file_name_data, {})
-
-    def test_load_file_names_data_files_load_file(self):
-        with open(os.path.join(self.temp_dir, 'archive.json'), 'w') as f:
-            f.write(json.dumps(
-                {'www.example.com': {'f': '000001', 'l': ['www.link.com']}}))
-
-        self.agent.file_name_data = None
-        assert_is_none(self.agent.file_name_data)
-
-        self.agent.naming_json_file = 'archive.json'
-        assert_is_instance(self.agent.file_name_data, dict)
-        assert_equals(
-            self.agent.file_name_data,
-            {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
-
-        with open(os.path.join(self.temp_dir, 'scanned.json'), 'w') as f:
-            json.dump(
-                {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'},
-                f)
-
-        self.agent.file_name_data = None
-        assert_is_none(self.agent.file_name_data)
-
-        self.agent.scanned_json_file = 'scanned.json'
-        assert_is_instance(self.agent.scanned_file_data, dict)
-        assert_equals(
-            self.agent.scanned_file_data,
-            {'url_1': 'link_1', 'url_2': 'link_2', 'url_3': 'link_3'})
-
-
     def test__save_filename(self):
         row_id = self.agent.db.set_filename('www.example.com')
         retrieved = self.agent.db.get_filename('www.example.com')
@@ -150,28 +77,25 @@ class TestAgent(object):
         archive = self.agent.archive_folder
         fpath = os.path.join(archive, '000001')
         with open(fpath, 'wb') as f: f.write(b'Some contents')
-        archive_json_file = os.path.join(self.temp_dir, 'archive.json')
         archive_folder = os.path.join(self.temp_dir, 'archives')
 
-        # One file, one dir, one data, archive_json_file, archive_folder, fpath:
-        assert_true(os.path.isfile(archive_json_file))
+        # One file, one dir, one data, archive_folder, fpath:
         assert_true(os.path.isdir(archive_folder))
         assert_true(os.path.isfile(fpath))
         # ./archive/ ./archive.json ./scanned.json
-        assert_equals(4, len(glob(os.path.join(self.agent.directory,'*'))))
+        assert_equals(3, len(glob(os.path.join(self.agent.directory,'*'))))
         assert_equals(2, len(glob(os.path.join(self.agent.archive_folder,'*'))))
 
         # Delete it:
         self.agent.clean()
         # Files and dir are gone:
-        assert_false(os.path.isfile(archive_json_file))
         assert_false(os.path.isdir(archive_folder))
         assert_false(os.path.isfile(fpath))
         # Root directory is empty:
         assert_equals(0, len(glob(os.path.join(self.agent.directory,'*'))))
         # Recreate, so teardown doesn't fail:
         self.agent = archiver.Agent(
-            naming_json_file = 'archive.json', scanned_json_file = 'scanned.json',
+            scanned_json_file = 'scanned.json',
             directory = self.temp_dir, archive_folder = 'archives', db = 'db')
 
         # Scanned
@@ -180,7 +104,7 @@ class TestAgent(object):
 
         # Only one file scanned_scanned_json_file:
         assert_true(os.path.isfile(scanned_scanned_json_file))
-        assert_equals(4, len(glob(os.path.join(self.agent.directory,'*'))))
+        assert_equals(3, len(glob(os.path.join(self.agent.directory,'*'))))
 
         # Delete it:
         self.agent.clean()
@@ -192,17 +116,17 @@ class TestAgent(object):
 
         # Recreate, so teardown doesn't fail:
         self.agent = archiver.Agent(
-            naming_json_file = 'archive.json', scanned_json_file = 'scanned.json',
+            scanned_json_file = 'scanned.json',
             directory = self.temp_dir, archive_folder = 'archives', db = 'db')
 
     # File names and paths
     def test__get_filename_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.agent._get_filename, url=['not a string'])
+            TypeError, self.agent.db.get_filename, url=['not a string'])
 
     def test__get_filename_url_raises_KeyError(self):
         assert_raises(
-            KeyError, self.agent._get_filename, url='www.example.com')
+            KeyError, self.agent.db.get_filename, url='www.example.com')
 
     def test__get_filename(self):
         self.agent.archive_folder = 'archives'
@@ -287,12 +211,10 @@ class TestAgent(object):
 
     def test__fetch_archive_page_writes_file(self):
         if self.skip_online_tests: raise SkipTest
-        assert_equals(self.agent.file_name_data, {})
         self.agent._fetch_archive_page(url = 'www.example.com')
         self.agent.archive_folder = 'archive_folder'
-        expected_name = '000000'
-        expected_archive_data = {'http://www.example.com': {'f': expected_name}}
-        assert_equals(self.agent.file_name_data, expected_archive_data)
+        expected_name = '000001'
+        assert_equals(self.agent.db.get_filename, expected_name)
 
     def test__fetch_article_page(self):
         pass
@@ -362,26 +284,26 @@ class TestAgent(object):
         string = '000001'
         assert_raises(OSError, self.agent.get_soup, fname=string, url=string)
 
-    def test_find_links_in_page_loads_from_disk(self):
-        fname = '000001'
-        archive = os.path.join(self.temp_dir, 'archives')
-        os.makedirs(archive, exist_ok=True)
-        fpath = os.path.join(archive, fname)
-        html_contents = (b'<html><head></head><body>'
-                         b'<a href="www.link.com">string</a>'
-                         b'</body></html>')
-        with open(fpath, 'wb') as f: f.write(html_contents)
-        url = 'www.example.com'
-        archive_data = {url: {'f': fname, 'l': ['www.link.com']}}
-        archive_scanned_json_file = os.path.join(self.temp_dir, 'archive.json')
-        with open(archive_scanned_json_file, 'w') as f:
-            json.dump(archive_data, f)
-        self.agent.file_name_data[url]['f'] = fname
+    #def test_find_links_in_page_loads_from_disk(self):
+    #    fname = '000001'
+    #    archive = os.path.join(self.temp_dir, 'archives')
+    #    os.makedirs(archive, exist_ok=True)
+    #    fpath = os.path.join(archive, fname)
+    #    html_contents = (b'<html><head></head><body>'
+    #                     b'<a href="www.link.com">string</a>'
+    #                     b'</body></html>')
+    #    with open(fpath, 'wb') as f: f.write(html_contents)
+    #    url = 'www.example.com'
+    #    archive_data = {url: {'f': fname, 'l': ['www.link.com']}}
+    #    archive_scanned_json_file = os.path.join(self.temp_dir, 'archive.json')
+    #    with open(archive_scanned_json_file, 'w') as f:
+    #        json.dump(archive_data, f)
+    #    self.agent.file_name_data[url]['f'] = fname
 
-        self.agent.find_links_in_page(url)
-        assert_equals(
-            archive_data,
-            {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
+    #    self.agent.find_links_in_page(url)
+    #    assert_equals(
+    #        archive_data,
+    #        {'www.example.com': {'f': '000001', 'l': ['www.link.com']}})
 
     def test_find_links_in_page_raises_KeyError(self):
         assert_raises(

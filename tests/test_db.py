@@ -35,7 +35,7 @@ class TestDB():
             self.db.set_filename(url)
             cur = con.cursor()
             cur.execute('SELECT * FROM file_names')
-            assert_equals(cur.fetchone(), (url, 1))
+            assert_equals(cur.fetchone(), (url, 1, 0))
 
     def test_set_filename_get_row_id(self):
         url = 'wikipedia.org'
@@ -49,7 +49,7 @@ class TestDB():
             cur = con.cursor()
             cur.execute('SELECT * FROM file_names')
             result = cur.fetchall()
-        assert_equals(result, [('a', 1), ('b', 2)])
+        assert_equals(result, [('a', 1, 0), ('b', 2, 0)])
 
     def test_get_filename(self):
         with self.db.connect() as con:
