@@ -13,8 +13,9 @@ import logging
 from collections import defaultdict as dd
 from socket import timeout
 from glob import glob
-
 from bs4 import BeautifulSoup as bs
+
+import archiver
 
 logging.basicConfig(
     level = logging.DEBUG,
@@ -34,11 +35,13 @@ class Agent(object):
 
     def __init__(
             self, directory, naming_json_file,
-            scanned_json_file, archive_folder):
+            scanned_json_file, archive_folder, db):
         self.directory = directory
         self.archive_folder = archive_folder
         self.naming_json_file = naming_json_file
         self.scanned_json_file = scanned_json_file
+        self.db_path = os.path.join(self.directory, db)
+        self.db = archiver.DB(fname = self.db_path)
 
     @property
     def directory(self):
@@ -153,6 +156,7 @@ class Agent(object):
         logging.info('Cleaning...')
         self.delete_file(target = self.naming_json_file)
         self.delete_file(target = self.scanned_json_file)
+        self.delete_file(target = self.db_path)
         # clean archive
         for f in glob(os.path.join(self.archive_folder, '*')):
             logging.info('Deleting (archive): %s', f)

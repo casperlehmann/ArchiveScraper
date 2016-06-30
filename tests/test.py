@@ -35,7 +35,7 @@ class TestAgent(object):
     def setup(self):
         self.agent = archiver.Agent(
             naming_json_file = 'archive.json', scanned_json_file = 'scanned.json',
-            directory = self.temp_dir, archive_folder = 'archives')
+            directory = self.temp_dir, archive_folder = 'archives', db = 'db')
 
     def teardown(self):
         self.agent.clean()
@@ -51,13 +51,14 @@ class TestAgent(object):
         assert_raises(
             ValueError, archiver.Agent, directory = '',
             naming_json_file = '1_archives.json', scanned_json_file = '1_scanned.json',
-            archive_folder = '1_archives')
+            archive_folder = '1_archives', db = 'db')
 
     def test_naming_json_file_sets_json(self):
+        self.agent.clean()
         self.agent.file_name_data = None
         self.agent = archiver.Agent(
             naming_json_file = 'archive.json', scanned_json_file = 'scanned.json',
-            directory = self.temp_dir, archive_folder = 'archives')
+            directory = self.temp_dir, archive_folder = 'archives', db = 'db')
         assert_equals(self.agent.file_name_data, {})
 
     def test_isdir_temp(self):
@@ -157,7 +158,7 @@ class TestAgent(object):
         assert_true(os.path.isdir(archive_folder))
         assert_true(os.path.isfile(fpath))
         # ./archive/ ./archive.json ./scanned.json
-        assert_equals(3, len(glob(os.path.join(self.agent.directory,'*'))))
+        assert_equals(4, len(glob(os.path.join(self.agent.directory,'*'))))
         assert_equals(2, len(glob(os.path.join(self.agent.archive_folder,'*'))))
 
         # Delete it:
@@ -171,7 +172,7 @@ class TestAgent(object):
         # Recreate, so teardown doesn't fail:
         self.agent = archiver.Agent(
             naming_json_file = 'archive.json', scanned_json_file = 'scanned.json',
-            directory = self.temp_dir, archive_folder = 'archives')
+            directory = self.temp_dir, archive_folder = 'archives', db = 'db')
 
         # Scanned
         scanned_scanned_json_file = os.path.join(self.temp_dir, 'scanned.json')
@@ -179,7 +180,7 @@ class TestAgent(object):
 
         # Only one file scanned_scanned_json_file:
         assert_true(os.path.isfile(scanned_scanned_json_file))
-        assert_equals(3, len(glob(os.path.join(self.agent.directory,'*'))))
+        assert_equals(4, len(glob(os.path.join(self.agent.directory,'*'))))
 
         # Delete it:
         self.agent.clean()
@@ -192,7 +193,7 @@ class TestAgent(object):
         # Recreate, so teardown doesn't fail:
         self.agent = archiver.Agent(
             naming_json_file = 'archive.json', scanned_json_file = 'scanned.json',
-            directory = self.temp_dir, archive_folder = 'archives')
+            directory = self.temp_dir, archive_folder = 'archives', db = 'db')
 
     # File names and paths
     def test__get_filename_url_raises_TypeError(self):
