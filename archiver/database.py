@@ -37,9 +37,10 @@ class DB():
         self.drop_name_mapper(con)
 
     @staticmethod
-    def insert_url(con, url):
+    def set_filename(con, url):
         cur = con.cursor()
         cur.execute('INSERT INTO file_names (url) VALUES ("{}")'.format(url))
+        return cur.lastrowid
 
     @staticmethod
     def get_filename(con, url):

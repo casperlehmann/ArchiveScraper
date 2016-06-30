@@ -30,23 +30,28 @@ class TestDB():
         with self.db.connect() as con:
             self.db.clean(con)
 
-    def test_insert(self):
+    def test_set_filename(self):
         url = 'wikipedia.org'
         with self.db.connect() as con:
-            self.db.insert_url(con, url)
+            self.db.set_filename(con, url)
             cur = con.cursor()
             cur.execute('SELECT * FROM file_names')
             assert_equals(cur.fetchone(), (url, 1))
 
-    def test_insert_autoincrement(self):
+    def test_set_filename_get_row_id(self):
         url = 'wikipedia.org'
         with self.db.connect() as con:
-            self.db.insert_url(con, url)
-            self.db.insert_url(con, url+'2')
+            row_id = self.db.set_filename(con, url)
+            assert_equals(row_id, 1)
+
+    def test_set_filename_autoincrement(self):
+        with self.db.connect() as con:
+            self.db.set_filename(con, 'a')
+            self.db.set_filename(con, 'b')
             cur = con.cursor()
             cur.execute('SELECT * FROM file_names')
             result = cur.fetchall()
-        assert_equals(result, [(url, 1), (url+'2', 2)])
+        assert_equals(result, [('a', 1), ('b', 2)])
 
     def test_get_filename(self):
         with self.db.connect() as con:
