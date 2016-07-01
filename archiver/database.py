@@ -8,7 +8,7 @@ import sqlite3 as lite
 
 class DB():
 
-    path = 'data_dearchiver/scraper.db'
+    path = 'data/scraper.db'
 
     def __init__(self, path = None):
         if not path is None: self.path = path
@@ -34,7 +34,9 @@ class DB():
             cur.execute(
                 'CREATE TABLE IF NOT EXISTS links('
                 'url VARCHAR(255) NOT NULL,'
-                'link VARCHAR(255) NOT NULL'
+                'link VARCHAR(255) NOT NULL,'
+                'fetched INT DEFAULT 0,'
+                'UNIQUE(url, link) ON CONFLICT IGNORE'
                 ')'
             )
 
@@ -73,7 +75,11 @@ class DB():
     def get_unscanned(self):
         with self.connect() as con:
             cur = con.cursor()
-            cur.execute('SELECT url FROM file_names WHERE scanned = 0')
+            cur.execute(
+                'SELECT file_names.url FROM file_names '
+                'JOIN links ON file_names.url = links.link '
+                'WHERE scanned = 0 AND four_o_four = 0'
+            )
             return [_[0] for _ in cur.fetchall()]
 
     def set_scanned(self, url):
@@ -104,12 +110,17 @@ class DB():
                 'SELECT url FROM file_names WHERE four_o_four = 1')
             return [_[0] for _ in res.fetchall()]
 
-    def update_four_o_four(self, url):
+    def set_four_o_four(self, url):
         with self.connect() as con:
             cur = con.cursor()
             cur.execute(
                 'INSERT INTO file_names (url, four_o_four) VALUES (?, 1)',
                 (url,))
+
+    def update_fetched(self, url):
+        with self.connect() as con:
+            cur = con.cursor()
+            cur.execute('UPDATE links SET fetched = 1 WHERE url = ?', (url,))
 
     def is_four_o_four(self, url):
         with self.connect() as con:
@@ -119,3 +130,28 @@ class DB():
             if res is None:
                 return False
             return bool(res[0])
+
+    def seed_archive(self, urls):
+        with self.connect() as con:
+            cur = con.cursor()
+            cur.executemany(
+                'INSERT INTO links (url, link) VALUES (?, ?)',
+                zip(len(urls)*['seed'], urls))
+
+    def get_unfetched_seeds(self):
+        with self.connect() as con:
+            cur = con.cursor()
+            cur.execute(
+                'SELECT link FROM links WHERE fetched = 0 AND url = "seed"')
+            return [_[0] for _ in cur.fetchall()]
+
+    def get_unfetched_links(self):
+        with self.connect() as con:
+            cur = con.cursor()
+            cur.execute(
+                'SELECT url, link FROM links '
+                'WHERE fetched = 0 AND url != "seed"'
+            )
+            return [link if not link.startswith('/')
+                    else 'http://'+url[7:].split('/')[0]+link
+                    for url, link in cur.fetchall()]

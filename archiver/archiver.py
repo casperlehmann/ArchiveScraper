@@ -126,10 +126,37 @@ class Agent(object):
             raise OSError(('File {} does not exist.'.format(fname)))
         return fpath
 
+    def seed_archive(self, urls):
+        """_"""
+        self.db.seed_archive(urls)
+
+    @staticmethod
+    def exclusion(url):
+        """_"""
+        url = url.strip('/')
+        if url == '#': return True
+        if 'click.ng/params.richmedia' in url: return True
+        for ending in ['/index.html', '.com', '.cn']:
+            if url.endswith(ending):
+                return True
+        return False
+
     # Data
-    def load_archive(self, urls):
+    def load_links(self):
+        """_"""
+        urls = self.db.get_unfetched_links()
+        self.load_pages(urls)
+
+    def load_seeds(self):
+        """_"""
+        urls = self.db.get_unfetched_seeds()
+        self.load_pages(urls)
+
+    def load_pages(self, urls):
         """_"""
         for url in urls:
+            if self.exclusion(url):
+                continue
             if self.db.is_four_o_four(url):
                 logging.info('400:     %s (Previously checked)', url)
                 continue
@@ -137,17 +164,19 @@ class Agent(object):
                 self.load_page(url)
             except urllib.error.HTTPError:
                 logging.info('404:     %s', url)
-                self.db.update_four_o_four(url)
+                self.db.set_four_o_four(url)
                 continue
             except http.client.IncompleteRead:
-                logging.info('Partial: %s', url)
-                #print ('Partial', e.partial)
+                logging.info('Partial: %s', url) # e.partial
             except urllib.error.URLError:
-                logging.info('fail:   %s', url)
+                logging.info('fail:    %s', url)
                 continue
             except timeout:
-                logging.info('retry:  %s', url)
-                self.load_page(url)
+                logging.info('timeout: %s', url)
+                continue
+            except ConnectionResetError:
+                logging.info(
+                    'ConnectionResetError: [Errno 54] Connection reset by peer: %s', url)
 
     def load_page(self, url):
         """_"""
@@ -173,6 +202,7 @@ class Agent(object):
             with open(fpath, 'wb') as f:
                 logging.info('Writing file: %s', fname)
                 f.write(url_obj.read())
+            self.db.update_fetched(url)
 
     def _save_links_from_page(self, url, links):
         if not isinstance (url, str):
@@ -214,7 +244,7 @@ class Agent(object):
         if not isinstance(target_id, str):
             raise TypeError('Parameter \'target_id\' must be a string.')
 
-        soup = self.get_soup(fname)
+        soup = self.get_soup(fname, url = url)
         target = soup.find(target_element, class_=target_class, id=target_id)
         if target is None: target = soup
         links = []

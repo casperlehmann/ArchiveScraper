@@ -26,23 +26,15 @@ if __name__ == '__main__':
             archive_folder = 'archives',
             db = 'db')
 
+    agent.seed_archive(all_urls)
+
     if SCAN_ARCHIVE:
-        agent.load_archive(all_urls)
+        agent.load_seeds()
         agent.find_links_in_archive(target_element = 'ul', target_class = 'list_16')
 
     if SCAN_ARTICLES:
+        agent.load_links()
         home = 'http://politics.people.com.cn'
-        article_urls = set(
-            [item if not item.startswith('/') else home + item
-             for url, li in agent.scanned_file_data.items()
-             for item in li])
-
-        reader = archiver.Agent(
-            directory = 'data_dearchiver',
-            naming_json_file = '2_articles.json', scanned_json_file = '2_artscan.json',
-            archive_folder = '2_articles')
-        print ('Fetching {} articles.'.format(len(article_urls)))
-        reader.load_archive(article_urls)
 
     #for x in article_urls: print (x)
     #c = agent.count_links()
