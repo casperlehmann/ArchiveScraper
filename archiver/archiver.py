@@ -212,16 +212,15 @@ class Agent(object):
         self.db.set_scanned(url)
         self.db.register_links(url, links)
 
-    def get_soup(self, fname, url = 'not supplied'):
+    def get_soup(self, url):
         """_"""
-        if fname is None or not isinstance(fname, str):
-            raise TypeError("fname must be a string.")
         if url is None or not isinstance(url, str):
             raise TypeError("url must be a string.")
+        fname = self.db.get_filename(url)
         logging.info(
             'Loading & Souping file: [%s] for url: [%s]', fname, url)
         try:
-            fpath = os.path.join(self.archive_folder, fname)
+            fpath = self._get_filepath(url)
             with open(fpath, 'rb') as fobj:
                 return bs(fobj.read(), 'html.parser')
         except FileNotFoundError:
@@ -233,7 +232,6 @@ class Agent(object):
         """_"""
         if not isinstance(url, str):
             raise TypeError('url is type:', type(url), url)
-        fname = self.db.get_filename(url)
         if target_element is None: target_element = ''
         if not isinstance(target_element, str):
             raise TypeError('Parameter \'target_element\' must be a string.')
@@ -244,7 +242,7 @@ class Agent(object):
         if not isinstance(target_id, str):
             raise TypeError('Parameter \'target_id\' must be a string.')
 
-        soup = self.get_soup(fname, url = url)
+        soup = self.get_soup(url = url)
         target = soup.find(target_element, class_=target_class, id=target_id)
         if target is None: target = soup
         links = []

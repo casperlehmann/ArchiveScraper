@@ -234,16 +234,17 @@ class TestAgent(object):
 
     def test_get_soup_file_raises_OSError(self):
         assert_raises(
-            OSError, self.agent.get_soup, fname = '000001')
+            KeyError, self.agent.get_soup, url = '000001')
 
     def test_get_soup(self):
-        fname = '000001'
+        url = 'wikipedia.org'
         self.agent.archive_folder = 'archives'
         archive = self.agent.archive_folder
+        fname = self.agent.db.set_filename(url)
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
 
-        soup = self.agent.get_soup(fname)
+        soup = self.agent.get_soup(url)
         assert_equals(soup.text, 'Some contents')
 
     def test_get_soup_filename_raises_TypeError(self):
@@ -257,7 +258,7 @@ class TestAgent(object):
 
     def test_get_soup_raises_OSError(self):
         string = '000001'
-        assert_raises(OSError, self.agent.get_soup, fname=string, url=string)
+        assert_raises(KeyError, self.agent.get_soup, url=string)
 
     #def test_find_links_in_page_loads_from_disk(self):
     #    fname = '000001'
