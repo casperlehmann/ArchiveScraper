@@ -15,16 +15,16 @@ if __name__ == '__main__':
         schema = 'http://politics.people.com.cn/GB/70731/review/{}.html')
 
     agent = archiver.Agent(
-        directory = 'data_dearchiver',
-        naming_json_file = '1_archives.json', scanned_json_file = '1_scanned.json',
-        archive_folder = '1_archives')
+        directory = 'data',
+        archive_folder = 'archives',
+        db = 'db')
 
     if CLEAN_ARCHIVE:
         agent.clean()
         agent = archiver.Agent(
-            directory = 'data_dearchiver',
-            naming_json_file = '1_archives.json', scanned_json_file = '1_scanned.json',
-            archive_folder = '1_archives')
+            directory = 'data',
+            archive_folder = 'archives',
+            db = 'db')
 
     if SCAN_ARCHIVE:
         agent.load_archive(all_urls)

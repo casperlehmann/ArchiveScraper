@@ -2,7 +2,6 @@
 
 """
 
-import json
 import os
 import re
 import shutil
@@ -29,17 +28,13 @@ class Agent(object):
     _directories = {
         'directory': None,
         'archive_folder': None,
-        'scanned_json_file': None
     }
-    scanned_file_data = None
 
     def __init__(
-            self, directory, scanned_json_file, archive_folder, db):
+            self, directory, archive_folder, db):
         self.directory = directory
         self.archive_folder = archive_folder
-        self.scanned_json_file = scanned_json_file
-        self.db_path = os.path.join(self.directory, db)
-        self.db = archiver.DB(fname = self.db_path)
+        self.db = archiver.DB(path = os.path.join(self.directory, db))
 
     @property
     def directory(self):
@@ -50,31 +45,12 @@ class Agent(object):
     def directory(self, directory):
         if not isinstance (directory, str):
             raise TypeError('directory must be a string.')
+        if len(directory) == 0:
+            raise ValueError('directory name cannot be "".')
+        os.makedirs(directory, exist_ok=True)
         if not os.path.isdir(directory):
             raise ValueError('directory is not a directory.')
         self._directories['directory'] = directory
-
-    @property
-    def scanned_json_file(self):
-        """_"""
-        return self._directories['scanned_json_file']
-
-    @scanned_json_file.setter
-    def scanned_json_file(self, json_file):
-        if not isinstance (json_file, str):
-            raise TypeError('scanned_json_file must be a string.')
-        if len(json_file) == 0:
-            raise ValueError('scanned_json_file cannot have length zero.')
-        self._directories['scanned_json_file'] = os.path.join(self.directory, json_file)
-        # load_scanned_file_data_files
-        logging.info('Loading data files...')
-        try:
-            self.scanned_file_data = dd(
-                dict, json.load(open(self._directories['scanned_json_file'])))
-        except FileNotFoundError:
-            logging.info('Creating new file: %s\n', self._directories['scanned_json_file'])
-            self.scanned_file_data = dd(dict)
-            json.dump(self.scanned_file_data, open(self._directories['scanned_json_file'], 'w'))
 
     @property
     def archive_folder(self):
@@ -90,9 +66,6 @@ class Agent(object):
                     archive_folder))
         os.makedirs(archive_folder, exist_ok=True)
         self._directories['archive_folder'] = archive_folder
-        four_o_four_file = os.path.join(archive_folder, '404.json')
-        if not os.path.isfile(four_o_four_file):
-            json.dump([], fp=open(four_o_four_file, 'w'))
 
     @staticmethod
     def delete_file(target):
@@ -130,8 +103,7 @@ class Agent(object):
     def clean(self):
         """_"""
         logging.info('Cleaning...')
-        self.delete_file(target = self.scanned_json_file)
-        self.delete_file(target = self.db_path)
+        self.delete_file(target = self.db.path)
         # clean archive
         for f in glob(os.path.join(self.archive_folder, '*')):
             logging.info('Deleting (archive): %s', f)
@@ -142,10 +114,8 @@ class Agent(object):
             shutil.rmtree(f)
         self._directories = {
             'directory': self.directory,
-            'archive_folder': None,
-            'scanned_json_file': None
+            'archive_folder': None
         }
-        self.scanned_file_data = None
 
     def _get_filepath(self, url):
         if not isinstance (url, str):
@@ -159,21 +129,15 @@ class Agent(object):
     # Data
     def load_archive(self, urls):
         """_"""
-        four_o_four_file = os.path.join(self.archive_folder, '404.json')
-        four_o_fours = json.load(open(four_o_four_file))
         for url in urls:
-            if url in four_o_fours:
+            if self.db.is_four_o_four(url):
                 logging.info('400:     %s (Previously checked)', url)
                 continue
             try:
-                self.load_archive_page(url)
+                self.load_page(url)
             except urllib.error.HTTPError:
                 logging.info('404:     %s', url)
-                four_o_fours.append(url)
-                json.dump(
-                    four_o_fours, open(
-                        os.path.join(self.archive_folder, '404.json'),
-                        'w'))
+                self.db.update_four_o_four(url)
                 continue
             except http.client.IncompleteRead:
                 logging.info('Partial: %s', url)
@@ -183,9 +147,9 @@ class Agent(object):
                 continue
             except timeout:
                 logging.info('retry:  %s', url)
-                self.load_archive_page(url)
+                self.load_page(url)
 
-    def load_archive_page(self, url):
+    def load_page(self, url):
         """_"""
         if not isinstance (url, str):
             raise TypeError('url must be a string')
@@ -194,11 +158,11 @@ class Agent(object):
             logging.info('Alredy here: %s', url)
         except KeyError:
             logging.info('Fetching...: %s', url)
-            self._fetch_archive_page(url)
+            self._fetch_page(url)
             fname = self.db.get_filename(url)
         return fname
 
-    def _fetch_archive_page(self, url):
+    def _fetch_page(self, url):
         if not isinstance(url, str):
             raise TypeError('url must be a string.')
         if not url.startswith('http'):
@@ -210,31 +174,13 @@ class Agent(object):
                 logging.info('Writing file: %s', fname)
                 f.write(url_obj.read())
 
-    def load_article_pages(self, *urls):
-        """_"""
-        for url in urls:
-            try:
-                self.db.get_filename(url)
-                logging.info('Alredy here')
-            except KeyError:
-                self._fetch_article_page(url)
-                self.db.get_filename(url)
-
-    def _fetch_article_page(self, url):
-        with urllib.request.urlopen(url) as url_obj:
-            os.makedirs(os.path.join(self.directory, 'articles'), exist_ok=True)
-            fname = self.db.set_filename(url)
-            with open(fname, 'wb') as f:
-                logging.info('Writing file: %s', fname)
-                f.write(url_obj.read())
-
     def _save_links_from_page(self, url, links):
         if not isinstance (url, str):
             raise TypeError('url needs to be of type string.')
         if not isinstance (links, list):
             raise TypeError
-        self.scanned_file_data[url] = links
-        json.dump(self.scanned_file_data, open(self.scanned_json_file, 'w'))
+        self.db.set_scanned(url)
+        self.db.register_links(url, links)
 
     def get_soup(self, fname, url = 'not supplied'):
         """_"""
@@ -255,7 +201,8 @@ class Agent(object):
             self, url,
             target_element = None, target_class = None, target_id = None):
         """_"""
-        if not isinstance(url, str): raise TypeError
+        if not isinstance(url, str):
+            raise TypeError('url is type:', type(url), url)
         fname = self.db.get_filename(url)
         if target_element is None: target_element = ''
         if not isinstance(target_element, str):
@@ -292,8 +239,7 @@ class Agent(object):
         """_"""
         if counter is None: counter = dd(int)
         if links is None:
-            links = [_ for key, item in self.scanned_file_data.items()
-                     for _ in item]
+            links = self.db.get_all_links()
         if domain is None: domain = 'politics.people.com.cn'
         if not isinstance(domain, str):
             raise TypeError('Parameter \'domain\' must be a string')

@@ -4,7 +4,6 @@
 
 import tempfile
 import os
-import json
 import shutil
 
 from glob import glob
@@ -33,7 +32,6 @@ class TestAgent(object):
 
     def setup(self):
         self.agent = archiver.Agent(
-            scanned_json_file = 'scanned.json',
             directory = self.temp_dir, archive_folder = 'archives', db = 'db')
 
     def teardown(self):
@@ -41,15 +39,12 @@ class TestAgent(object):
 
     # __init__
     def test_directory_raises_TypeError(self):
-        assert_raises(
-            TypeError, archiver.Agent, directory = 1,
-            scanned_json_file = 'scanned.json')
+        assert_raises(TypeError, archiver.Agent, directory = 1)
 
     def test_directory_raises_ValueError(self):
         assert_raises(
             ValueError, archiver.Agent, directory = '',
-            scanned_json_file = '1_scanned.json',
-            archive_folder = '1_archives', db = 'db')
+            archive_folder = 'archives', db = 'db')
 
     def test_isdir_temp(self):
         assert_true(os.path.isdir(self.temp_dir))
@@ -83,8 +78,8 @@ class TestAgent(object):
         assert_true(os.path.isdir(archive_folder))
         assert_true(os.path.isfile(fpath))
         # ./archive/ ./archive.json ./scanned.json
-        assert_equals(3, len(glob(os.path.join(self.agent.directory,'*'))))
-        assert_equals(2, len(glob(os.path.join(self.agent.archive_folder,'*'))))
+        assert_equals(2, len(glob(os.path.join(self.agent.directory,'*'))))
+        assert_equals(1, len(glob(os.path.join(self.agent.archive_folder,'*'))))
 
         # Delete it:
         self.agent.clean()
@@ -95,28 +90,18 @@ class TestAgent(object):
         assert_equals(0, len(glob(os.path.join(self.agent.directory,'*'))))
         # Recreate, so teardown doesn't fail:
         self.agent = archiver.Agent(
-            scanned_json_file = 'scanned.json',
             directory = self.temp_dir, archive_folder = 'archives', db = 'db')
 
-        # Scanned
-        scanned_scanned_json_file = os.path.join(self.temp_dir, 'scanned.json')
-        assert_true(os.path.isfile(scanned_scanned_json_file))
-
-        # Only one file scanned_scanned_json_file:
-        assert_true(os.path.isfile(scanned_scanned_json_file))
-        assert_equals(3, len(glob(os.path.join(self.agent.directory,'*'))))
+        assert_equals(2, len(glob(os.path.join(self.agent.directory,'*'))))
 
         # Delete it:
         self.agent.clean()
 
-        # Files and dir are gone:
-        assert_false(os.path.isfile(scanned_scanned_json_file))
         # Root directory is empty:
         assert_equals(0, len(glob(os.path.join(self.agent.directory,'*'))))
 
         # Recreate, so teardown doesn't fail:
         self.agent = archiver.Agent(
-            scanned_json_file = 'scanned.json',
             directory = self.temp_dir, archive_folder = 'archives', db = 'db')
 
     # File names and paths
@@ -187,31 +172,31 @@ class TestAgent(object):
         assert_equals(a,b)
 
     # Data
-    def test__load_archive_pages_url_raises_TypeError(self):
+    def test__load_pages_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.agent.load_archive_page, url = 1)
+            TypeError, self.agent.load_page, url = 1)
 
-    def test__load_archive_pages_raises_KeyError_when_page_not_saved(self):
+    def test__load_pages_raises_KeyError_when_page_not_saved(self):
         if self.skip_online_tests: raise SkipTest
         assert_raises(
-            KeyError, self.agent.load_archive_page, url = 'www.example.com')
+            KeyError, self.agent.load_page, url = 'www.example.com')
 
-    def test__load_archive_pages(self):
+    def test__load_pages(self):
         self.agent.archive_folder = 'archives'
         fname = self.agent.db.set_filename('www.example.com')
-        retrieved = self.agent.load_archive_page(
+        retrieved = self.agent.load_page(
             url = 'www.example.com')
         assert_equals(fname, '000001')
         assert_equals(retrieved, '000001')
 
-    def test__fetch_archive_page_url_raises_TypeError(self):
+    def test__fetch_page_url_raises_TypeError(self):
         if self.skip_online_tests: raise SkipTest
         assert_raises(
-            TypeError, self.agent._fetch_archive_page, url = 1)
+            TypeError, self.agent._fetch_page, url = 1)
 
-    def test__fetch_archive_page_writes_file(self):
+    def test__fetch_page_writes_file(self):
         if self.skip_online_tests: raise SkipTest
-        self.agent._fetch_archive_page(url = 'www.example.com')
+        self.agent._fetch_page(url = 'www.example.com')
         self.agent.archive_folder = 'archive_folder'
         expected_name = '000001'
         assert_equals(self.agent.db.get_filename, expected_name)
@@ -219,20 +204,12 @@ class TestAgent(object):
     def test__fetch_article_page(self):
         pass
 
-    #class TestArticleScanner(object):
-    def test_isfile_scanned_json_file(self):
-        assert_true(os.path.isfile(self.agent.scanned_json_file))
-
     # Scanned
     def test__save_links_from_page(self):
         self.agent._save_links_from_page('www.example.com', ['link_1'])
-        assert_equals(
-            json.load(open(self.agent.scanned_json_file)),
-            {'www.example.com': ['link_1']})
+        assert_equals(self.agent.db.get_all_links(), [('link_1',)])
         self.agent._save_links_from_page('www.example2.com', ['link_2'])
-        assert_equals(
-            json.load(open(self.agent.scanned_json_file)),
-            {'www.example.com': ['link_1'], 'www.example2.com': ['link_2']})
+        assert_equals(self.agent.db.get_all_links(), [('link_1',), ('link_2',)])
 
     def test__save_scanned_url_raises_TypeError(self):
         assert_raises(TypeError, self.agent._save_links_from_page, url = 1)
@@ -243,9 +220,7 @@ class TestAgent(object):
 
     def test__save_archive_links(self):
         self.agent._save_links_from_page('www.example.com', ['www.link.com'])
-        assert_equals(
-            json.load(open(self.agent.scanned_json_file)),
-            {'www.example.com': ['www.link.com']})
+        assert_equals(self.agent.db.get_all_links(), [('www.link.com',)])
 
     def test__save_archive_links_url_raises_TypeError(self):
         assert_raises(

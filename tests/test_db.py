@@ -17,25 +17,26 @@ class TestDB():
     @classmethod
     def setup_class(cls):
         cls.temp_dir = tempfile.mkdtemp()
-        cls.fname = os.path.join(cls.temp_dir, 'test.db')
+        cls.path = os.path.join(cls.temp_dir, 'test.db')
 
     @classmethod
     def teardown_class(cls):
         shutil.rmtree(cls.temp_dir)
 
     def setup(self):
-        self.db = archiver.DB(fname = self.fname)
+        self.db = archiver.DB(path = self.path)
 
     def teardown(self):
         self.db.clean()
+        os.remove(self.path)
 
     def test_set_filename(self):
         url = 'wikipedia.org'
         with self.db.connect() as con:
             self.db.set_filename(url)
             cur = con.cursor()
-            cur.execute('SELECT * FROM file_names')
-            assert_equals(cur.fetchone(), (url, 1, 0))
+            cur.execute('SELECT url, ID FROM file_names')
+            assert_equals(cur.fetchone(), (url, 1))
 
     def test_set_filename_get_row_id(self):
         url = 'wikipedia.org'
@@ -47,9 +48,9 @@ class TestDB():
             self.db.set_filename('a')
             self.db.set_filename('b')
             cur = con.cursor()
-            cur.execute('SELECT * FROM file_names')
+            cur.execute('SELECT url, ID FROM file_names')
             result = cur.fetchall()
-        assert_equals(result, [('a', 1, 0), ('b', 2, 0)])
+        assert_equals(result, [('a', 1), ('b', 2)])
 
     def test_get_filename(self):
         with self.db.connect() as con:
