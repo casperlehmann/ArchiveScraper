@@ -186,22 +186,16 @@ class Agent(object):
             logging.info('Alredy here: %s', url)
         except KeyError:
             logging.info('Fetching...: %s', url)
-            self._fetch_page(url)
-            fname = self.db.get_filename(url)
+            if not url.startswith('http'):
+                url = 'http://' + url
+            with urllib.request.urlopen(url) as url_obj:
+                fname = self.db.set_filename(url)
+                fpath = os.path.join(self.archive_folder, fname)
+                with open(fpath, 'wb') as f:
+                    logging.info('Writing file: %s', fname)
+                    f.write(url_obj.read())
+                self.db.update_fetched(url)
         return fname
-
-    def _fetch_page(self, url):
-        if not isinstance(url, str):
-            raise TypeError('url must be a string.')
-        if not url.startswith('http'):
-            url = 'http://' + url
-        with urllib.request.urlopen(url) as url_obj:
-            fname = self.db.set_filename(url)
-            fpath = os.path.join(self.archive_folder, fname)
-            with open(fpath, 'wb') as f:
-                logging.info('Writing file: %s', fname)
-                f.write(url_obj.read())
-            self.db.update_fetched(url)
 
     def _save_links_from_page(self, url, links):
         if not isinstance (url, str):
