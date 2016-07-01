@@ -30,8 +30,7 @@ class Agent(object):
         'archive_folder': None,
     }
 
-    def __init__(
-            self, directory, archive_folder, db):
+    def __init__(self, directory, archive_folder, db):
         self.directory = directory
         self.archive_folder = archive_folder
         self.db = archiver.DB(path = os.path.join(self.directory, db))
