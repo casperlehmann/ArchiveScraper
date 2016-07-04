@@ -8,7 +8,6 @@ import urllib.request
 import http.client
 import logging
 
-from collections import defaultdict as dd
 from socket import timeout
 from bs4 import BeautifulSoup as bs
 
@@ -30,32 +29,7 @@ class Agent(object):
             directory = directory, archive_folder = archive_folder, db = db)
         self.db = archiver.DB(path = self.fh.db)
 
-    # Feedback
-    @staticmethod
-    def show_counter(counter, root, filtr = None):
-        """_"""
-        if not isinstance(root, str):
-            raise TypeError('Parameter \'root\' must be a string.')
-        if filtr is None:
-            filtr = r'/'
-            #filtr = r'/[1-2][09][901][0-9]/'
-        refiltered_count = {}
-        for item in counter:
-            if re.search(filtr, item) is not None:
-                refiltered_count[item] = counter[item]
-        for href, count in sorted(
-                refiltered_count.items(),
-                key=lambda x: x[1]):
-            stripped = href.strip('/').strip('GB/index.html').strip('/')
-            if stripped.endswith('.com') or stripped.endswith('.cn'):
-                continue
-            if href.startswith('/'):
-                logging.info('%8s %s', count, root+href)
-            else:
-                logging.info('%8s %s', count, href)
-
     def clean(self):
-        """_"""
         self.fh.clean()
 
     def get_filepath(self, url):
@@ -68,12 +42,10 @@ class Agent(object):
         return fpath
 
     def seed_archive(self, urls):
-        """_"""
         self.db.seed_archive(urls)
 
     @staticmethod
     def exclusion(url):
-        """_"""
         url = url.strip('/')
         if url == '#': return True
         if 'click.ng/params.richmedia' in url: return True
@@ -84,17 +56,14 @@ class Agent(object):
 
     # Data
     def load_links(self):
-        """_"""
         urls = self.db.get_unfetched_links()
         self.load_pages(urls)
 
     def load_seeds(self):
-        """_"""
         urls = self.db.get_unfetched_seeds()
         self.load_pages(urls)
 
     def load_pages(self, urls):
-        """_"""
         for url in urls:
             if self.exclusion(url):
                 continue
@@ -120,7 +89,6 @@ class Agent(object):
                     'ConnectionResetError: [Errno 54] Connection reset by peer: %s', url)
 
     def load_page(self, url):
-        """_"""
         if not isinstance (url, str):
             raise TypeError('url must be a string')
         try:
@@ -154,7 +122,6 @@ class Agent(object):
         self.db.register_links(url, links)
 
     def get_soup(self, url):
-        """_"""
         if url is None or not isinstance(url, str):
             raise TypeError("url must be a string.")
         fname = self.db.get_filename(url)
@@ -170,7 +137,6 @@ class Agent(object):
     def find_links_in_page(
             self, url,
             target_element = None, target_class = None, target_id = None):
-        """_"""
         if not isinstance(url, str):
             raise TypeError('url is type:', type(url), url)
         if target_element is None: target_element = ''
@@ -195,27 +161,9 @@ class Agent(object):
 
     def find_links_in_archive(
             self, target_element = None, target_class = None, target_id = None):
-        """_"""
         for url in self.db.get_unscanned():
             self.find_links_in_page(
                 url,
                 target_element = target_element,
                 target_class = target_class,
                 target_id = target_id)
-
-    # Analysis
-    def count_links(self, counter = None, links = None, domain = None):
-        """_"""
-        if counter is None: counter = dd(int)
-        if links is None:
-            links = self.db.get_all_links()
-        if domain is None: domain = 'politics.people.com.cn'
-        if not isinstance(domain, str):
-            raise TypeError('Parameter \'domain\' must be a string')
-
-        for link in links:
-            if domain in link or link[0] == '/':
-                counter[link] += 1
-            else:
-                counter[link] += 1
-        return counter
