@@ -42,7 +42,6 @@ class Agent(object):
     def seed_archive(self, urls):
         self.db.seed_archive(urls)
 
-    # Data
     def load_links(self):
         urls = self.db.get_unfetched_links()
         self.load_pages(urls)
