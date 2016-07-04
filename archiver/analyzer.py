@@ -62,6 +62,12 @@ class Analyzer():
                 links.append(link)
         self._save_links_from_page(url, links)
 
+    def find_text_in_page(self, url):
+        if not isinstance(url, str):
+            raise TypeError('url is type:', type(url), url)
+        soup = self.get_soup(url = url)
+        return soup.text
+
     def get_soup(self, url):
         if url is None or not isinstance(url, str):
             raise TypeError("url must be a string.")

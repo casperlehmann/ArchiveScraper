@@ -50,3 +50,24 @@ class Agent(object):
                 target_element = target_element,
                 target_class = target_class,
                 target_id = target_id)
+
+    def extract_text_from_articles(self):
+        """Only scan non-seeds.
+
+        """
+        fetched_pages = self.db.get_fetched_articles()
+        for page in fetched_pages:
+            print (''.join((80*['='])))
+            print (''.join((80*['='])))
+            print ()
+            text = self.analyzer.find_text_in_page(page)
+            import re
+            out = text
+            out = re.sub(r'\n+', r'\n', out)
+            out = re.sub(r'\t+', r'', out)
+            out = re.sub(r'( )+', r' ', out)
+            print (out)
+            print ()
+            break
+        #file_names = [self.db.get_filepath(_) for _ in fetched_pages]
+        #print (file_names[:10])

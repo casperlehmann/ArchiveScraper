@@ -6,7 +6,7 @@ import os
 
 import sqlite3 as lite
 
-# pylint: disable=missing-docstring
+# pylint: disable=missing-docstring, too-many-public-methods
 
 class DB():
 
@@ -23,8 +23,7 @@ class DB():
                 'url VARCHAR(255) NOT NULL,'
                 'ID INTEGER PRIMARY KEY AUTOINCREMENT,'
                 'scanned INT DEFAULT 0,'
-                'four_o_four INT DEFAULT 0,'
-                'archive_page INT DEFAULT 0'
+                'four_o_four INT DEFAULT 0'
                 ')'
             )
 
@@ -110,9 +109,13 @@ class DB():
             if not isinstance (url, str):
                 raise TypeError
             cur = con.cursor()
+            urls = len(links)*[url]
+            links = [link if not link.startswith('/')
+                     else 'http://'+url[7:].split('/')[0]+link
+                     for link in links]
             cur.executemany(
                 'INSERT INTO links(url, link) VALUES (?, ?)',
-                zip(len(links)*[url], links))
+                zip(urls, links))
 
     def get_all_links(self):
         with self.connect() as con:
@@ -172,3 +175,24 @@ class DB():
             return [link if not link.startswith('/')
                     else 'http://'+url[7:].split('/')[0]+link
                     for url, link in cur.fetchall()]
+
+    def get_fetched_articles(self):
+        with self.connect() as con:
+            cur = con.cursor()
+            #cur.execute(
+            #    'SELECT file_names.url FROM file_names JOIN links '
+            #    'ON file_names.url = links.link ')
+            #print (cur.fetchall())
+
+            #cur.execute('SELECT file_names.url FROM file_names')
+            #print (cur.fetchall())
+
+            #cur.execute('SELECT link FROM links')
+            #print (cur.fetchall())
+
+            cur.execute(
+                'SELECT file_names.url FROM file_names JOIN links '
+                'ON file_names.url = links.link WHERE links.url != "seed" '
+                'AND four_o_four = 0'
+            )
+            return [_[0] for _ in cur.fetchall()]
