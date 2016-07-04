@@ -2,7 +2,6 @@
 
 """
 
-import os
 import logging
 
 from bs4 import BeautifulSoup as bs
@@ -30,15 +29,6 @@ class Agent(object):
     def clean(self):
         self.fh.clean()
 
-    def get_filepath(self, url):
-        if not isinstance (url, str):
-            raise TypeError
-        fname = self.db.get_filename(url)
-        fpath = os.path.join(self.fh.archive_folder, fname)
-        if not os.path.isfile(fpath):
-            raise OSError(('File {} does not exist.'.format(fname)))
-        return fpath
-
     def seed_archive(self, urls):
         self.db.seed_archive(urls)
 
@@ -60,19 +50,6 @@ class Agent(object):
             raise TypeError
         self.db.set_scanned(url)
         self.db.register_links(url, links)
-
-    def get_soup(self, url):
-        if url is None or not isinstance(url, str):
-            raise TypeError("url must be a string.")
-        fname = self.db.get_filename(url)
-        logging.info(
-            'Loading & Souping file: [%s] for url: [%s]', fname, url)
-        try:
-            fpath = self.get_filepath(url)
-            with open(fpath, 'rb') as fobj:
-                return bs(fobj.read(), 'html.parser')
-        except FileNotFoundError:
-            raise OSError('File not found: {}'.format(fname))
 
     def find_links_in_archive(
             self, target_element = None, target_class = None, target_id = None):
@@ -107,3 +84,16 @@ class Agent(object):
                 link = a.attrs['href'].strip()
                 links.append(link)
         self._save_links_from_page(url, links)
+
+    def get_soup(self, url):
+        if url is None or not isinstance(url, str):
+            raise TypeError("url must be a string.")
+        fname = self.db.get_filename(url)
+        logging.info(
+            'Loading & Souping file: [%s] for url: [%s]', fname, url)
+        try:
+            fpath = self.db.get_filepath(url)
+            with open(fpath, 'rb') as fobj:
+                return bs(fobj.read(), 'html.parser')
+        except FileNotFoundError:
+            raise OSError('File not found: {}'.format(fname))

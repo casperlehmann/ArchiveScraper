@@ -123,16 +123,16 @@ class TestAgent(object):
 
     def test__get_filepath_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.agent.get_filepath, url = ['not a string'])
+            TypeError, self.agent.db.get_filepath, url = ['not a string'])
 
     def test__get_filepath_url_raises_KeyError(self):
         assert_raises(
-            KeyError, self.agent.get_filepath, url='www.example.com')
+            KeyError, self.agent.db.get_filepath, url='www.example.com')
 
     def test__get_filepath_file_raises_OSError(self):
         self.agent.db.set_filename('www.example.com')
         assert_raises(
-            OSError, self.agent.get_filepath, url='www.example.com')
+            OSError, self.agent.db.get_filepath, url='www.example.com')
 
     def test__get_filepath(self):
         self.agent.fh.archive_folder = 'archives'
@@ -140,7 +140,7 @@ class TestAgent(object):
         fname = self.agent.db.set_filename('www.example.com')
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
-        assert_equals(self.agent.get_filepath('www.example.com'), fpath)
+        assert_equals(self.agent.db.get_filepath('www.example.com'), fpath)
 
     def test__get_archive_folder_sets_folder_name(self):
         assert_equals(str(self.agent.fh.archive_folder)[-9:], '/archives')

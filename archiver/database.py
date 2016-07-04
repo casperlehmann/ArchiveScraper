@@ -2,6 +2,8 @@
 
 """
 
+import os
+
 import sqlite3 as lite
 
 # pylint: disable=missing-docstring
@@ -57,6 +59,15 @@ class DB():
             cur.execute('INSERT INTO file_names (url) VALUES (?)', (url,))
             filename = str(cur.lastrowid).zfill(6)
             return filename
+
+    def get_filepath(self, url):
+        if not isinstance (url, str):
+            raise TypeError
+        fname = self.get_filename(url)
+        fpath = os.path.join(self.parent.fh.archive_folder, fname)
+        if not os.path.isfile(fpath):
+            raise OSError(('File {} does not exist.'.format(fname)))
+        return fpath
 
     def get_filename(self, url):
         with self.connect() as con:
