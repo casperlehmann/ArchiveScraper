@@ -77,7 +77,13 @@ class Analyzer():
         try:
             fpath = self.parent.db.get_filepath(url)
             with open(fpath, 'rb') as fobj:
-                return bs(fobj.read(), 'html.parser')
+                soup = bs(fobj.read(), 'html.parser')
+                # Remove all scripts and style data:
+                # http://stackoverflow.com/questions/22799990/beatifulsoup4
+                #                       -get-text-still-has-javascript
+                for script in soup(["script", "style"]):
+                    script.extract()
+                return soup
         except FileNotFoundError:
             raise OSError('File not found: {}'.format(fname))
 
