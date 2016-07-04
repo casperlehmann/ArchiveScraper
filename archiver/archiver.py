@@ -74,6 +74,15 @@ class Agent(object):
         except FileNotFoundError:
             raise OSError('File not found: {}'.format(fname))
 
+    def find_links_in_archive(
+            self, target_element = None, target_class = None, target_id = None):
+        for url in self.db.get_unscanned():
+            self.find_links_in_page(
+                url,
+                target_element = target_element,
+                target_class = target_class,
+                target_id = target_id)
+
     def find_links_in_page(
             self, url,
             target_element = None, target_class = None, target_id = None):
@@ -98,12 +107,3 @@ class Agent(object):
                 link = a.attrs['href'].strip()
                 links.append(link)
         self._save_links_from_page(url, links)
-
-    def find_links_in_archive(
-            self, target_element = None, target_class = None, target_id = None):
-        for url in self.db.get_unscanned():
-            self.find_links_in_page(
-                url,
-                target_element = target_element,
-                target_class = target_class,
-                target_id = target_id)
