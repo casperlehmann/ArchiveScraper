@@ -174,17 +174,17 @@ class TestAgent(object):
     # Data
     def test__load_pages_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.agent.load_page, url = 1)
+            TypeError, self.agent.scraper.load_page, url = 1)
 
     def test__load_pages_raises_KeyError_when_page_not_saved(self):
         if self.skip_online_tests: raise SkipTest
         assert_raises(
-            KeyError, self.agent.load_page, url = 'www.example.com')
+            KeyError, self.agent.scraper.load_page, url = 'www.example.com')
 
     def test__load_pages(self):
         self.agent.fh.archive_folder = 'archives'
         fname = self.agent.db.set_filename('www.example.com')
-        retrieved = self.agent.load_page(
+        retrieved = self.agent.scraper.load_page(
             url = 'www.example.com')
         assert_equals(fname, '000001')
         assert_equals(retrieved, '000001')
@@ -192,11 +192,11 @@ class TestAgent(object):
     def test__fetch_page_url_raises_TypeError(self):
         if self.skip_online_tests: raise SkipTest
         assert_raises(
-            TypeError, self.agent._fetch_page, url = 1)
+            TypeError, self.agent.scraper._fetch_page, url = 1)
 
     def test__fetch_page_writes_file(self):
         if self.skip_online_tests: raise SkipTest
-        self.agent._fetch_page(url = 'www.example.com')
+        self.agent.scraper._fetch_page(url = 'www.example.com')
         self.agent.fh.archive_folder = 'archive_folder'
         expected_name = '000001'
         assert_equals(self.agent.db.get_filename, expected_name)
