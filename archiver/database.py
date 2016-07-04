@@ -81,6 +81,13 @@ class DB():
             filename = str(result[0]).zfill(6)
             return filename
 
+    def rm_filename(self, url):
+        with self.connect() as con:
+            if not isinstance (url, str):
+                raise TypeError
+            cur = con.cursor()
+            cur.execute('DELETE FROM file_names WHERE url=?', (url,))
+
     def get_unscanned(self):
         with self.connect() as con:
             cur = con.cursor()
@@ -126,10 +133,11 @@ class DB():
                 'INSERT INTO file_names (url, four_o_four) VALUES (?, 1)',
                 (url,))
 
-    def update_fetched(self, url):
+    def update_fetched(self, url, revert = False):
+        fetched = 1-int(revert)
         with self.connect() as con:
             cur = con.cursor()
-            cur.execute('UPDATE links SET fetched = 1 WHERE url = ?', (url,))
+            cur.execute('UPDATE links SET fetched = ? WHERE url = ?', (fetched, url))
 
     def is_four_o_four(self, url):
         with self.connect() as con:
