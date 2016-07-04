@@ -33,11 +33,11 @@ class Agent(object):
 
     def load_unfetched_links(self):
         urls = self.db.get_unfetched_links()
-        self.load_pages(urls)
+        self.scraper.load_pages(urls)
 
     def load_unfetched_seeds(self):
         urls = self.db.get_unfetched_seeds()
-        self.load_pages(urls)
+        self.scraper.load_pages(urls)
 
     def load_pages(self, urls):
         self.scraper.load_pages(urls)
