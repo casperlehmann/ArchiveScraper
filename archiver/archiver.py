@@ -4,17 +4,17 @@
 
 import os
 import re
-import shutil
 import urllib.request
 import http.client
 import logging
 
 from collections import defaultdict as dd
 from socket import timeout
-from glob import glob
 from bs4 import BeautifulSoup as bs
 
 import archiver
+
+# pylint: disable=missing-docstring
 
 logging.basicConfig(
     level = logging.DEBUG,
@@ -25,55 +25,10 @@ class Agent(object):
 
     """
 
-    _directories = {
-        'directory': None,
-        'archive_folder': None,
-    }
-
     def __init__(self, directory, archive_folder, db):
-        self.directory = directory
-        self.archive_folder = archive_folder
-        self.db = archiver.DB(path = os.path.join(self.directory, db))
-
-    @property
-    def directory(self):
-        """dir"""
-        return self._directories['directory']
-
-    @directory.setter
-    def directory(self, directory):
-        if not isinstance (directory, str):
-            raise TypeError('directory must be a string.')
-        if len(directory) == 0:
-            raise ValueError('directory name cannot be "".')
-        os.makedirs(directory, exist_ok=True)
-        if not os.path.isdir(directory):
-            raise ValueError('directory is not a directory.')
-        self._directories['directory'] = directory
-
-    @property
-    def archive_folder(self):
-        """_"""
-        return self._directories['archive_folder']
-
-    @archive_folder.setter
-    def archive_folder(self, archive_folder):
-        archive_folder = os.path.join(self.directory, archive_folder)
-        if not isinstance(archive_folder, str):
-            raise TypeError(
-                'Name of archive folder must be a string, not {}'.format(
-                    archive_folder))
-        os.makedirs(archive_folder, exist_ok=True)
-        self._directories['archive_folder'] = archive_folder
-
-    @staticmethod
-    def delete_file(target):
-        """_"""
-        try:
-            logging.info('Deleting: ' + target + '...')
-            os.remove(target)
-        except FileNotFoundError:
-            logging.info('Does not exist: ' + target)
+        self.fh = archiver.FileHander(
+            directory = directory, archive_folder = archive_folder, db = db)
+        self.db = archiver.DB(path = self.fh.db)
 
     # Feedback
     @staticmethod
@@ -101,26 +56,13 @@ class Agent(object):
 
     def clean(self):
         """_"""
-        logging.info('Cleaning...')
-        self.delete_file(target = self.db.path)
-        # clean archive
-        for f in glob(os.path.join(self.archive_folder, '*')):
-            logging.info('Deleting (archive): %s', f)
-            os.remove(f)
-        # remove subfolders
-        for f in glob(os.path.join(self.directory, '*')):
-            logging.info('Deleting: (dir): %s', f)
-            shutil.rmtree(f)
-        self._directories = {
-            'directory': self.directory,
-            'archive_folder': None
-        }
+        self.fh.clean()
 
-    def _get_filepath(self, url):
+    def get_filepath(self, url):
         if not isinstance (url, str):
             raise TypeError
         fname = self.db.get_filename(url)
-        fpath = os.path.join(self.archive_folder, fname)
+        fpath = os.path.join(self.fh.archive_folder, fname)
         if not os.path.isfile(fpath):
             raise OSError(('File {} does not exist.'.format(fname)))
         return fpath
@@ -197,7 +139,7 @@ class Agent(object):
             url = 'http://' + url
         with urllib.request.urlopen(url) as url_obj:
             fname = self.db.set_filename(url)
-            fpath = os.path.join(self.archive_folder, fname)
+            fpath = os.path.join(self.fh.archive_folder, fname)
             with open(fpath, 'wb') as f:
                 logging.info('Writing file: %s', fname)
                 f.write(url_obj.read())
@@ -219,7 +161,7 @@ class Agent(object):
         logging.info(
             'Loading & Souping file: [%s] for url: [%s]', fname, url)
         try:
-            fpath = self._get_filepath(url)
+            fpath = self.get_filepath(url)
             with open(fpath, 'rb') as fobj:
                 return bs(fobj.read(), 'html.parser')
         except FileNotFoundError:

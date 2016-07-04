@@ -68,8 +68,8 @@ class TestAgent(object):
 
     # Cleaning
     def test_clean(self):
-        self.agent.archive_folder = 'archives'
-        archive = self.agent.archive_folder
+        self.agent.fh.archive_folder = 'archives'
+        archive = self.agent.fh.archive_folder
         fpath = os.path.join(archive, '000001')
         with open(fpath, 'wb') as f: f.write(b'Some contents')
         archive_folder = os.path.join(self.temp_dir, 'archives')
@@ -78,8 +78,8 @@ class TestAgent(object):
         assert_true(os.path.isdir(archive_folder))
         assert_true(os.path.isfile(fpath))
         # ./archive/ ./archive.json ./scanned.json
-        assert_equals(2, len(glob(os.path.join(self.agent.directory,'*'))))
-        assert_equals(1, len(glob(os.path.join(self.agent.archive_folder,'*'))))
+        assert_equals(2, len(glob(os.path.join(self.agent.fh.directory,'*'))))
+        assert_equals(1, len(glob(os.path.join(self.agent.fh.archive_folder,'*'))))
 
         # Delete it:
         self.agent.clean()
@@ -87,18 +87,18 @@ class TestAgent(object):
         assert_false(os.path.isdir(archive_folder))
         assert_false(os.path.isfile(fpath))
         # Root directory is empty:
-        assert_equals(0, len(glob(os.path.join(self.agent.directory,'*'))))
+        assert_equals(0, len(glob(os.path.join(self.agent.fh.directory,'*'))))
         # Recreate, so teardown doesn't fail:
         self.agent = archiver.Agent(
             directory = self.temp_dir, archive_folder = 'archives', db = 'db')
 
-        assert_equals(2, len(glob(os.path.join(self.agent.directory,'*'))))
+        assert_equals(2, len(glob(os.path.join(self.agent.fh.directory,'*'))))
 
         # Delete it:
         self.agent.clean()
 
         # Root directory is empty:
-        assert_equals(0, len(glob(os.path.join(self.agent.directory,'*'))))
+        assert_equals(0, len(glob(os.path.join(self.agent.fh.directory,'*'))))
 
         # Recreate, so teardown doesn't fail:
         self.agent = archiver.Agent(
@@ -114,8 +114,8 @@ class TestAgent(object):
             KeyError, self.agent.db.get_filename, url='www.example.com')
 
     def test__get_filename(self):
-        self.agent.archive_folder = 'archives'
-        archive = self.agent.archive_folder
+        self.agent.fh.archive_folder = 'archives'
+        archive = self.agent.fh.archive_folder
         fname = self.agent.db.set_filename('www.example.com')
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
@@ -123,35 +123,35 @@ class TestAgent(object):
 
     def test__get_filepath_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.agent._get_filepath, url = ['not a string'])
+            TypeError, self.agent.get_filepath, url = ['not a string'])
 
     def test__get_filepath_url_raises_KeyError(self):
         assert_raises(
-            KeyError, self.agent._get_filepath, url='www.example.com')
+            KeyError, self.agent.get_filepath, url='www.example.com')
 
     def test__get_filepath_file_raises_OSError(self):
         self.agent.db.set_filename('www.example.com')
         assert_raises(
-            OSError, self.agent._get_filepath, url='www.example.com')
+            OSError, self.agent.get_filepath, url='www.example.com')
 
     def test__get_filepath(self):
-        self.agent.archive_folder = 'archives'
-        archive = self.agent.archive_folder
+        self.agent.fh.archive_folder = 'archives'
+        archive = self.agent.fh.archive_folder
         fname = self.agent.db.set_filename('www.example.com')
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
-        assert_equals(self.agent._get_filepath('www.example.com'), fpath)
+        assert_equals(self.agent.get_filepath('www.example.com'), fpath)
 
     def test__get_archive_folder_sets_folder_name(self):
-        assert_equals(str(self.agent._directories['archive_folder'])[-9:], '/archives')
-        self.agent.archive_folder = 'test'
+        assert_equals(str(self.agent.fh.archive_folder)[-9:], '/archives')
+        self.agent.fh.archive_folder = 'test'
         assert_equals(
-            self.agent._directories['archive_folder'],
+            self.agent.fh.archive_folder,
             os.path.join(self.temp_dir, 'test'))
 
     def test__get_archive_folder_archive_folder_raises_TypeError(self):
         def name_setter(name):
-            self.agent.archive_folder = name
+            self.agent.fh.archive_folder = name
         assert_raises(
             TypeError,
             name_setter,
@@ -160,15 +160,15 @@ class TestAgent(object):
     def test__get_archive_folder_creates_dirs(self):
         test_dir = os.path.join(self.temp_dir, 'test_dir')
         assert_false(os.path.exists(test_dir))
-        self.agent.archive_folder = test_dir
+        self.agent.fh.archive_folder = test_dir
         assert_true(os.path.exists(test_dir))
 
     def test__get_archive_folder_stays_the_same(self):
         test_dir = os.path.join(self.temp_dir, 'test_dir')
-        self.agent.archive_folder = test_dir
-        a = self.agent._directories['archive_folder']
-        self.agent.archive_folder = test_dir
-        b = self.agent._directories['archive_folder']
+        self.agent.fh.archive_folder = test_dir
+        a = self.agent.fh.archive_folder
+        self.agent.fh.archive_folder = test_dir
+        b = self.agent.fh.archive_folder
         assert_equals(a,b)
 
     # Data
@@ -182,7 +182,7 @@ class TestAgent(object):
             KeyError, self.agent.load_page, url = 'www.example.com')
 
     def test__load_pages(self):
-        self.agent.archive_folder = 'archives'
+        self.agent.fh.archive_folder = 'archives'
         fname = self.agent.db.set_filename('www.example.com')
         retrieved = self.agent.load_page(
             url = 'www.example.com')
@@ -197,7 +197,7 @@ class TestAgent(object):
     def test__fetch_page_writes_file(self):
         if self.skip_online_tests: raise SkipTest
         self.agent._fetch_page(url = 'www.example.com')
-        self.agent.archive_folder = 'archive_folder'
+        self.agent.fh.archive_folder = 'archive_folder'
         expected_name = '000001'
         assert_equals(self.agent.db.get_filename, expected_name)
 
@@ -238,8 +238,8 @@ class TestAgent(object):
 
     def test_get_soup(self):
         url = 'wikipedia.org'
-        self.agent.archive_folder = 'archives'
-        archive = self.agent.archive_folder
+        self.agent.fh.archive_folder = 'archives'
+        archive = self.agent.fh.archive_folder
         fname = self.agent.db.set_filename(url)
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
