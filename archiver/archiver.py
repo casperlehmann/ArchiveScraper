@@ -3,7 +3,6 @@
 """
 
 import os
-import re
 import logging
 
 from bs4 import BeautifulSoup as bs
