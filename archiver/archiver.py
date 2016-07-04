@@ -22,8 +22,9 @@ class Agent(object):
 
     def __init__(self, directory, archive_folder, db):
         self.fh = archiver.FileHander(
+            parent = self,
             directory = directory, archive_folder = archive_folder, db = db)
-        self.db = archiver.DB(path = self.fh.db)
+        self.db = archiver.DB(parent = self)
         self.scraper = archiver.Scraper(parent = self)
 
     def clean(self):

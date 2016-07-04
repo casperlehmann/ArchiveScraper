@@ -8,10 +8,8 @@ import sqlite3 as lite
 
 class DB():
 
-    path = 'data/scraper.db'
-
-    def __init__(self, path = None):
-        if not path is None: self.path = path
+    def __init__(self, parent):
+        self.parent = parent
         self.create_name_mapper()
         self.create_links_mapper()
 
@@ -41,7 +39,7 @@ class DB():
             )
 
     def connect(self):
-        return lite.connect(self.path)
+        return lite.connect(self.parent.fh.db)
 
     def drop_name_mapper(self):
         with self.connect() as con:

@@ -2,7 +2,6 @@
 
 """
 import tempfile
-import os
 import shutil
 
 from nose.tools import assert_equals
@@ -17,18 +16,18 @@ class TestDB():
     @classmethod
     def setup_class(cls):
         cls.temp_dir = tempfile.mkdtemp()
-        cls.path = os.path.join(cls.temp_dir, 'test.db')
 
     @classmethod
     def teardown_class(cls):
         shutil.rmtree(cls.temp_dir)
 
     def setup(self):
-        self.db = archiver.DB(path = self.path)
+        self.agent = archiver.Agent(
+            directory = self.temp_dir, archive_folder = 'archives', db = 'test.db')
+        self.db = self.agent.db
 
     def teardown(self):
-        self.db.clean()
-        os.remove(self.path)
+        self.agent.clean()
 
     def test_set_filename(self):
         url = 'wikipedia.org'

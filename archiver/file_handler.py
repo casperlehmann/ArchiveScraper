@@ -15,7 +15,8 @@ class FileHander():
     _archive_folder = None
     _db = None
 
-    def __init__(self, directory, archive_folder, db):
+    def __init__(self, parent, directory, archive_folder, db):
+        self.parent = parent
         self.directory = directory
         self.archive_folder = archive_folder
         self.db = db
