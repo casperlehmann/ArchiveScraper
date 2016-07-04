@@ -206,35 +206,35 @@ class TestAgent(object):
 
     # Scanned
     def test__save_links_from_page(self):
-        self.agent._save_links_from_page('www.example.com', ['link_1'])
+        self.agent.analyzer._save_links_from_page('www.example.com', ['link_1'])
         assert_equals(self.agent.db.get_all_links(), [('link_1',)])
-        self.agent._save_links_from_page('www.example2.com', ['link_2'])
+        self.agent.analyzer._save_links_from_page('www.example2.com', ['link_2'])
         assert_equals(self.agent.db.get_all_links(), [('link_1',), ('link_2',)])
 
     def test__save_scanned_url_raises_TypeError(self):
-        assert_raises(TypeError, self.agent._save_links_from_page, url = 1)
+        assert_raises(TypeError, self.agent.analyzer._save_links_from_page, url = 1)
 
     def test__save_scanned_self_scanned_raises_TypeError(self):
         self.agent.file_name_data = ''
-        assert_raises(TypeError, self.agent._save_links_from_page, url = 'a')
+        assert_raises(TypeError, self.agent.analyzer._save_links_from_page, url = 'a')
 
     def test__save_archive_links(self):
-        self.agent._save_links_from_page('www.example.com', ['www.link.com'])
+        self.agent.analyzer._save_links_from_page('www.example.com', ['www.link.com'])
         assert_equals(self.agent.db.get_all_links(), [('www.link.com',)])
 
     def test__save_archive_links_url_raises_TypeError(self):
         assert_raises(
-            TypeError, self.agent._save_links_from_page,
+            TypeError, self.agent.analyzer._save_links_from_page,
             url = 1, links = None)
 
     def test__save_archive_links_fname_raises_TypeError(self):
         assert_raises(
-            TypeError, self.agent._save_links_from_page,
+            TypeError, self.agent.analyzer._save_links_from_page,
             url = 'www.example.com', links = None)
 
     def test_get_soup_file_raises_OSError(self):
         assert_raises(
-            KeyError, self.agent.get_soup, url = '000001')
+            KeyError, self.agent.analyzer.get_soup, url = '000001')
 
     def test_get_soup(self):
         url = 'wikipedia.org'
@@ -244,21 +244,21 @@ class TestAgent(object):
         fpath = os.path.join(archive, fname)
         with open(fpath, 'wb') as f: f.write(b'Some contents')
 
-        soup = self.agent.get_soup(url)
+        soup = self.agent.analyzer.get_soup(url)
         assert_equals(soup.text, 'Some contents')
 
     def test_get_soup_filename_raises_TypeError(self):
-        assert_raises(TypeError, self.agent.get_soup, fname=1, url='string')
+        assert_raises(TypeError, self.agent.analyzer.get_soup, fname=1, url='string')
 
     def test_get_soup_url_raises_TypeError(self):
         string = '000001'
         not_string = 1
         assert_raises(
-            TypeError, self.agent.get_soup, fname=string, url=not_string)
+            TypeError, self.agent.analyzer.get_soup, fname=string, url=not_string)
 
     def test_get_soup_raises_OSError(self):
         string = '000001'
-        assert_raises(KeyError, self.agent.get_soup, url=string)
+        assert_raises(KeyError, self.agent.analyzer.get_soup, url=string)
 
     #def test_find_links_in_page_loads_from_disk(self):
     #    fname = '000001'
@@ -283,7 +283,7 @@ class TestAgent(object):
 
     def test_find_links_in_page_raises_KeyError(self):
         assert_raises(
-            KeyError, self.agent.find_links_in_page, url = 'www.example.com')
+            KeyError, self.agent.analyzer.find_links_in_page, url = 'www.example.com')
 
     def test_find_links_in_page_url_raises_TypeError(self):
-        assert_raises(TypeError, self.agent.find_links_in_page, 1)
+        assert_raises(TypeError, self.agent.analyzer.find_links_in_page, 1)

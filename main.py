@@ -29,11 +29,11 @@ if __name__ == '__main__':
     agent.seed_archive(all_urls)
 
     if SCAN_ARCHIVE:
-        agent.load_seeds()
+        agent.load_unfetched_seeds()
         agent.find_links_in_archive(target_element = 'ul', target_class = 'list_16')
 
     if SCAN_ARTICLES:
-        agent.load_links()
+        agent.load_unfetched_links()
         home = 'http://politics.people.com.cn'
 
     #for x in article_urls: print (x)
