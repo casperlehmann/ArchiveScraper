@@ -4,11 +4,8 @@
 
 import os
 import re
-import urllib.request
-import http.client
 import logging
 
-from socket import timeout
 from bs4 import BeautifulSoup as bs
 
 import archiver
@@ -28,6 +25,7 @@ class Agent(object):
         self.fh = archiver.FileHander(
             directory = directory, archive_folder = archive_folder, db = db)
         self.db = archiver.DB(path = self.fh.db)
+        self.scraper = archiver.Scraper(parent = self)
 
     def clean(self):
         self.fh.clean()
@@ -44,16 +42,6 @@ class Agent(object):
     def seed_archive(self, urls):
         self.db.seed_archive(urls)
 
-    @staticmethod
-    def exclusion(url):
-        url = url.strip('/')
-        if url == '#': return True
-        if 'click.ng/params.richmedia' in url: return True
-        for ending in ['/index.html', '.com', '.cn']:
-            if url.endswith(ending):
-                return True
-        return False
-
     # Data
     def load_links(self):
         urls = self.db.get_unfetched_links()
@@ -64,54 +52,7 @@ class Agent(object):
         self.load_pages(urls)
 
     def load_pages(self, urls):
-        for url in urls:
-            if self.exclusion(url):
-                continue
-            if self.db.is_four_o_four(url):
-                logging.info('400:     %s (Previously checked)', url)
-                continue
-            try:
-                self.load_page(url)
-            except urllib.error.HTTPError:
-                logging.info('404:     %s', url)
-                self.db.set_four_o_four(url)
-                continue
-            except http.client.IncompleteRead:
-                logging.info('Partial: %s', url) # e.partial
-            except urllib.error.URLError:
-                logging.info('fail:    %s', url)
-                continue
-            except timeout:
-                logging.info('timeout: %s', url)
-                continue
-            except ConnectionResetError:
-                logging.info(
-                    'ConnectionResetError: [Errno 54] Connection reset by peer: %s', url)
-
-    def load_page(self, url):
-        if not isinstance (url, str):
-            raise TypeError('url must be a string')
-        try:
-            fname = self.db.get_filename(url)
-            logging.info('Alredy here: %s', url)
-        except KeyError:
-            logging.info('Fetching...: %s', url)
-            self._fetch_page(url)
-            fname = self.db.get_filename(url)
-        return fname
-
-    def _fetch_page(self, url):
-        if not isinstance(url, str):
-            raise TypeError('url must be a string.')
-        if not url.startswith('http'):
-            url = 'http://' + url
-        with urllib.request.urlopen(url) as url_obj:
-            fname = self.db.set_filename(url)
-            fpath = os.path.join(self.fh.archive_folder, fname)
-            with open(fpath, 'wb') as f:
-                logging.info('Writing file: %s', fname)
-                f.write(url_obj.read())
-            self.db.update_fetched(url)
+        self.scraper.load_pages(urls)
 
     def _save_links_from_page(self, url, links):
         if not isinstance (url, str):
