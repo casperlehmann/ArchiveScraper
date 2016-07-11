@@ -7,6 +7,7 @@ from archiver import archiver, url_tools
 CLEAN_ARCHIVE = True
 SCAN_ARCHIVE = True
 SCAN_ARTICLES = True
+EXTRACT_TEXT = True
 
 if __name__ == '__main__':
     all_urls = url_tools.get_archive_urls(
