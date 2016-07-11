@@ -20,21 +20,21 @@ class Scraper():
             if self.exclusion(url):
                 continue
             if self.parent.db.is_four_o_four(url):
-                logging.info('400:     %s (Previously checked)', url)
+                logging.info('PrevCheck404:%s', url)
                 continue
             try:
                 self.load_page(url)
             except urllib.error.HTTPError:
-                logging.info('404:     %s', url)
+                logging.info('404:         %s', url)
                 self.parent.db.set_four_o_four(url)
                 continue
             except http.client.IncompleteRead:
-                logging.info('Partial: %s', url) # e.partial
+                logging.info('Partial:     %s', url) # e.partial
             except urllib.error.URLError:
-                logging.info('fail:    %s', url)
+                logging.info('fail:        %s', url)
                 continue
             except timeout:
-                logging.info('timeout: %s', url)
+                logging.info('timeout:     %s', url)
                 continue
             except ConnectionResetError:
                 logging.info(
@@ -94,3 +94,4 @@ class Scraper():
             if url.endswith(ending):
                 return True
         return False
+
