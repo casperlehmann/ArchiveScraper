@@ -66,8 +66,8 @@ class Agent(object):
             out = re.sub(r'\n+', r'\n', out)
             out = re.sub(r'\t+', r'', out)
             out = re.sub(r'( )+', r' ', out)
+            print ('来源 in out and 字号 in out:', '来源' in out and '字号' in out)
             print (out)
             print ()
-            break
         #file_names = [self.db.get_filepath(_) for _ in fetched_pages]
         #print (file_names[:10])
