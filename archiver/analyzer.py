@@ -92,5 +92,5 @@ class Analyzer():
             raise TypeError('url needs to be of type string.')
         if not isinstance (links, list):
             raise TypeError
-        self.parent.db.set_scanned(url)
         self.parent.db.register_links(url, links)
+        self.parent.db.set_scanned(url)
