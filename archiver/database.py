@@ -3,6 +3,7 @@
 """
 
 import os
+import logging
 
 import sqlite3 as lite
 
@@ -171,7 +172,11 @@ class DB():
             cur = con.cursor()
             cur.execute(
                 'SELECT link FROM links WHERE fetched = 0 AND url = "seed"')
-            return [_[0] for _ in cur.fetchall()]
+            links = {_[0] for _ in cur.fetchall()}
+            logging.info(
+                'Number of unique links to fetch (archives): %s',
+                len(links))
+            return links
 
     def get_unfetched_links(self):
         with self.connect() as con:
@@ -180,9 +185,14 @@ class DB():
                 'SELECT url, link FROM links '
                 'WHERE fetched = 0 AND url != "seed"'
             )
-            return [link if not link.startswith('/')
-                    else 'http://'+url[7:].split('/')[0]+link
-                    for url, link in cur.fetchall()]
+            links = {link if not link.startswith('/')
+                     else 'http://'+url[7:].split('/')[0]+link
+                     for url, link in cur.fetchall()}
+            logging.info(
+                'Number of unique links to fetch (articles): %s',
+                len(links))
+
+            return links
 
     def get_fetched_articles(self):
         with self.connect() as con:
