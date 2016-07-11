@@ -93,7 +93,8 @@ class DB():
             cur.execute(
                 'SELECT file_names.url FROM file_names '
                 'JOIN links ON file_names.url = links.link '
-                'WHERE scanned = 0 AND four_o_four = 0'
+                'WHERE scanned = 0 AND four_o_four = 0 '
+                'AND links.url = "seed"'
             )
             return [_[0] for _ in cur.fetchall()]
 
