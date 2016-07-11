@@ -105,6 +105,13 @@ class DB():
             cur = con.cursor()
             cur.execute('UPDATE file_names SET scanned = 1 WHERE url=?', (url,))
 
+    def set_unscanned(self, url):
+        with self.connect() as con:
+            if not isinstance (url, str):
+                raise TypeError
+            cur = con.cursor()
+            cur.execute('UPDATE file_names SET scanned = 0 WHERE url=?', (url,))
+
     def register_links(self, url, links):
         with self.connect() as con:
             if not isinstance (url, str):
