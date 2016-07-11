@@ -36,6 +36,9 @@ if __name__ == '__main__':
         agent.load_unfetched_links()
         home = 'http://politics.people.com.cn'
 
+    if EXTRACT_TEXT:
+        agent.extract_text_from_articles()
+
     #for x in article_urls: print (x)
     #c = agent.count_links()
 
