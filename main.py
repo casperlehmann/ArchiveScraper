@@ -4,14 +4,15 @@
 
 from archiver import archiver, url_tools
 
-CLEAN_ARCHIVE = True
-SCAN_ARCHIVE = True
-SCAN_ARTICLES = True
+CLEAN_ARCHIVE = False
+SCAN_ARCHIVE = False
+SCAN_ARTICLES = False
 EXTRACT_TEXT = True
 
 if __name__ == '__main__':
     all_urls = url_tools.get_archive_urls(
-        from_date = '2016-04-01',
+        #from_date = '2016-04-01',
+        from_date = '2012-02-07',
         earliest_date='2012-02-06',
         schema = 'http://politics.people.com.cn/GB/70731/review/{}.html')
 
