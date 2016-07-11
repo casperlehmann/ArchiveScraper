@@ -107,6 +107,13 @@ class DB():
             cur.execute('UPDATE file_names SET scanned = 1 WHERE url=?', (url,))
 
     def set_unscanned(self, url):
+        """Tell the database that an url has not been scanned for links, e.g.:
+        for url in [
+                'http://politics.people.com.cn/GB/70731/review/20120216.html',
+                'http://politics.people.com.cn/GB/70731/review/20120321.html',
+                'http://politics.people.com.cn/GB/70731/review/20120323.html']:
+            agent.db.set_unscanned(url)
+        """
         with self.connect() as con:
             if not isinstance (url, str):
                 raise TypeError
