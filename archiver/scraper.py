@@ -89,7 +89,8 @@ class Scraper():
     def exclusion(url):
         url = url.strip('/')
         if url == '#': return True
-        if 'click.ng/params.richmedia' in url: return True
+        if 'click.ng/params.richmedia' in url:
+            return True
         for ending in ['/index.html', '.com', '.cn']:
             if url.endswith(ending):
                 return True
