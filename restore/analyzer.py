@@ -1,163 +1,44 @@
 "_"
 import re
 
+from collections import defaultdict as dd
 def analyze_coverage(_data, names_and_funcs, all_links):
     "_"
+    def show(j, fit_sum, count_sum, count_filtered, names_and_counts):
+        "Print info"
+        print ('Fit:      {:>5} / {:<5} = {:>5}%'.format(
+            fit_sum, j, round(fit_sum/j*100, 2)))
+        print ('Count:    {:>5} / {:<5} = {:>5}%'.format(
+            count_sum, j, round(count_sum/j*100, 2)))
+        print ('Filtered: {:>5} / {:<5} = {:>5}%'.format(
+            count_filtered, j, round(count_filtered/j*100, 2)))
+        for name, counts in names_and_counts.items():
+            print ('{:<30} - fit: {:>10} count: {:10}'.format(
+                name, counts['fit'], counts['count']))
     fit_sum = 0
     count_sum = 0
     count_filtered = 0
-
-    fit_Y_MD_cCATALOGUE_CONTENT = 0
-    fit_Ycppcnpc_MD_cCATALOGUE_CONTENT = 0
-    fit_num_num = 0
-    fit_GB_4_num = 0
-    fit_GB_num = 0
-    fit_Ycppccnpc_GB_num = 0
-    fit_blog_article_num = 0
-
-    count_Y_MD_cCATALOGUE_CONTENT = 0
-    count_Ycppcnpc_MD_cCATALOGUE_CONTENT = 0
-    count_num_num = 0
-    count_GB_4_num = 0
-    count_GB_num = 0
-    count_Ycppccnpc_GB_num = 0
-    count_blog_article_num = 0
-
-    names_and_funcs = {k: v for (k,v) in names_and_funcs}
-
-    for _i, link in enumerate(all_links):#[:3]:
-        i = _i + 1
-        #print (i)
-        if (filter_pages(link)) is True:
+    names_and_counts = dd(lambda:dd(int))
+    for _j, _link in enumerate(all_links):#[:3]:
+        j = _j+1
+        local = {}
+        if (filter_pages(_link)) is True:
             count_filtered += 1
-        Y_MD_cCATALOGUE_CONTENT = names_and_funcs['Y_MD_cCATALOGUE_CONTENT'](link, _data)
-        if not Y_MD_cCATALOGUE_CONTENT is False:
-            fit_Y_MD_cCATALOGUE_CONTENT += 1
-            if Y_MD_cCATALOGUE_CONTENT is not None:
-                count_Y_MD_cCATALOGUE_CONTENT += 1
-        Ycppcnpc_MD_cCATALOGUE_CONTENT = names_and_funcs['Ycppcnpc_MD_cCATALOGUE_CONTENT'](link, _data)
-        if not Ycppcnpc_MD_cCATALOGUE_CONTENT is False:
-            fit_Ycppcnpc_MD_cCATALOGUE_CONTENT += 1
-            if Ycppcnpc_MD_cCATALOGUE_CONTENT is not None:
-                count_Ycppcnpc_MD_cCATALOGUE_CONTENT += 1
-        num_num = names_and_funcs['num_num'](link, _data)
-        if not num_num is False:
-            fit_num_num += 1
-            if num_num is not None:
-                count_num_num += 1
-        GB_4_num = names_and_funcs['GB_4_num'](link, _data)
-        if not GB_4_num is False:
-            fit_GB_4_num += 1
-            if GB_4_num is not None:
-                count_GB_4_num += 1
-        GB_num = names_and_funcs['GB_num'](link, _data)
-        if not GB_num is False:
-            fit_GB_num += 1
-            if GB_num is not None:
-                count_GB_num += 1
-        Ycppccnpc_GB_num = names_and_funcs['Ycppccnpc_GB_num'](link, _data)
-        if not Ycppccnpc_GB_num is False:
-            fit_Ycppccnpc_GB_num += 1
-            if Ycppccnpc_GB_num is not None:
-                count_Ycppccnpc_GB_num += 1
-        blog_article_num = names_and_funcs['blog_article_num'](link, _data)
-        if not blog_article_num is False:
-            fit_blog_article_num += 1
-            if blog_article_num is not None:
-                count_blog_article_num += 1
-
-        if sum([
-                int(Y_MD_cCATALOGUE_CONTENT is not False),
-                int(Ycppcnpc_MD_cCATALOGUE_CONTENT is not False),
-                int(num_num is not False),
-                int(GB_4_num is not False),
-                int(GB_num is not False),
-                int(Ycppccnpc_GB_num is not False),
-                int(blog_article_num is not False)]) > 0:
-            fit_sum += 1
-
-        if sum([
-                int(Y_MD_cCATALOGUE_CONTENT not in [None, False]),
-                int(Ycppcnpc_MD_cCATALOGUE_CONTENT not in [None, False]),
-                int(num_num not in [None, False]),
-                int(GB_4_num not in [None, False]),
-                int(GB_num not in [None, False]),
-                int(Ycppccnpc_GB_num not in [None, False]),
-                int(blog_article_num not in [None, False])]) > 0:
-            count_sum += 1
-
-        if i % 100 == 0:
-            print ('Fit: {} / {} = {}%'.format(
-                fit_sum, i, round(fit_sum/i*100, 2)))
-            print ('Count: {} / {} = {}%'.format(
-                count_sum, i, round(count_sum/i*100, 2)))
-            print ('Filtered: {} / {} = {}%'.format(
-                count_filtered, i, round(count_filtered/i*100, 2)))
-            print ('{:<30} - fit: {:>10} count: {:10}'.format(
-                'Y_MD_cCATALOGUE_CONTENT',
-                fit_Y_MD_cCATALOGUE_CONTENT,
-                count_Y_MD_cCATALOGUE_CONTENT))
-            print ('{:<30} - fit: {:>10} count: {:10}'.format(
-                'Ycppcnpc_MD_cCATALOGUE_CONTENT',
-                fit_Ycppcnpc_MD_cCATALOGUE_CONTENT,
-                count_Ycppcnpc_MD_cCATALOGUE_CONTENT))
-            print ('{:<30} - fit: {:>10} count: {:10}'.format(
-                'num_num',
-                fit_num_num,
-                count_num_num))
-            print ('{:<30} - fit: {:>10} count: {:10}'.format(
-                'GB_4_num',
-                fit_GB_4_num,
-                count_GB_4_num))
-            print ('{:<30} - fit: {:>10} count: {:10}'.format(
-                'GB_num',
-                fit_GB_num,
-                count_GB_num))
-            print ('{:<30} - fit: {:>10} count: {:10}'.format(
-                'Ycppccnpc_GB_num',
-                fit_Ycppccnpc_GB_num,
-                count_Ycppccnpc_GB_num))
-            print ('{:<30} - fit: {:>10} count: {:10}'.format(
-                'blog_article_num',
-                fit_blog_article_num,
-                count_blog_article_num))
-            print()
-
-    print ('Fit: {} / {} = {}%'.format(
-        fit_sum, i, round(fit_sum/i*100, 2)))
-    print ('Count: {} / {} = {}%'.format(
-        count_sum, i, round(count_sum/i*100, 2)))
-    print ('Filtered: {} / {} = {}%'.format(
-        count_filtered, i, round(count_filtered/i*100, 2)))
-
-    print ('{:<30} - fit: {:>10} count: {:10}'.format(
-        'Y_MD_cCATALOGUE_CONTENT',
-        fit_Y_MD_cCATALOGUE_CONTENT,
-        count_Y_MD_cCATALOGUE_CONTENT))
-    print ('{:<30} - fit: {:>10} count: {:10}'.format(
-        'Ycppcnpc_MD_cCATALOGUE_CONTENT',
-        fit_Ycppcnpc_MD_cCATALOGUE_CONTENT,
-        count_Ycppcnpc_MD_cCATALOGUE_CONTENT))
-    print ('{:<30} - fit: {:>10} count: {:10}'.format(
-        'num_num',
-        fit_num_num,
-        count_num_num))
-    print ('{:<30} - fit: {:>10} count: {:10}'.format(
-        'GB_4_num',
-        fit_GB_4_num,
-        count_GB_4_num))
-    print ('{:<30} - fit: {:>10} count: {:10}'.format(
-        'GB_num',
-        fit_GB_num,
-        count_GB_num))
-    print ('{:<30} - fit: {:>10} count: {:10}'.format(
-        'Ycppccnpc_GB_num',
-        fit_Ycppccnpc_GB_num,
-        count_Ycppccnpc_GB_num))
-    print ('{:<30} - fit: {:>10} count: {:10}'.format(
-        'blog_article_num',
-        fit_blog_article_num,
-        count_blog_article_num))
+        for name, func in names_and_funcs:
+            _result = func(_link, _data)
+            local[name] = {
+                'fit': int(_result is not False),
+                'count': int(_result not in [None, False])
+            }
+            names_and_counts[name]['count'] += local[name]['count']
+            names_and_counts[name]['fit'] += local[name]['fit']
+        fit_sum += int(sum([v['fit'] for v in local.values()]) != 0)
+        count_sum += int(sum([v['count'] for v in local.values()]) != 0)
+        if j % 100 == 0:
+            print (40*'-=')
+            show(j, fit_sum, count_sum, count_filtered, names_and_counts)
+    print (40*'&&')
+    show(j, fit_sum, count_sum, count_filtered, names_and_counts)
 
 def filter_pages(_link):
     "_"
