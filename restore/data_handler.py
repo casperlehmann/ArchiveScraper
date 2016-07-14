@@ -1,28 +1,34 @@
 "_"
 import sqlite3 as lite
 import json
+import os
 
 from restore import page_identifier, page_mapper, page_contains_url
 
-def get_all_links():
+def get_all_links(restore_path):
     "_"
     try:
-        all_links = json.load(open('all_links', 'r'))
+        all_links = json.load(
+            open(os.path.join(restore_path, 'all_links.json'), 'r'))
     except FileNotFoundError:
         with lite.connect('data/db') as con:
             cur = con.cursor()
             all_links = list(set(
                 _[0] for _ in cur.execute('SELECT link FROM links').fetchall()))
-        json.dump(list(all_links), open('all_links', 'w'))
+        json.dump(
+            list(all_links),
+            open(os.path.join(restore_path, 'all_links.json'), 'w'))
         exit()
     return all_links
 
-def get_page_data(path):
+def get_page_data(path, restore_path):
     "_"
     try:
         #open('q', 'r')
-        missing_data = json.load(open('missing_data', 'r'))
-        page_data = json.load(open('page_data', 'r'))
+        missing_data = json.load(
+            open(os.path.join(restore_path, 'missing_data.json'), 'r'))
+        page_data = json.load(
+            open(os.path.join(restore_path, 'page_data.json'), 'r'))
     except FileNotFoundError:
         missing_data = []
         page_data = []
@@ -37,21 +43,26 @@ def get_page_data(path):
                 missing_data.append((fname, content_id, catalogs, publish_date))
             else:
                 page_data.append((fname, content_id, catalogs, publish_date))
-        json.dump(missing_data, open('missing_data', 'w'))
-        json.dump(page_data, open('page_data', 'w'))
+        json.dump(
+            missing_data,
+            open(os.path.join(restore_path, 'missing_data.json'), 'w'))
+        json.dump(
+            page_data,
+            open(os.path.join(restore_path, 'page_data.json'), 'w'))
         exit()
     return page_data, missing_data
 
-def get_mapping(all_links, page_data, names_and_funcs):
+def get_mapping(all_links, page_data, names_and_funcs, restore_path):
     "_"
     try:
-        mapping = json.load(open('mapping.json', 'r'))
+        mapping = json.load(
+            open(os.path.join(restore_path, 'mapping.json'), 'r'))
     except FileNotFoundError:
         sad = 0
         happy = 0
         results = []
         mapping = {}
-        for i, link in enumerate(all_links[:10000]):
+        for i, link in enumerate(all_links):
             for result in page_mapper(link, page_data, names_and_funcs):
                 url = result['url']
                 fname = result['fname']
@@ -68,6 +79,7 @@ def get_mapping(all_links, page_data, names_and_funcs):
                 sad += 1
         print ('happy:', happy)
         print ('sad:', sad)
-        json.dump(mapping, open('mapping.json', 'w'))
+        json.dump(
+            mapping, open(os.path.join(restore_path, 'mapping.json'), 'w'))
         exit()
     return mapping

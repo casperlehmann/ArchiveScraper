@@ -4,6 +4,8 @@ import re
 
 from bs4 import BeautifulSoup as bs
 
+# pylint: disable=unused-variable
+
 def page_identifier(_path, num):
     "_"
     str_num = str(num).zfill(6)
@@ -41,34 +43,10 @@ def page_identifier(_path, num):
 
 def page_mapper(_url, _data, _names_and_funcs):
     "_"
-    Y_MD_cCATALOGUE_CONTENT = _names_and_funcs['Y_MD_cCATALOGUE_CONTENT'](_url, _data)
-    if Y_MD_cCATALOGUE_CONTENT is not None:
-        yield Y_MD_cCATALOGUE_CONTENT
-
-    Ycppcnpc_MD_cCATALOGUE_CONTENT = _names_and_funcs['Ycppcnpc_MD_cCATALOGUE_CONTENT'](_url, _data)
-    if Ycppcnpc_MD_cCATALOGUE_CONTENT is not None:
-        yield Ycppcnpc_MD_cCATALOGUE_CONTENT
-
-    num_num = _names_and_funcs['num_num'](_url, _data)
-    if num_num is not None:
-        yield num_num
-
-    GB_4_num = _names_and_funcs['GB_4_num'](_url, _data)
-    if GB_4_num is not None:
-        yield GB_4_num
-
-    GB_num = _names_and_funcs['GB_num'](_url, _data)
-    if GB_num is not None:
-        yield GB_num
-
-    Ycppccnpc_GB_num = _names_and_funcs['Ycppccnpc_GB_num'](_url, _data)
-    if Ycppccnpc_GB_num is not None:
-        yield Ycppccnpc_GB_num
-
-    blog_article_num = _names_and_funcs['blog_article_num'](_url, _data)
-    if blog_article_num is not None:
-        yield blog_article_num
-
+    for name, func in _names_and_funcs:
+        result = func(_url, _data)
+        if not result in (None, False):
+            yield result
     # Archive pages. Can match on 'catalogs', but would be time consuming.
     #GB_num_review_num = _names_and_funcs['GB_num_review_num'](_url, _data)
     #if GB_num_review_num is not None:
