@@ -8,6 +8,7 @@ import urllib.request
 import http.client
 
 from socket import timeout
+from shutil import copyfile
 
 # pylint: disable=missing-docstring
 
@@ -16,6 +17,8 @@ class Scraper():
         self.parent = parent
 
     def load_pages(self, urls):
+        import json
+        restorer = json.load(open('data_restore/mapping.json', 'r'))
         for url in urls:
             if self.exclusion(url):
                 continue
@@ -23,7 +26,7 @@ class Scraper():
                 logging.info('PrevCheck404:%s', url)
                 continue
             try:
-                self.load_page(url)
+                self.load_page(url, restorer)
             except urllib.error.HTTPError:
                 logging.info('404:         %s', url)
                 self.parent.db.set_four_o_four(url)
@@ -40,7 +43,7 @@ class Scraper():
                 logging.info(
                     'ConnectionResetError: [Errno 54] Connection reset by peer: %s', url)
 
-    def load_page(self, url):
+    def load_page(self, url, restorer = None):
         if not isinstance (url, str):
             raise TypeError('url must be a string')
         try:
@@ -48,24 +51,37 @@ class Scraper():
             logging.info('Alredy here: %s', url)
         except KeyError:
             logging.info('Fetching...: %s', url)
-            self._fetch_page(url)
+            self._fetch_page(url, restorer)
             fname = self.parent.db.get_filename(url)
         return fname
 
-    def _fetch_page(self, url):
+    def _fetch_page(self, url, restorer = None):
+        if restorer is None: restorer = dict()
         if not isinstance(url, str):
             raise TypeError('url must be a string.')
         if not url.startswith('http'):
             url = 'http://' + url
         fname = None
         try:
-            with urllib.request.urlopen(url) as url_obj:
+            if url in restorer:
                 fname = self.parent.db.set_filename(url)
                 fpath = os.path.join(self.parent.fh.archive_folder, fname)
-                with open(fpath, 'wb') as f:
-                    logging.info('Writing file: %s', fname)
-                    f.write(url_obj.read())
+                old_file = restorer['url']
+                os.mkdir('data_old', exist_ok=True)
+                old_file_path = os.path.join('data_old', )
+                logging.info('Copying file: %s -> %s', fname, old_file)
+                copyfile(old_file_path, fpath)
                 self.parent.db.update_fetched(url)
+            else:
+                with urllib.request.urlopen(url) as url_obj:
+                    fname = self.parent.db.set_filename(url)
+                    fpath = os.path.join(self.parent.fh.archive_folder, fname)
+                    with open(fpath, 'wb') as f:
+                        logging.info('Writing file: %s', fname)
+                        f.write(url_obj.read())
+                    self.parent.db.update_fetched(url)
+                    if fname == '050000':
+                        exit()
         except KeyboardInterrupt:
             if not fname is None:
                 fname = self.parent.db.get_filename(url)

@@ -33,6 +33,7 @@ class Agent(object):
 
     def load_unfetched_links(self):
         urls = self.db.get_unfetched_links()
+        #exit()
         self.scraper.load_pages(urls)
 
     def load_unfetched_seeds(self):

@@ -198,7 +198,6 @@ class DB():
             logging.info(
                 'Number of unique links to fetch (articles): %s',
                 len(links))
-
             return links
 
     def get_fetched_articles(self):
