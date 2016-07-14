@@ -4,6 +4,7 @@
 
 .ipynb_checkpoints/
 data/
+data_restore/
 data_dearchiver/
 __pycache__/
 .coverage
