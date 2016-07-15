@@ -16,9 +16,7 @@ class Scraper():
     def __init__(self, parent):
         self.parent = parent
 
-    def load_pages(self, urls):
-        import json
-        restorer = json.load(open('data_restore/mapping.json', 'r'))
+    def load_pages(self, urls, restorer = None):
         for url in urls:
             if self.exclusion(url):
                 continue
@@ -50,7 +48,6 @@ class Scraper():
             fname = self.parent.db.get_filename(url)
             logging.info('Alredy here: %s', url)
         except KeyError:
-            logging.info('Fetching...: %s', url)
             self._fetch_page(url, restorer)
             fname = self.parent.db.get_filename(url)
         return fname
@@ -66,13 +63,15 @@ class Scraper():
             if url in restorer:
                 fname = self.parent.db.set_filename(url)
                 fpath = os.path.join(self.parent.fh.archive_folder, fname)
-                old_file = restorer['url']
-                os.mkdir('data_old', exist_ok=True)
-                old_file_path = os.path.join('data_old', )
-                logging.info('Copying file: %s -> %s', fname, old_file)
+                old_file = restorer[url]
+                os.makedirs('data_old', exist_ok=True)
+                old_file_path = os.path.join('data_old/archives', old_file)
+                logging.info('url: %s', url)
+                logging.info('Copying file: %s -> %s', old_file, fname)
                 copyfile(old_file_path, fpath)
                 self.parent.db.update_fetched(url)
             else:
+                logging.info('Fetching...: %s', url)
                 with urllib.request.urlopen(url) as url_obj:
                     fname = self.parent.db.set_filename(url)
                     fpath = os.path.join(self.parent.fh.archive_folder, fname)
@@ -82,6 +81,7 @@ class Scraper():
                     self.parent.db.update_fetched(url)
                     if fname == '050000':
                         exit()
+            print()
         except KeyboardInterrupt:
             if not fname is None:
                 fname = self.parent.db.get_filename(url)

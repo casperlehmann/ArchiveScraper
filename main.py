@@ -1,6 +1,7 @@
 """Generate archive urls, download archives, scan for links, download articles.
 
 """
+import json
 
 from archiver import archiver, url_tools
 
@@ -8,6 +9,8 @@ CLEAN_ARCHIVE = False
 SCAN_ARCHIVE = False
 SCAN_ARTICLES = False
 EXTRACT_TEXT = True
+
+RESTORER = json.load(open('data_restore/mapping.json', 'r'))
 
 if __name__ == '__main__':
     all_urls = url_tools.get_archive_urls(
@@ -31,7 +34,7 @@ if __name__ == '__main__':
     agent.seed_archive(all_urls)
 
     if SCAN_ARCHIVE:
-        agent.load_unfetched_seeds()
+        agent.load_unfetched_seeds(RESTORER)
         agent.find_links_in_archive(target_element = 'ul', target_class = 'list_16')
 
     if SCAN_ARTICLES:
