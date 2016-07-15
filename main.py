@@ -15,8 +15,7 @@ RESTORER = None
 
 if __name__ == '__main__':
     all_urls = url_tools.get_archive_urls(
-        #from_date = '2016-04-01',
-        from_date = '2012-02-07',
+        from_date = '2016-04-01',
         earliest_date='2012-02-06',
         schema = 'http://politics.people.com.cn/GB/70731/review/{}.html')
 
