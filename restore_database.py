@@ -22,7 +22,7 @@ names_and_funcs = (
     ('blog_article_num', match_blog_article_num))
 
 DATA_PATH = '/Users/Lasper/safe data/_data_dearchiver/2_articles/'
-DATA_RESTORE_PATH = 'data_restore_usb'
+DATA_RESTORE_PATH = 'data_restore'
 os.makedirs(DATA_RESTORE_PATH, exist_ok=True)
 
 page_data, missing_data, content_ids = get_page_data(DATA_PATH, DATA_RESTORE_PATH)
