@@ -154,9 +154,13 @@ class DB():
 
     def update_fetched(self, url, revert = False):
         fetched = 1-int(revert)
+        # Clean this up:
+        #with self.connect() as con:
+        #    cur = con.cursor()
+        #    cur.execute('UPDATE links SET fetched = ? WHERE url = "seed"', (fetched, url))
         with self.connect() as con:
             cur = con.cursor()
-            cur.execute('UPDATE links SET fetched = ? WHERE url = ?', (fetched, url))
+            cur.execute('UPDATE links SET fetched = ? WHERE link = ?', (fetched, url))
 
     def is_four_o_four(self, url):
         with self.connect() as con:
