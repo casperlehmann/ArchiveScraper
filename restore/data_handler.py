@@ -14,7 +14,8 @@ def get_all_links(restore_path):
         with lite.connect(os.path.join(restore_path, 'db')) as con:
             cur = con.cursor()
             all_links = list(set(
-                _[0] for _ in cur.execute('SELECT link FROM links').fetchall()))
+                _[0] for _ in cur.execute(
+                    'SELECT link FROM links WHERE url != "seed"').fetchall()))
         json.dump(
             list(all_links),
             open(os.path.join(restore_path, 'all_links.json'), 'w'))
