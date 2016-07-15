@@ -33,7 +33,7 @@ def get_page_data(path, restore_path):
     except FileNotFoundError:
         missing_data = []
         page_data = []
-        for x in range(15478):#1600, 11600):
+        for x in range(1, 47212):#15478):
             catalogs, content_id, publish_date = page_identifier(path, x)
             fname = str(x).zfill(6)
             if None in (content_id, catalogs, publish_date):
