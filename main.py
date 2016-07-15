@@ -6,9 +6,9 @@ import json
 from archiver import archiver, url_tools
 
 CLEAN_ARCHIVE = False
-SCAN_ARCHIVE = False
-SCAN_ARTICLES = False
-EXTRACT_TEXT = True
+SCAN_ARCHIVE = True
+SCAN_ARTICLES = True
+EXTRACT_TEXT = False
 
 RESTORER = json.load(open('data_restore/mapping.json', 'r'))
 RESTORER = None
