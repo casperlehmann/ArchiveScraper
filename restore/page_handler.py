@@ -1,6 +1,7 @@
 """_
 """
 import re
+import os
 
 from bs4 import BeautifulSoup as bs
 
@@ -52,11 +53,9 @@ def page_mapper(_url, _data, _names_and_funcs):
     #if GB_num_review_num is not None:
     #    yield GB_num_review_num
 
-def page_contains_url(_url, _fname):
+def page_contains_url(_url, _fname, path):
     "_"
-    with open(
-        '/Users/Lasper/safe data/_data_dearchiver/2_articles/{}'.format(_fname),
-        'rb') as _file:
+    with open(os.path.join(path, _fname), 'rb') as _file:
         soup = bs(_file, 'html.parser', exclude_encodings=['windows-1252'])
     marker = r'/'.join(_url.split('/')[3:])
     res = re.search(marker, str(soup.contents))

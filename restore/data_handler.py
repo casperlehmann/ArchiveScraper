@@ -66,7 +66,7 @@ def get_mapping(all_links, page_data, names_and_funcs, restore_path):
             for result in page_mapper(link, page_data, names_and_funcs):
                 url = result['url']
                 fname = result['fname']
-                if page_contains_url(url, fname):
+                if page_contains_url(url, fname, path):
                     mapping[url] = fname
                     happy += 1
                     break
