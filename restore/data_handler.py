@@ -30,9 +30,12 @@ def get_page_data(path, restore_path):
             open(os.path.join(restore_path, 'missing_data.json'), 'r'))
         page_data = json.load(
             open(os.path.join(restore_path, 'page_data.json'), 'r'))
+        content_ids = json.load(
+            open(os.path.join(restore_path, 'content_ids.json'), 'r'))
     except FileNotFoundError:
         missing_data = []
         page_data = []
+        content_ids = []
         for x in range(1, 47212):#15478):
             catalogs, content_id, publish_date = page_identifier(path, x)
             fname = str(x).zfill(6)
@@ -44,14 +47,19 @@ def get_page_data(path, restore_path):
                 missing_data.append((fname, content_id, catalogs, publish_date))
             else:
                 page_data.append((fname, content_id, catalogs, publish_date))
+            if not content_id is None:
+                content_ids.append((fname, content_id, catalogs, publish_date))
         json.dump(
             missing_data,
             open(os.path.join(restore_path, 'missing_data.json'), 'w'))
         json.dump(
             page_data,
             open(os.path.join(restore_path, 'page_data.json'), 'w'))
+        json.dump(
+            content_ids,
+            open(os.path.join(restore_path, 'content_ids.json'), 'w'))
         #exit()
-    return page_data, missing_data
+    return page_data, missing_data, content_ids
 
 def get_mapping(all_links, page_data, names_and_funcs, restore_path, path):
     "_"
