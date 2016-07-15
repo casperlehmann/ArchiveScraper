@@ -11,6 +11,7 @@ SCAN_ARTICLES = False
 EXTRACT_TEXT = True
 
 RESTORER = json.load(open('data_restore/mapping.json', 'r'))
+RESTORER = None
 
 if __name__ == '__main__':
     all_urls = url_tools.get_archive_urls(
