@@ -21,16 +21,17 @@ names_and_funcs = (
     ('Ycppccnpc_GB_num', match_Ycppccnpc_GB_num),
     ('blog_article_num', match_blog_article_num))
 
-PATH = '/Users/Lasper/safe data/_data_dearchiver/2_articles/'
-RESTORE_PATH = 'data_restore'
-os.makedirs(RESTORE_PATH, exist_ok=True)
+DATA_PATH = '/Users/Lasper/safe data/_data_dearchiver/2_articles/'
+DATA_RESTORE_PATH = 'data_restore_usb'
+os.makedirs(DATA_RESTORE_PATH, exist_ok=True)
 
-page_data, missing_data = get_page_data(PATH, RESTORE_PATH)
-all_links = get_all_links(RESTORE_PATH)
-print ('all_links:      ', len(all_links))
-print ('missing_data:   ', len(missing_data))
-print ('page_data:      ', len(page_data))
+page_data, missing_data, content_ids = get_page_data(DATA_PATH, DATA_RESTORE_PATH)
+all_links = get_all_links(DATA_RESTORE_PATH)
+#print ('all_links:      ', len(all_links))
+#print ('missing_data:   ', len(missing_data))
+#print ('page_data:      ', len(page_data))
+#print ('content_ids:    ', len(content_ids))
 
-mapping = get_mapping(all_links, page_data, names_and_funcs, RESTORE_PATH)
+mapping = get_mapping(all_links, content_ids, names_and_funcs, DATA_RESTORE_PATH, DATA_PATH)
 
-analyze_coverage(page_data, names_and_funcs, all_links)
+analyze_coverage(content_ids, names_and_funcs, all_links)
