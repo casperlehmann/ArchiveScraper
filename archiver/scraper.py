@@ -47,11 +47,6 @@ class Scraper():
         try:
             fname = self.parent.db.get_filename(url)
             logging.info('Alredy here: %s', url)
-
-            #with self.parent.db.connect() as con:
-            #    cur = con.cursor()
-            #    cur.execute('UPDATE links SET fetched = ? WHERE link = ?', (1, url))
-
         except KeyError:
             self._fetch_page(url, restorer)
             fname = self.parent.db.get_filename(url)
