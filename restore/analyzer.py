@@ -34,10 +34,9 @@ def analyze_coverage(_data, names_and_funcs, all_links):
             names_and_counts[name]['fit'] += local[name]['fit']
         fit_sum += int(sum([v['fit'] for v in local.values()]) != 0)
         count_sum += int(sum([v['count'] for v in local.values()]) != 0)
-        if j % 100 == 0:
+        if j % 10000 == 0:
             print (40*'-=')
             show(j, fit_sum, count_sum, count_filtered, names_and_counts)
-    print (40*'&&')
     show(j, fit_sum, count_sum, count_filtered, names_and_counts)
 
 def filter_pages(_link):
