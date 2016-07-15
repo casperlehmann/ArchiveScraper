@@ -18,7 +18,7 @@ def get_all_links(restore_path):
         json.dump(
             list(all_links),
             open(os.path.join(restore_path, 'all_links.json'), 'w'))
-        exit()
+        #exit()
     return all_links
 
 def get_page_data(path, restore_path):
@@ -49,7 +49,7 @@ def get_page_data(path, restore_path):
         json.dump(
             page_data,
             open(os.path.join(restore_path, 'page_data.json'), 'w'))
-        exit()
+        #exit()
     return page_data, missing_data
 
 def get_mapping(all_links, page_data, names_and_funcs, restore_path):
@@ -81,5 +81,5 @@ def get_mapping(all_links, page_data, names_and_funcs, restore_path):
         print ('sad:', sad)
         json.dump(
             mapping, open(os.path.join(restore_path, 'mapping.json'), 'w'))
-        exit()
+        #exit()
     return mapping
