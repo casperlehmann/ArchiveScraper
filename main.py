@@ -38,7 +38,7 @@ if __name__ == '__main__':
         agent.find_links_in_archive(target_element = 'ul', target_class = 'list_16')
 
     if SCAN_ARTICLES:
-        agent.load_unfetched_links()
+        agent.load_unfetched_links(RESTORER)
         home = 'http://politics.people.com.cn'
 
     if EXTRACT_TEXT:

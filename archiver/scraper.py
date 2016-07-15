@@ -18,6 +18,10 @@ class Scraper():
 
     def load_pages(self, urls, restorer = None):
         for url in urls:
+            if not restorer is None:
+                if not url in restorer:
+                    logging.info('Skipping url not in restorer.')
+                    continue
             if self.exclusion(url):
                 continue
             if self.parent.db.is_four_o_four(url):
@@ -81,7 +85,6 @@ class Scraper():
                     self.parent.db.update_fetched(url)
                     if fname == '050000':
                         exit()
-            print()
         except KeyboardInterrupt:
             if not fname is None:
                 fname = self.parent.db.get_filename(url)
