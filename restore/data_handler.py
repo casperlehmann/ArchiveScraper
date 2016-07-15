@@ -11,7 +11,7 @@ def get_all_links(restore_path):
         all_links = json.load(
             open(os.path.join(restore_path, 'all_links.json'), 'r'))
     except FileNotFoundError:
-        with lite.connect('data/db') as con:
+        with lite.connect(os.path.join(restore_path, 'db')) as con:
             cur = con.cursor()
             all_links = list(set(
                 _[0] for _ in cur.execute('SELECT link FROM links').fetchall()))
@@ -52,7 +52,7 @@ def get_page_data(path, restore_path):
         #exit()
     return page_data, missing_data
 
-def get_mapping(all_links, page_data, names_and_funcs, restore_path):
+def get_mapping(all_links, page_data, names_and_funcs, restore_path, path):
     "_"
     try:
         mapping = json.load(
