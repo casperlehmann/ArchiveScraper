@@ -5,10 +5,10 @@
 
 from archiver import archiver, url_tools
 
-CLEAN_ARCHIVE = False
-SCAN_ARCHIVE = True
-SCAN_ARTICLES = True
-EXTRACT_TEXT = False
+CLEAN_ARCHIVE = bool(0)
+SCAN_ARCHIVE  = bool(0)
+SCAN_ARTICLES = bool(0)
+EXTRACT_TEXT  = bool(1)
 LIMIT = '075000'
 
 #RESTORER = json.load(open('data_restore/mapping.json', 'r'))
