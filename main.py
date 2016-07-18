@@ -1,7 +1,7 @@
 """Generate archive urls, download archives, scan for links, download articles.
 
 """
-import json
+#import json
 
 from archiver import archiver, url_tools
 
@@ -11,7 +11,7 @@ SCAN_ARTICLES = True
 EXTRACT_TEXT = False
 LIMIT = '075000'
 
-RESTORER = json.load(open('data_restore/mapping.json', 'r'))
+#RESTORER = json.load(open('data_restore/mapping.json', 'r'))
 RESTORER = None
 
 if __name__ == '__main__':
