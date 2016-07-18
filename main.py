@@ -9,6 +9,7 @@ CLEAN_ARCHIVE = False
 SCAN_ARCHIVE = True
 SCAN_ARTICLES = True
 EXTRACT_TEXT = False
+LIMIT = '075000'
 
 RESTORER = json.load(open('data_restore/mapping.json', 'r'))
 RESTORER = None
@@ -38,7 +39,7 @@ if __name__ == '__main__':
         agent.find_links_in_archive(target_element = 'ul', target_class = 'list_16')
 
     if SCAN_ARTICLES:
-        agent.load_unfetched_links(RESTORER)
+        agent.load_unfetched_links(RESTORER, LIMIT)
         home = 'http://politics.people.com.cn'
 
     if EXTRACT_TEXT:

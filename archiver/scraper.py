@@ -16,7 +16,7 @@ class Scraper():
     def __init__(self, parent):
         self.parent = parent
 
-    def load_pages(self, urls, restorer = None):
+    def load_pages(self, urls, limit, restorer = None):
         for url in urls:
             if not restorer is None:
                 if not url in restorer:
@@ -28,7 +28,7 @@ class Scraper():
                 logging.info('PrevCheck404:%s', url)
                 continue
             try:
-                self.load_page(url, restorer)
+                self.load_page(url, limit, restorer = restorer)
             except urllib.error.HTTPError:
                 logging.info('404:         %s', url)
                 self.parent.db.set_four_o_four(url)
@@ -45,18 +45,18 @@ class Scraper():
                 logging.info(
                     'ConnectionResetError: [Errno 54] Connection reset by peer: %s', url)
 
-    def load_page(self, url, restorer = None):
+    def load_page(self, url, limit, restorer = None):
         if not isinstance (url, str):
             raise TypeError('url must be a string')
         try:
             fname = self.parent.db.get_filename(url)
             logging.info('Alredy here: %s', url)
         except KeyError:
-            self._fetch_page(url, restorer)
+            self._fetch_page(url, limit, restorer = restorer)
             fname = self.parent.db.get_filename(url)
         return fname
 
-    def _fetch_page(self, url, restorer = None):
+    def _fetch_page(self, url, limit, restorer = None):
         if restorer is None: restorer = dict()
         if not isinstance(url, str):
             raise TypeError('url must be a string.')
@@ -83,7 +83,7 @@ class Scraper():
                         logging.info('Writing file: %s', fname)
                         f.write(url_obj.read())
                     self.parent.db.update_fetched(url)
-                    if fname == '050000':
+                    if fname == limit:
                         exit()
         except KeyboardInterrupt:
             if not fname is None:

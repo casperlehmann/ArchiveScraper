@@ -31,17 +31,17 @@ class Agent(object):
     def seed_archive(self, urls):
         self.db.seed_archive(urls)
 
-    def load_unfetched_links(self, restorer = None):
+    def load_unfetched_links(self, limit, restorer = None):
         urls = self.db.get_unfetched_links()
         #exit()
-        self.scraper.load_pages(urls, restorer)
+        self.scraper.load_pages(urls, limit, restorer = restorer)
 
-    def load_unfetched_seeds(self, restorer = None):
+    def load_unfetched_seeds(self, limit, restorer = None):
         urls = self.db.get_unfetched_seeds()
-        self.scraper.load_pages(urls, restorer)
+        self.scraper.load_pages(urls, limit, restorer = restorer)
 
-    def load_pages(self, urls, restorer = None):
-        self.scraper.load_pages(urls, restorer)
+    def load_pages(self, urls, limit, restorer = None):
+        self.scraper.load_pages(urls, limit, restorer = restorer)
 
     def find_links_in_archive(
             self, target_element = None, target_class = None, target_id = None):
