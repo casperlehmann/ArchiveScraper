@@ -196,7 +196,7 @@ class TestAgent(object):
 
     def test__fetch_page_writes_file(self):
         if self.skip_online_tests: raise SkipTest
-        self.agent.scraper._fetch_page(url = 'www.example.com')
+        self.agent.scraper._fetch_page(url = 'www.example.com', limit='')
         self.agent.fh.archive_folder = 'archive_folder'
         expected_name = '000001'
         assert_equals(self.agent.db.get_filename, expected_name)
