@@ -221,6 +221,6 @@ class DB():
             cur.execute(
                 'SELECT file_names.url FROM file_names JOIN links '
                 'ON file_names.url = links.link WHERE links.url != "seed" '
-                'AND four_o_four = 0'
+                'AND four_o_four = 0 AND fetched = 1'
             )
             return [_[0] for _ in cur.fetchall()]
