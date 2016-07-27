@@ -33,6 +33,9 @@ class Scraper():
                 logging.info('404:         %s', url)
                 self.parent.db.set_four_o_four(url)
                 continue
+            except http.client.InvalidURL:
+                logging.info('Invalid url: %s', url)
+                continue
             except http.client.IncompleteRead:
                 logging.info('Partial:     %s', url) # e.partial
             except urllib.error.URLError:
