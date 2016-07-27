@@ -105,6 +105,8 @@ class Scraper():
                 # really good practice.
                 # http://stackoverflow.com/questions/9630004/how-to-decrease
                 #       -the-auto-increment-id-in-android-sqlite
+            last = self.parent.db.get_last()
+            logging.info('Last inserted row id: %s', last)
             exit()
 
     @staticmethod

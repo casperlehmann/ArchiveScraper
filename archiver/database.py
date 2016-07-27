@@ -51,6 +51,12 @@ class DB():
     def clean(self):
         self.drop_name_mapper()
 
+    def get_last(self):
+        with self.connect() as con:
+            cur = con.cursor()
+            cur.execute('SELECT last_insert_rowid()')
+            return cur.fetchone()[0]
+
     def set_filename(self, url):
         if not isinstance (url, str):
             raise TypeError
