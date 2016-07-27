@@ -207,17 +207,6 @@ class DB():
     def get_fetched_articles(self):
         with self.connect() as con:
             cur = con.cursor()
-            #cur.execute(
-            #    'SELECT file_names.url FROM file_names JOIN links '
-            #    'ON file_names.url = links.link ')
-            #print (cur.fetchall())
-
-            #cur.execute('SELECT file_names.url FROM file_names')
-            #print (cur.fetchall())
-
-            #cur.execute('SELECT link FROM links')
-            #print (cur.fetchall())
-
             cur.execute(
                 'SELECT file_names.url FROM file_names JOIN links '
                 'ON file_names.url = links.link WHERE links.url != "seed" '
