@@ -6,8 +6,8 @@
 from archiver import archiver, url_tools
 
 CLEAN_ARCHIVE = bool(0)
-SCAN_ARCHIVE  = bool(0)
-SCAN_ARTICLES = bool(0)
+SCAN_ARCHIVE  = bool(1)
+SCAN_ARTICLES = bool(1)
 EXTRACT_TEXT  = bool(1)
 LIMIT = '075000'
 
