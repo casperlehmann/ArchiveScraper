@@ -57,18 +57,8 @@ class Agent(object):
 
         """
         fetched_pages = self.db.get_fetched_articles()
-        for page in fetched_pages:
-            print (''.join((80*['='])))
-            print (''.join((80*['='])))
-            print ()
-            text = self.analyzer.find_text_in_page(page)
-            import re
-            out = text
-            out = re.sub(r'\n+', r'\n', out)
-            out = re.sub(r'\t+', r'', out)
-            out = re.sub(r'( )+', r' ', out)
-            print ('来源 in out and 字号 in out:', '来源' in out and '字号' in out)
-            print (out)
-            print ()
-        #file_names = [self.db.get_filepath(_) for _ in fetched_pages]
-        #print (file_names[:10])
+        for i, url in enumerate(fetched_pages):
+            name = self.db.get_filename(url)
+            text = self.analyzer.find_text_in_page(url, clean = True)
+            yield i, len(fetched_pages), name, url, text
+            #print ('来源 in text and 字号 in text:', '来源' in text and '字号' in text)

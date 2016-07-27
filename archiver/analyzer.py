@@ -62,11 +62,16 @@ class Analyzer():
                 links.append(link)
         self._save_links_from_page(url, links)
 
-    def find_text_in_page(self, url):
+    def find_text_in_page(self, url, clean = False):
         if not isinstance(url, str):
             raise TypeError('url is type:', type(url), url)
         soup = self.get_soup(url = url)
-        return soup.text
+        out = soup.text
+        if clean:
+            out = re.sub(r'\n+', r'\n', out)
+            out = re.sub(r'\t+', r'', out)
+            out = re.sub(r'( )+', r' ', out)
+        return out
 
     def get_soup(self, url):
         if url is None or not isinstance(url, str):

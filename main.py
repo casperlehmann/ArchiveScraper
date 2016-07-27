@@ -43,7 +43,8 @@ if __name__ == '__main__':
         home = 'http://politics.people.com.cn'
 
     if EXTRACT_TEXT:
-        agent.extract_text_from_articles()
+        for i, max_i, name, url, text in agent.extract_text_from_articles():
+            print ('{}/{}'.format(i, max_i), name, url, text)
 
     #for x in article_urls: print (x)
     #c = agent.count_links()
