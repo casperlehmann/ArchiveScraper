@@ -35,11 +35,11 @@ if __name__ == '__main__':
     agent.seed_archive(all_urls)
 
     if SCAN_ARCHIVE:
-        agent.load_unfetched_seeds(RESTORER)
+        agent.load_unfetched_seeds('000000', RESTORER)
         agent.find_links_in_archive(target_element = 'ul', target_class = 'list_16')
 
     if SCAN_ARTICLES:
-        agent.load_unfetched_links(RESTORER, LIMIT)
+        agent.load_unfetched_links(LIMIT, RESTORER)
         home = 'http://politics.people.com.cn'
 
     if EXTRACT_TEXT:
