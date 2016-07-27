@@ -27,7 +27,7 @@ class TestDB():
         self.db = self.agent.db
 
     def teardown(self):
-        self.agent.fh._clean()
+        self.agent.clean()
 
     def test_set_filename(self):
         url = 'wikipedia.org'

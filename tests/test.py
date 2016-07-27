@@ -35,7 +35,7 @@ class TestAgent(object):
             directory = self.temp_dir, archive_folder = 'archives', db = 'db')
 
     def teardown(self):
-        self.agent.fh._clean()
+        self.agent.clean()
 
     # __init__
     def test_directory_raises_TypeError(self):
@@ -67,7 +67,7 @@ class TestAgent(object):
             url = 'www.example.com', fname = 1)
 
     # Cleaning
-    def test_fh_clean(self):
+    def test_clean(self):
         self.agent.fh.archive_folder = 'archives'
         archive = self.agent.fh.archive_folder
         fpath = os.path.join(archive, '000001')
@@ -82,7 +82,7 @@ class TestAgent(object):
         assert_equals(1, len(glob(os.path.join(self.agent.fh.archive_folder,'*'))))
 
         # Delete it:
-        self.agent.fh._clean()
+        self.agent.clean()
         # Files and dir are gone:
         assert_false(os.path.isdir(archive_folder))
         assert_false(os.path.isfile(fpath))
@@ -95,7 +95,7 @@ class TestAgent(object):
         assert_equals(2, len(glob(os.path.join(self.agent.fh.directory,'*'))))
 
         # Delete it:
-        self.agent.fh._clean()
+        self.agent.clean()
 
         # Root directory is empty:
         assert_equals(0, len(glob(os.path.join(self.agent.fh.directory,'*'))))
@@ -185,7 +185,7 @@ class TestAgent(object):
         self.agent.fh.archive_folder = 'archives'
         fname = self.agent.db.set_filename('www.example.com')
         retrieved = self.agent.scraper.load_page(
-            url = 'www.example.com', limit = '')
+            url = 'www.example.com')
         assert_equals(fname, '000001')
         assert_equals(retrieved, '000001')
 
@@ -196,7 +196,7 @@ class TestAgent(object):
 
     def test__fetch_page_writes_file(self):
         if self.skip_online_tests: raise SkipTest
-        self.agent.scraper._fetch_page(url = 'www.example.com', limit='')
+        self.agent.scraper._fetch_page(url = 'www.example.com')
         self.agent.fh.archive_folder = 'archive_folder'
         expected_name = '000001'
         assert_equals(self.agent.db.get_filename, expected_name)

@@ -79,9 +79,6 @@ class FileHander():
         if not input('You sure you want to delete everything? (Yes/no)\n >') == 'Yes':
             print ('Bye')
             exit()
-        self._clean()
-
-    def _clean(self):
         logging.info('Cleaning...')
         self.delete_file(target = self.db)
         # clean archive
